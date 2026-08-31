@@ -17,9 +17,9 @@ def generate_code(length=6) -> str:
 # el usuario y tipo de código antes de crear uno nuevo
 def create_code_and_send_code(database: Session, user_id: uuid.UUID, email: str, code_type: typeCode):
     database.query(Codes).filter(
-        Codes.user_id == user_id, 
-        Codes.type == code_type
-    ).delete()
+        Codes.user_id == user_id
+    ).delete(synchronize_session=False)
+    database.commit()
     
     code = generate_code(6)
     new_code = Codes(

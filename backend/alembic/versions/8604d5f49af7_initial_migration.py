@@ -63,7 +63,6 @@ def upgrade() -> None:
     sa.Column('user_id', sa.UUID(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id'),
-    sa.UniqueConstraint('user_id')
     )
     op.create_table('refreshToken',
     sa.Column('id', sa.Uuid(), nullable=False),

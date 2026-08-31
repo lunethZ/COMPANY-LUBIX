@@ -104,3 +104,9 @@ class Users(Base):
         cascade="all, delete-orphan"
     )
 
+    cart: Mapped["Cart | None"] = relationship(
+        "Cart",
+        back_populates="user",
+        cascade="all, delete-orphan"
+    )
+

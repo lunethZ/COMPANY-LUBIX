@@ -265,7 +265,7 @@ def reset_password_service(user: ResetPassword, database: Session):
 
 
 def save_refresh_token(database: Session, user_id, token: str):
-    database.query(RefreshToken).filter(RefreshToken.token == token).delete()
+    database.query(RefreshToken).filter(RefreshToken.user_id == user_id).delete(synchronize_session=False)
     new_token = RefreshToken(
         token=token,
         revoked=False,

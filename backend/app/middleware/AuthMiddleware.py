@@ -56,6 +56,7 @@ ROLES_PERMISSIONS_ROUTERS = {
         "/user/addresses",
         "/user/orders",
         "/user/favorites",
+        "/cart",
         "/pqrs"
     ]
     

@@ -23,6 +23,27 @@ def _get_product_rating(product_id, database):
     return float(result.avg_rating or 0), int(result.review_count or 0)
 
 
+@router.get("/catalogs")
+def list_catalogs(database: Session = Depends(get_db)):
+    rows = (
+        database.query(Catalog, func.count(Product.id))
+        .outerjoin(Product, Product.catalog_id == Catalog.id)
+        .filter(Product.status == "active")
+        .group_by(Catalog.id)
+        .order_by(Catalog.name.asc())
+        .all()
+    )
+
+    return [
+        {
+            "id": str(catalog.id),
+            "name": catalog.name,
+            "product_count": count,
+        }
+        for catalog, count in rows
+    ]
+
+
 @router.get("/search")
 def search_products(
     q: str = Query("", description="Texto de busqueda"),

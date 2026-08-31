@@ -12,8 +12,8 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
 class typeCode(str, typerEnum):
-    resetPassword = "resetPassword",
-    verifyEmail = "verifyEmail",
+    resetPassword = "resetPassword"
+    verifyEmail = "verifyEmail"
 
 class Codes(Base):
     __tablename__ = "event_codes"
@@ -44,7 +44,6 @@ class Codes(Base):
     user_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
         ForeignKey("users.id"),
-        unique=True,
         nullable=False
     )
 
