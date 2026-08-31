@@ -3,22 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import api from "../api/axios";
-interface CartItem {
-  id: number | string;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-}
-
-function getCart(): CartItem[] {
-  try {
-    const raw = localStorage.getItem("cart");
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
+import { useCart } from "../context/CartContext";
 import {
   CheckCircleIcon,
   CreditCardIcon,
@@ -117,7 +102,8 @@ function generateOrderNumber(): string {
 
 const PagarPage = () => {
   const navigate = useNavigate();
-  const [cart] = useState<CartItem[]>(() => getCart());
+  const { items, subtotal, emptyCart } = useCart();
+  const cart = items;
 
   const [step, setStep] = useState<Step>("envio");
   const [processing, setProcessing] = useState(false);
@@ -152,7 +138,6 @@ const PagarPage = () => {
 
   const [banco, setBanco] = useState("");
 
-  const subtotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const descuentoPromo = promoApplied ? subtotal * PROMO_DESCUENTO : 0;
   const baseEnvio = subtotal - descuentoPromo >= ENVIO_GRATIS_MIN ? 0 : COSTO_ENVIO;
   const total = subtotal - descuentoPromo + baseEnvio;
@@ -259,9 +244,9 @@ const PagarPage = () => {
     try {
       const res = await api.post("/user/orders", {
         items: cart.map((item) => ({
-          product_id: item.id,
+          product_id: String(item.product_id),
           name: item.name,
-          price: item.price,
+          price: item.unit_price,
           quantity: item.quantity,
         })),
         subtotal,
@@ -276,6 +261,7 @@ const PagarPage = () => {
         postal_code: envio.codigoPostal || undefined,
       });
       setOrderNumber(res.data.id);
+      await emptyCart();
     } catch (err) {
       console.error("Error creating order:", err);
     }

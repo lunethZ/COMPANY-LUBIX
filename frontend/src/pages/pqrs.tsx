@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { errorDetailMessage } from '../utils/errors';
 import {
   PaperAirplaneIcon,
   ExclamationTriangleIcon,
@@ -101,7 +102,7 @@ export default function PQRSPage() {
       loadPQRS();
       setTimeout(() => { setMessage(''); setMessageType(''); }, 4000);
     } catch (err: any) {
-      setMessage(err?.response?.data?.detail || 'Error al enviar la solicitud');
+      setMessage(errorDetailMessage(err, 'Error al enviar la solicitud'));
       setMessageType('error');
       setTimeout(() => { setMessage(''); setMessageType(''); }, 3000);
     } finally {

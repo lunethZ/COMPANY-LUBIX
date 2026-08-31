@@ -3,7 +3,9 @@ import { useNavigate, useParams } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import api from "../api/axios";
+import { errorDetailMessage } from "../utils/errors";
 import {
   HeartIcon as HeartOutline,
   StarIcon,
@@ -90,6 +92,7 @@ const ProductoDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { addToCart } = useCart();
   const [activeImage, setActiveImage] = useState(0);
   const [cartMsg, setCartMsg] = useState(false);
   const [producto, setProducto] = useState<ProductDetail | null>(null);
@@ -184,30 +187,14 @@ const ProductoDetalle: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    const cart = (() => {
-      try {
-        const raw = localStorage.getItem("cart");
-        return raw ? JSON.parse(raw) : [];
-      } catch {
-        return [];
-      }
-    })();
-    const existing = cart.find(
-      (item: any) => String(item.id) === String(producto.id)
-    );
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({
-        id: producto.id,
-        name: producto.name,
-        price: producto.price,
-        image: producto.images?.[0] || "/placeholder.png",
-        quantity: 1,
-      });
-    }
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent("cart-changed"));
+    if (!producto) return;
+    void addToCart({
+      id: producto.id,
+      name: producto.name,
+      price: producto.price,
+      image: producto.images?.[0] || "/placeholder.png",
+      stock: producto.stock,
+    });
     setCartMsg(true);
     setTimeout(() => setCartMsg(false), 1500);
   };
@@ -253,7 +240,7 @@ const ProductoDetalle: React.FC = () => {
       );
     } catch (err: any) {
       setReviewMsg(
-        err?.response?.data?.detail || "Error al publicar la reseña"
+        errorDetailMessage(err, "Error al publicar la reseña")
       );
     } finally {
       setSubmittingReview(false);

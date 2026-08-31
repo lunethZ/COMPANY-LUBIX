@@ -2,7 +2,9 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbaruser';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import api from '../api/axios';
+import { errorDetailMessage } from '../utils/errors';
 const formatCOP = (value: number) => {
   return "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 };
@@ -60,7 +62,8 @@ interface Order {
 }
 
 export default function BuyerDashboard() {
-  const { user, logout } = useAuth();
+  const { user, logout, updateUser } = useAuth();
+  const { addToCart: addCartItem } = useCart();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
@@ -198,8 +201,11 @@ export default function BuyerDashboard() {
         phone: profileForm.phone || prev.phone,
         avatar: (profileForm.name || prev.name).charAt(0).toUpperCase(),
       }));
+      if (profileForm.name) {
+        updateUser({ name: profileForm.name });
+      }
     } catch (err: any) {
-      setProfileMsg(err?.response?.data?.detail || "Error al actualizar el perfil");
+      setProfileMsg(errorDetailMessage(err, "Error al actualizar el perfil"));
     }
   };
 
@@ -213,7 +219,7 @@ export default function BuyerDashboard() {
       setPassMsg("Contraseña actualizada correctamente");
       setPassForm({ current: "", newPass: "" });
     } catch (err: any) {
-      setPassMsg(err?.response?.data?.detail || "Error al cambiar la contraseña");
+      setPassMsg(errorDetailMessage(err, "Error al cambiar la contraseña"));
     }
   };
 
@@ -225,7 +231,7 @@ export default function BuyerDashboard() {
       setAddressForm({ label: "", address: "", city: "", department: "", postal_code: "", is_default: false });
       loadAddresses();
     } catch (err: any) {
-      setAddressMsg(err?.response?.data?.detail || "Error al agregar la dirección");
+      setAddressMsg(errorDetailMessage(err, "Error al agregar la dirección"));
     }
   };
 
@@ -299,15 +305,12 @@ export default function BuyerDashboard() {
   };
 
   const addToCart = (p: Producto) => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existing = cart.find((item: any) => String(item.id) === String(p.id));
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ id: p.id, name: p.nombre, price: p.precio, image: p.imagen, quantity: 1 });
-    }
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent("cart-changed"));
+    void addCartItem({
+      id: p.id,
+      name: p.nombre,
+      price: p.precio,
+      image: p.imagen,
+    });
   };
 
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [

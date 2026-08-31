@@ -12,6 +12,7 @@ interface AuthContextType {
   isAuthenticated: boolean;
   login: (token: string, user: User) => void;
   logout: () => void;
+  updateUser: (data: Partial<User>) => void;
   isUser: () => boolean;
   isCompany: () => boolean;
   isAdmin: () => boolean;

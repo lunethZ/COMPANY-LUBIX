@@ -1,36 +1,17 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
 import { UserCircleIcon, ShoppingCartIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
-import { useState, useEffect } from "react";
-
-function getCart() {
-  try {
-    const raw = localStorage.getItem("cart");
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
+import { useState } from "react";
 
 export default function NavbarUsuario() {
   const { user, logout } = useAuth();
+  const { totalItems } = useCart();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
-  const [cartCount, setCartCount] = useState(0);
-
-  useEffect(() => {
-    const update = () => setCartCount(getCart().reduce((sum: number, item: any) => sum + item.quantity, 0));
-    update();
-    window.addEventListener("cart-changed", update);
-    window.addEventListener("storage", update);
-    return () => {
-      window.removeEventListener("cart-changed", update);
-      window.removeEventListener("storage", update);
-    };
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,9 +76,9 @@ export default function NavbarUsuario() {
         <Link to="/carrito" className="flex items-center gap-1 hover:text-green-400 transition relative">
           <ShoppingCartIcon className="w-5 h-5" />
           <span>Carrito</span>
-          {cartCount > 0 && (
+          {totalItems > 0 && (
             <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-              {cartCount}
+              {totalItems}
             </span>
           )}
         </Link>

@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NavbarUsuario from "../components/navbaruser";
 import Footer from "../components/footer";
 import { useAuth } from "../context/AuthContext";
+import { useCart } from "../context/CartContext";
 import api from "../api/axios";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
@@ -40,6 +41,7 @@ const GamepadIcon = (props: React.SVGProps<SVGSVGElement>) => (
 const HomeUsuario: React.FC = () => {
   const [index, setIndex] = useState(0);
   const { user } = useAuth();
+  const { addToCart } = useCart();
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [cartMsg, setCartMsg] = useState<string | null>(null);
@@ -109,15 +111,12 @@ const HomeUsuario: React.FC = () => {
   };
 
   const handleAddToCart = (prod: Producto) => {
-    const cart = JSON.parse(localStorage.getItem("cart") || "[]");
-    const existing = cart.find((item: any) => String(item.id) === String(prod.id));
-    if (existing) {
-      existing.quantity += 1;
-    } else {
-      cart.push({ id: prod.id, name: prod.nombre, price: prod.precio, image: prod.imagen, quantity: 1 });
-    }
-    localStorage.setItem("cart", JSON.stringify(cart));
-    window.dispatchEvent(new CustomEvent("cart-changed"));
+    void addToCart({
+      id: prod.id,
+      name: prod.nombre,
+      price: prod.precio,
+      image: prod.imagen,
+    });
     setCartMsg(prod.id);
     setTimeout(() => setCartMsg(null), 1500);
   };

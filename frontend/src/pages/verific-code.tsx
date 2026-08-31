@@ -130,10 +130,9 @@ const VerificationCode: React.FC = () => {
 
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        const errorDetail = error.response?.data;
-
-        if (errorDetail?.detail) {
-          showMessage(errorDetail.detail, "error");
+        const msg = errorDetailMessage(error, "");
+        if (msg) {
+          showMessage(msg, "error");
         } else {
           showMessage("Código inválido", "error");
         }

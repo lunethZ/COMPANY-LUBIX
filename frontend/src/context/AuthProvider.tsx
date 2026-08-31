@@ -35,6 +35,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     setUser(null);
   };
 
+  //  HELPERS
+  const updateUser = (data: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...data };
+      localStorage.setItem("user", JSON.stringify(next));
+      return next;
+    });
+  };
+
   //  Helper methods
   const isUser = () => user?.role_id === "user";
   const isCompany = () => user?.role_id === "empresa";
@@ -47,6 +57,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       isAuthenticated: !!user,
       login, 
       logout,
+      updateUser,
       isUser,
       isCompany,
       isAdmin,

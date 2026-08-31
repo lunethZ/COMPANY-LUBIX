@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import axios from "axios";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
+import { errorDetailMessage } from "../utils/errors";
 
 const NewPassword: React.FC = () => {
   const [email, setEmail] = useState("");
@@ -88,8 +89,11 @@ const NewPassword: React.FC = () => {
       console.error("❌ Error reset:", err);
       
       if (axios.isAxiosError(err)) {
-        const errorData = err.response?.data;
-        const errorMsg = errorData?.detail || errorData?.message || "Código inválido";
+        const errorData = err.response?.data as { detail?: unknown; message?: string } | undefined;
+        const errorMsg =
+          errorDetailMessage(err, "") ||
+          (typeof errorData?.message === "string" ? errorData.message : "") ||
+          "Código inválido";
         showMessage(errorMsg, "error");
       } else {
         showMessage("Error de conexión", "error");

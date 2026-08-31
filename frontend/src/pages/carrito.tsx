@@ -1,20 +1,13 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import { TrashIcon, ShoppingBagIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
-
-interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-}
+import { useCart } from "../context/CartContext";
 
 const CartPage = () => {
-  const [cart, setCart] = useState<CartItem[]>([]);
+  const { items, subtotal, totalItems, increment, decrement, removeItem } = useCart();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
@@ -26,33 +19,6 @@ const CartPage = () => {
       : user?.role_id === "admin"
         ? "/dashboard-admin"
         : "/";
-
-  useEffect(() => {
-    const saved = localStorage.getItem("cart");
-    if (saved) {
-      try {
-        setCart(JSON.parse(saved));
-      } catch { setCart([]); }
-    }
-  }, []);
-
-  const removeItem = (id: number) => {
-    const updated = cart.filter((item) => item.id !== id);
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-  };
-
-  const updateQuantity = (id: number, delta: number) => {
-    const updated = cart.map((item) =>
-      item.id === id
-        ? { ...item, quantity: Math.max(1, item.quantity + delta) }
-        : item
-    );
-    setCart(updated);
-    localStorage.setItem("cart", JSON.stringify(updated));
-  };
-
-  const total = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
@@ -70,7 +36,7 @@ const CartPage = () => {
           Carrito de Compras
         </h1>
 
-        {cart.length === 0 ? (
+        {items.length === 0 ? (
           <div className="text-center py-20">
             <ShoppingBagIcon className="w-20 h-20 mx-auto mb-4 opacity-30" style={{ color: "var(--color-muted)" }} />
             <p className="text-lg font-medium mb-2" style={{ color: "var(--color-text)" }}>Tu carrito está vacío</p>
@@ -84,20 +50,26 @@ const CartPage = () => {
           </div>
         ) : (
           <div className="space-y-4">
-            {cart.map((item) => (
+            {items.map((item) => (
               <div
-                key={item.id}
+                key={item.product_id}
                 className="flex items-center gap-4 p-4 rounded-xl border"
                 style={{ backgroundColor: "var(--color-bg-card)", borderColor: "var(--color-border)" }}
               >
-                <img src={item.image} alt={item.name} className="w-20 h-20 rounded-lg object-cover" />
+                {item.image ? (
+                  <img src={item.image} alt={item.name} className="w-20 h-20 rounded-lg object-cover" />
+                ) : (
+                  <div className="w-20 h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                    <ShoppingBagIcon className="w-8 h-8 opacity-30" />
+                  </div>
+                )}
                 <div className="flex-1 min-w-0">
                   <h3 className="font-semibold" style={{ color: "var(--color-text)" }}>{item.name}</h3>
-                  <p className="text-lg font-bold text-green-500">${item.price.toLocaleString("es-CO")}</p>
+                  <p className="text-lg font-bold text-green-500">${item.unit_price.toLocaleString("es-CO")}</p>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => updateQuantity(item.id, -1)}
+                    onClick={() => decrement(item.product_id)}
                     className="w-8 h-8 rounded-lg font-bold"
                     style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
                   >
@@ -105,7 +77,7 @@ const CartPage = () => {
                   </button>
                   <span className="w-8 text-center font-semibold" style={{ color: "var(--color-text)" }}>{item.quantity}</span>
                   <button
-                    onClick={() => updateQuantity(item.id, 1)}
+                    onClick={() => increment(item.product_id)}
                     className="w-8 h-8 rounded-lg font-bold"
                     style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
                   >
@@ -113,7 +85,7 @@ const CartPage = () => {
                   </button>
                 </div>
                 <button
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => removeItem(item.product_id)}
                   className="p-2 text-red-400 hover:text-red-300 transition"
                 >
                   <TrashIcon className="w-5 h-5" />
@@ -122,7 +94,7 @@ const CartPage = () => {
             ))}
             <div className="text-right pt-4">
               <p className="text-xl font-bold" style={{ color: "var(--color-text)" }}>
-                Total: <span className="text-green-500">${total.toLocaleString("es-CO")}</span>
+                Total ({totalItems} {totalItems === 1 ? "artículo" : "artículos"}): <span className="text-green-500">${subtotal.toLocaleString("es-CO")}</span>
               </p>
               <button
                 onClick={handleCheckout}
