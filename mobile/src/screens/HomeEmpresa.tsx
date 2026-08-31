@@ -1,5 +1,6 @@
 import React from "react";
 import { View, Text, ScrollView, TouchableOpacity } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { Screen } from "../components/ui";
 import AppHeader from "../components/AppHeader";
 import { useTheme } from "../context/ThemeContext";
@@ -18,9 +19,9 @@ const stats = [
 ];
 
 const pillars = [
-  { icon: "⚙️", title: "Infraestructura", text: "Tecnología robusta y escalable para tu negocio." },
-  { icon: "🛡️", title: "Confianza y Seguridad", text: "Protección de datos y pagos seguros." },
-  { icon: "🤝", title: "Soporte Estratégico", text: "Acompañamiento continuo para crecer." },
+  { icon: "settings", title: "Infraestructura", text: "Tecnología robusta y escalable para tu negocio." },
+  { icon: "shield-checkmark", title: "Confianza y Seguridad", text: "Protección de datos y pagos seguros." },
+  { icon: "hand-left", title: "Soporte Estratégico", text: "Acompañamiento continuo para crecer." },
 ];
 
 const projects = [
@@ -79,7 +80,7 @@ export default function HomeEmpresaScreen() {
           </Text>
           {pillars.map((p) => (
             <View key={p.title} style={{ backgroundColor: C.bgCard, borderWidth: 1, borderColor: C.border, borderRadius: 14, padding: 18, marginBottom: 12 }}>
-              <Text style={{ fontSize: 24, marginBottom: 6 }}>{p.icon}</Text>
+              <Ionicons name={p.icon as keyof typeof Ionicons.glyphMap} size={26} color={C.accent} />
               <Text style={{ color: C.accent, fontSize: 17, fontWeight: "700", marginBottom: 4 }}>{p.title}</Text>
               <Text style={{ color: C.textSecondary, fontSize: 14 }}>{p.text}</Text>
             </View>

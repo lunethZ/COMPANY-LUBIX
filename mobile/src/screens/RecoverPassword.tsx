@@ -7,6 +7,7 @@ import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import axios from "axios";
 import type { RootStackParamList } from "../navigation/types";
+import { errorDetailMessage } from "../utils/errors";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -39,7 +40,7 @@ export default function RecoverPasswordScreen() {
       setTimeout(() => navigation.replace("NewPassword", { email: email.trim() }), 1000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        showMessage(error.response?.data?.detail || "Error al enviar el código", "error");
+        showMessage(errorDetailMessage(error, "Error al enviar el código"), "error");
       }
     } finally {
       setLoading(false);

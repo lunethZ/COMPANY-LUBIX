@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useTheme } from "../context/ThemeContext";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
 export function Screen({
   children,
@@ -173,6 +174,55 @@ export function StrengthBar({ strength }: { strength: number }) {
   );
 }
 
+export function Stars({
+  value,
+  size = 16,
+  style,
+}: {
+  value: number;
+  size?: number;
+  style?: object;
+}) {
+  const { C } = useTheme();
+  return (
+    <View style={[styles.starsRow, style]}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Ionicons
+          key={i}
+          name={i <= Math.round(value) ? "star" : "star-outline"}
+          size={size}
+          color={i <= Math.round(value) ? C.starFill : C.starEmpty}
+        />
+      ))}
+    </View>
+  );
+}
+
+export function StarRatingEditable({
+  value,
+  size = 26,
+  onChange,
+}: {
+  value: number;
+  size?: number;
+  onChange: (v: number) => void;
+}) {
+  const { C } = useTheme();
+  return (
+    <View style={styles.starsRow}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <TouchableOpacity key={i} onPress={() => onChange(i)}>
+          <Ionicons
+            name={i <= value ? "star" : "star-outline"}
+            size={size}
+            color={i <= value ? C.starFill : C.starEmpty}
+          />
+        </TouchableOpacity>
+      ))}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
   screen: { flex: 1 },
   card: {
@@ -215,6 +265,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   popupText: { fontSize: 14, fontWeight: "600" },
+  starsRow: { flexDirection: "row", alignItems: "center", gap: 1 },
   strengthTrack: {
     height: 8,
     borderRadius: 999,

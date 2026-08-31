@@ -1,19 +1,30 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+} from "react";
 import { secureStore } from "../store/secureStore";
+import { onAuthEvent } from "../utils/authEvents";
+
+export type RoleId = "user" | "empresa" | "admin";
 
 export interface User {
-  id: number;
+  id: string;
   name: string;
   email: string;
-  role_id: "user" | "empresa" | "admin";
+  role_id: RoleId;
 }
 
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   loading: boolean;
-  login: (token: string, user: User) => void;
-  logout: () => void;
+  login: (accessToken: string, refreshToken: string | undefined, user: User) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (data: Partial<User>) => Promise<void>;
   isUser: () => boolean;
   isCompany: () => boolean;
 }
@@ -32,6 +43,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const clearSession = useCallback(async () => {
+    await secureStore.removeItem("access_token");
+    await secureStore.removeItem("refresh_token");
+    await secureStore.removeItem("user");
+    setUser(null);
+  }, []);
+
   useEffect(() => {
     (async () => {
       try {
@@ -46,19 +64,36 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setLoading(false);
       }
     })();
-  }, []);
 
-  const login = async (token: string, userData: User) => {
-    await secureStore.setItem("access_token", token);
+    const unsubscribe = onAuthEvent((event) => {
+      if (event.type === "expired" || event.type === "logged-out") {
+        void clearSession();
+      }
+    });
+
+    return unsubscribe;
+  }, [clearSession]);
+
+  const login = async (accessToken: string, refreshToken: string | undefined, userData: User) => {
+    await secureStore.setItem("access_token", accessToken);
+    if (refreshToken) {
+      await secureStore.setItem("refresh_token", refreshToken);
+    }
     await secureStore.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
 
   const logout = async () => {
-    await secureStore.removeItem("access_token");
-    await secureStore.removeItem("refresh_token");
-    await secureStore.removeItem("user");
-    setUser(null);
+    await clearSession();
+  };
+
+  const updateUser = async (data: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...data };
+      void secureStore.setItem("user", JSON.stringify(next));
+      return next;
+    });
   };
 
   const isUser = () => user?.role_id === "user";
@@ -72,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         login,
         logout,
+        updateUser,
         isUser,
         isCompany,
       }}

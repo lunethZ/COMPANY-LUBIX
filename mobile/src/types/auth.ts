@@ -34,7 +34,7 @@ export interface LoginResponse {
   access_token?: string;
   refresh_token?: string;
   token_type?: string;
-  id?: number;
+  id?: string;
   Nombre?: string;
   email?: string;
   role?: string;

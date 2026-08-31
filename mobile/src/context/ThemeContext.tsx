@@ -5,7 +5,7 @@ import { colors } from "../constants/colors";
 
 export type ThemeType = "light" | "dark";
 
-interface ThemeColors {
+export interface ThemeColors {
   bg: string;
   bgSecondary: string;
   bgCard: string;
@@ -30,6 +30,20 @@ interface ThemeColors {
   inputBg: string;
   inputBorder: string;
   cardShadow: string;
+  navy: string;
+  navyInput: string;
+  emerald: string;
+  emeraldDark: string;
+  yellow: string;
+  pink: string;
+  star: string;
+  starFill: string;
+  starEmpty: string;
+  muted: string;
+  successBg: string;
+  successTextGreen: string;
+  errorBg: string;
+  errorTextRed: string;
 }
 
 interface ThemeContextType {

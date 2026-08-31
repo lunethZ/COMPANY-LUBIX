@@ -1,11 +1,13 @@
 import axios from "axios";
 import { secureStore } from "../store/secureStore";
+import { emitAuthExpired } from "../utils/authEvents";
 
 const API_URL =
   process.env.EXPO_PUBLIC_API_URL || "http://10.0.2.2:8001";
 
 const api = axios.create({
   baseURL: API_URL,
+  timeout: 20000,
 });
 
 api.interceptors.request.use(async (config) => {
@@ -22,7 +24,6 @@ api.interceptors.response.use(
     const originalRequest = error.config;
     const url = originalRequest?.url || "";
 
-    // No reintentar refresh sobre el propio endpoint (evita bucles 401)
     if (url.includes("/auth/refresh")) {
       return Promise.reject(error);
     }
@@ -50,11 +51,13 @@ api.interceptors.response.use(
           await secureStore.removeItem("access_token");
           await secureStore.removeItem("refresh_token");
           await secureStore.removeItem("user");
+          emitAuthExpired();
         }
       } else {
         await secureStore.removeItem("access_token");
         await secureStore.removeItem("refresh_token");
         await secureStore.removeItem("user");
+        emitAuthExpired();
       }
     }
 

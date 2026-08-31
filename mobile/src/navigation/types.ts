@@ -1,17 +1,30 @@
+import type { NavigatorScreenParams } from "@react-navigation/native";
+
+export type MainTabParamList = {
+  Inicio: undefined;
+  Buscar: { q?: string; categoria?: string } | undefined;
+  Categorias: undefined;
+  Carrito: undefined;
+  Perfil: undefined;
+};
+
+export type CheckoutStackParamList = {
+  Resumen: undefined;
+  Direccion: undefined;
+  Pago: undefined;
+  Confirmacion: { orderId: string };
+};
+
 export type RootStackParamList = {
   Login: undefined;
   Register: undefined;
   Recover: undefined;
   Verification: { email: string } | undefined;
   NewPassword: { email: string } | undefined;
-  Home: undefined;
-  HomeUsuario: undefined;
+  Main: NavigatorScreenParams<MainTabParamList> | undefined;
+  ProductoDetalle: { id: string };
+  Checkout: undefined;
   HomeEmpresa: undefined;
-  DashboardUsuario: undefined;
   DashboardEmpresa: undefined;
   DashboardAdmin: undefined;
-  Carrito: undefined;
-  BuscarProducto: { q?: string } | undefined;
-  Productos: undefined;
-  ProductoDetalle: { id: number };
 };

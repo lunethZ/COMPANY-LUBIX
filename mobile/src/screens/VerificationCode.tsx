@@ -7,6 +7,7 @@ import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import axios from "axios";
 import type { RootStackParamList } from "../navigation/types";
+import { errorDetailMessage } from "../utils/errors";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type Route = RouteProp<RootStackParamList, "Verification">;
@@ -54,7 +55,7 @@ export default function VerificationCodeScreen() {
       return response;
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        showMessage(error.response?.data?.detail || "Código incorrecto", "error");
+        showMessage(errorDetailMessage(error, "Código incorrecto"), "error");
       }
     } finally {
       setLoading(false);
@@ -72,7 +73,7 @@ export default function VerificationCodeScreen() {
       showMessage("Código reenviado a tu correo", "success");
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        showMessage(error.response?.data?.detail || "No se pudo reenviar", "error");
+        showMessage(errorDetailMessage(error, "No se pudo reenviar"), "error");
       }
     } finally {
       setLoading(false);

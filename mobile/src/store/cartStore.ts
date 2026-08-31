@@ -1,15 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-export interface CartItem {
-  id: number;
-  name: string;
-  price: number;
-  image: string;
-  quantity: number;
-}
+import type { CartItem } from "../types/cart";
 
 const CART_KEY = "cart";
-const FAV_KEY = "favorites";
 
 export const cartStore = {
   async get(): Promise<CartItem[]> {
@@ -27,28 +19,30 @@ export const cartStore = {
       // ignore
     }
   },
-  async add(item: { id: number; name: string; price: number; image: string }): Promise<CartItem[]> {
+  async add(item: CartItem): Promise<CartItem[]> {
     const cart = await this.get();
-    const existing = cart.find((c) => c.id === item.id);
+    const existing = cart.find((c) => c.product_id === item.product_id);
     if (existing) {
-      existing.quantity += 1;
+      existing.quantity += item.quantity;
     } else {
-      cart.push({ ...item, quantity: 1 });
+      cart.push(item);
     }
     await this.set(cart);
     return cart;
   },
-  async updateQuantity(id: number, delta: number): Promise<CartItem[]> {
+  async updateQuantity(productId: string, delta: number): Promise<CartItem[]> {
     const cart = await this.get();
     const updated = cart.map((i) =>
-      i.id === id ? { ...i, quantity: Math.max(1, i.quantity + delta) } : i
+      i.product_id === productId
+        ? { ...i, quantity: Math.max(1, i.quantity + delta) }
+        : i
     );
     await this.set(updated);
     return updated;
   },
-  async remove(id: number): Promise<CartItem[]> {
+  async remove(productId: string): Promise<CartItem[]> {
     const cart = await this.get();
-    const updated = cart.filter((i) => i.id !== id);
+    const updated = cart.filter((i) => i.product_id !== productId);
     await this.set(updated);
     return updated;
   },
@@ -58,28 +52,5 @@ export const cartStore = {
     } catch {
       // ignore
     }
-  },
-};
-
-export const favoritesStore = {
-  async get(): Promise<number[]> {
-    try {
-      const raw = await AsyncStorage.getItem(FAV_KEY);
-      return raw ? (JSON.parse(raw) as number[]) : [];
-    } catch {
-      return [];
-    }
-  },
-  async toggle(id: number): Promise<number[]> {
-    const favs = await this.get();
-    const updated = favs.includes(id) ? favs.filter((f) => f !== id) : [...favs, id];
-    await AsyncStorage.setItem(FAV_KEY, JSON.stringify(updated)).catch(() => {});
-    return updated;
-  },
-  async remove(id: number): Promise<number[]> {
-    const favs = await this.get();
-    const updated = favs.filter((f) => f !== id);
-    await AsyncStorage.setItem(FAV_KEY, JSON.stringify(updated)).catch(() => {});
-    return updated;
   },
 };

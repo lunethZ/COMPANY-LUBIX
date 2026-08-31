@@ -1,32 +1,42 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, Text, ScrollView, TouchableOpacity, TextInput } from "react-native";
 import { Screen } from "../components/ui";
 import AppHeader from "../components/AppHeader";
 import { useTheme } from "../context/ThemeContext";
 import { useAuth } from "../context/AuthContext";
-import { PRODUCTS, formatCOP, CATEGORIES } from "../data/products";
+import { searchProducts } from "../api/products";
+import { formatCOP } from "../utils/format";
+import type { Product } from "../types/product";
 
 type Tab = "products" | "stats" | "profile";
 
-const sellerProducts = PRODUCTS.map((p, idx) => ({
-  ...p,
-  active: idx % 2 === 0,
-  sold: (idx + 1) * 5,
-  views: (idx + 2) * 50,
-}));
+const sellerProductsFrom = (products: Product[]) =>
+  products.map((p, idx) => ({
+    ...p,
+    active: idx % 2 === 0,
+    sold: (idx + 1) * 5,
+    views: (idx + 2) * 50,
+  }));
 
 export default function DashboardEmpresaScreen() {
   const { C } = useTheme();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("products");
   const [showModal, setShowModal] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const [form, setForm] = useState({
     name: "",
     price: "",
     stock: "",
-    category: CATEGORIES[0],
+    category: "",
     description: "",
   });
+
+  useEffect(() => {
+    searchProducts({}).then(setProducts).catch(() => {});
+  }, []);
+
+  const sellerProducts = sellerProductsFrom(products);
 
   const tabs: { key: Tab; label: string }[] = [
     { key: "products", label: "Mis Productos" },

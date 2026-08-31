@@ -1,29 +1,31 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { useTheme } from "../context/ThemeContext";
 import LoginScreen from "../screens/Login";
 import RegisterScreen from "../screens/Register";
 import RecoverPasswordScreen from "../screens/RecoverPassword";
 import VerificationCodeScreen from "../screens/VerificationCode";
 import NewPasswordScreen from "../screens/NewPassword";
-import HomeScreen from "../screens/Home";
-import HomeUsuarioScreen from "../screens/HomeUsuario";
+import MainTabs from "./MainTabs";
+import CheckoutStack from "./CheckoutStack";
+import ProductoDetalleScreen from "../screens/ProductoDetalle";
 import HomeEmpresaScreen from "../screens/HomeEmpresa";
-import DashboardUsuarioScreen from "../screens/DashboardUsuario";
 import DashboardEmpresaScreen from "../screens/DashboardEmpresa";
 import DashboardAdminScreen from "../screens/DashboardAdmin";
-import CarritoScreen from "../screens/Carrito";
-import BuscarProductoScreen from "../screens/BuscarProducto";
-import ProductosScreen from "../screens/Productos";
-import ProductoDetalleScreen from "../screens/ProductoDetalle";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
+  const { C } = useTheme();
+
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        contentStyle: { backgroundColor: C.bg },
+      }}
+    >
       <Stack.Group>
-        <Stack.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Register" component={RegisterScreen} options={{ headerShown: false }} />
         <Stack.Screen name="Recover" component={RecoverPasswordScreen} options={{ headerShown: false }} />
@@ -31,15 +33,18 @@ export default function RootNavigator() {
         <Stack.Screen name="NewPassword" component={NewPasswordScreen} options={{ headerShown: false }} />
       </Stack.Group>
       <Stack.Group>
-        <Stack.Screen name="HomeUsuario" component={HomeUsuarioScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
+        <Stack.Screen
+          name="ProductoDetalle"
+          component={ProductoDetalleScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="Checkout" component={CheckoutStack} options={{ headerShown: false }} />
+      </Stack.Group>
+      <Stack.Group>
         <Stack.Screen name="HomeEmpresa" component={HomeEmpresaScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="DashboardUsuario" component={DashboardUsuarioScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DashboardEmpresa" component={DashboardEmpresaScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DashboardAdmin" component={DashboardAdminScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Carrito" component={CarritoScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="BuscarProducto" component={BuscarProductoScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Productos" component={ProductosScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="ProductoDetalle" component={ProductoDetalleScreen} options={{ headerShown: false }} />
       </Stack.Group>
     </Stack.Navigator>
   );

@@ -3,10 +3,12 @@ import { View, Text, ScrollView, KeyboardAvoidingView, Platform } from "react-na
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Field, Button, Popup, Screen, StrengthBar } from "../components/ui";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import axios from "axios";
 import type { RootStackParamList } from "../navigation/types";
+import { errorDetailMessage } from "../utils/errors";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 type Route = RouteProp<RootStackParamList, "NewPassword">;
@@ -63,7 +65,7 @@ export default function NewPasswordScreen() {
       setTimeout(() => navigation.replace("Login"), 1200);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        showMessage(error.response?.data?.detail || "No se pudo restablecer", "error");
+        showMessage(errorDetailMessage(error, "No se pudo restablecer"), "error");
       }
     } finally {
       setLoading(false);
@@ -71,9 +73,12 @@ export default function NewPasswordScreen() {
   };
 
   const requirement = (ok: boolean, label: string) => (
-    <Text style={{ color: ok ? C.accent : C.textSecondary, fontSize: 12, fontWeight: ok ? "600" : "400" }}>
-      {ok ? "✓ " : ""}{label}
-    </Text>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+      {ok ? <Ionicons name="checkmark-circle" size={14} color={C.accent} /> : null}
+      <Text style={{ color: ok ? C.accent : C.textSecondary, fontSize: 12, fontWeight: ok ? "600" : "400" }}>
+        {label}
+      </Text>
+    </View>
   );
 
   return (

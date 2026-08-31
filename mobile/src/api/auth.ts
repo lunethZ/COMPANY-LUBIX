@@ -50,3 +50,11 @@ export const resetPassword = async (data: {
   code: string;
   new_password: string;
 }) => await api.post("/auth/reset-password-user", data);
+
+export const verifyEmail = async (data: { email: string; code: string }) =>
+  await api.post("/auth/verify-email-user", data);
+
+export const refreshTokens = async (oldRefreshToken: string) =>
+  await api.post<{ access_token: string; refresh_token: string }>("/auth/refresh", {
+    old_refresh_token: oldRefreshToken,
+  });

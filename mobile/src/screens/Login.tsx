@@ -9,6 +9,7 @@ import api from "../api/axios";
 import axios from "axios";
 import type { LoginResponse } from "../types/auth";
 import type { RootStackParamList } from "../navigation/types";
+import { errorDetailMessage } from "../utils/errors";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -52,10 +53,10 @@ export default function LoginScreen() {
       const mappedRole =
         data.role === "company" ? "empresa" : data.role === "admin" ? "admin" : "user";
 
-      login(data.access_token, {
-        id: data.id,
-        name: data.Nombre,
-        email: data.email,
+      login(data.access_token, data.refresh_token, {
+        id: data.id as string,
+        name: data.Nombre || "",
+        email: data.email || "",
         role_id: mappedRole,
       });
 
@@ -63,13 +64,13 @@ export default function LoginScreen() {
 
       showMessage(`¡Bienvenido ${data.Nombre}!`, "success");
       setTimeout(() => {
-        if (mappedRole === "empresa") navigation.replace("DashboardEmpresa");
+        if (mappedRole === "empresa") navigation.replace("HomeEmpresa");
         else if (mappedRole === "admin") navigation.replace("DashboardAdmin");
-        else navigation.replace("HomeUsuario");
+        else navigation.replace("Main");
       }, 1000);
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        showMessage(error.response?.data?.detail || "Error de login", "error");
+        showMessage(errorDetailMessage(error, "Error de login"), "error");
       } else {
         showMessage("Error desconocido", "error");
       }

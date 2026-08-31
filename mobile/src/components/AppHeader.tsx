@@ -1,9 +1,10 @@
 import React from "react";
-import { View, Text, TouchableOpacity, StyleSheet, SafeAreaView } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
+import { useCart } from "../context/CartContext";
 import type { RootStackParamList } from "../navigation/types";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -12,65 +13,59 @@ interface Props {
   role?: "user" | "empresa" | "admin" | "guest";
 }
 
-  export default function AppHeader({ role = "guest" }: Props) {
-    const navigation = useNavigation<Nav>();
-    const { user, logout } = useAuth();
-    const { C } = useTheme();
-    const barBg = C.navbar;
+export default function AppHeader({ role = "guest" }: Props) {
+  const navigation = useNavigation<Nav>();
+  const { user, logout } = useAuth();
+  const { C } = useTheme();
+  const { totalItems } = useCart();
 
   const handleLogout = async () => {
     await logout();
     navigation.reset({ index: 0, routes: [{ name: "Login" }] });
   };
 
-  const home = () => {
-    if (role === "user") navigation.navigate("HomeUsuario");
-    else if (role === "empresa") navigation.navigate("HomeEmpresa");
-    else if (role === "admin") navigation.navigate("DashboardAdmin");
-    else navigation.navigate("Home");
-  };
-
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: barBg }]}>
-      <View style={styles.nav}>
-        <TouchableOpacity onPress={home}>
-          <Text style={styles.logo}>Lubix</Text>
-        </TouchableOpacity>
-        <View style={styles.actions}>
-          {role === "user" && (
-            <TouchableOpacity onPress={() => navigation.navigate("Carrito")}>
-              <Text style={[styles.link, { color: C.text }]}>Carrito</Text>
-            </TouchableOpacity>
-          )}
-          {user && (
-            <View style={styles.avatarWrap}>
-              <View style={styles.avatar}>
-                <Text style={styles.avatarText}>{user.name?.charAt(0).toUpperCase() || "U"}</Text>
-              </View>
-              <TouchableOpacity onPress={handleLogout}>
-                <Text style={styles.logout}>Salir</Text>
-              </TouchableOpacity>
+    <View style={[styles.nav, { backgroundColor: C.navbar, borderBottomColor: C.border }]}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Main", { screen: "Inicio" })}
+      >
+        <Text style={styles.logo}>Lubix</Text>
+      </TouchableOpacity>
+      <View style={styles.actions}>
+        {role === "user" && (
+          <TouchableOpacity onPress={() => navigation.navigate("Main", { screen: "Carrito" })}>
+            <Text style={[styles.link, { color: C.text }]}>Carrito {totalItems > 0 ? `(${totalItems})` : ""}</Text>
+          </TouchableOpacity>
+        )}
+        {user && (
+          <View style={styles.avatarWrap}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{user.name?.charAt(0).toUpperCase() || "U"}</Text>
             </View>
-          )}
-          {!user && (
-            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text style={[styles.link, { color: C.text }]}>Entrar</Text>
+            <TouchableOpacity onPress={handleLogout}>
+              <Text style={styles.logout}>Salir</Text>
             </TouchableOpacity>
-          )}
-        </View>
+          </View>
+        )}
+        {!user && (
+          <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+            <Text style={[styles.link, { color: C.text }]}>Entrar</Text>
+          </TouchableOpacity>
+        )}
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: {},
   nav: {
     paddingVertical: 14,
     paddingHorizontal: 16,
+    paddingTop: 46,
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
+    borderBottomWidth: 1,
   },
   logo: { color: "#22c55e", fontWeight: "800", fontSize: 20 },
   actions: { flexDirection: "row", alignItems: "center", gap: 12 },
@@ -84,6 +79,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   avatarText: { color: "#000", fontWeight: "700" },
-  link: { color: "#ffffff", fontSize: 14, fontWeight: "600" },
-  logout: { color: "#fca5a5", fontSize: 13, fontWeight: "600" },
+  link: { fontSize: 14, fontWeight: "600" },
+  logout: { color: "#f87171", fontSize: 13, fontWeight: "600" },
 });

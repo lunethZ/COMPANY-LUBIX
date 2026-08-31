@@ -5,6 +5,7 @@ import AppHeader from "../components/AppHeader";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import axios from "axios";
+import { errorDetailMessage } from "../utils/errors";
 
 type Module = "Inventario" | "Base de Datos" | "Ventas" | "Usuarios";
 type Filter = Module | "Todos";
@@ -85,7 +86,7 @@ export default function DashboardAdminScreen() {
       setPendingCompanies((prev) => prev.filter((c) => c.id !== id));
     } catch (error) {
       if (axios.isAxiosError(error)) {
-        showPopup(error.response?.data?.detail || "Error al autorizar empresa", "error");
+        showPopup(errorDetailMessage(error, "Error al autorizar empresa"), "error");
       } else {
         showPopup("Error desconocido", "error");
       }

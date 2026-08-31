@@ -4,10 +4,12 @@ import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Field, Button, Popup, Screen, StrengthBar } from "../components/ui";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import axios from "axios";
 import type { RootStackParamList } from "../navigation/types";
+import { errorDetailMessage } from "../utils/errors";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
 
@@ -133,8 +135,10 @@ export default function RegisterScreen() {
     } catch (error) {
       if (axios.isAxiosError(error)) {
         showPopup(
-          error.response?.data?.detail ||
-            (mode === "empresa" ? "No se pudo registrar la empresa" : "Error al registrar"),
+          errorDetailMessage(
+            error,
+            mode === "empresa" ? "No se pudo registrar la empresa" : "Error al registrar"
+          ),
           "error"
         );
       } else {
@@ -146,9 +150,12 @@ export default function RegisterScreen() {
   };
 
   const requirement = (ok: boolean, label: string) => (
-    <Text style={{ color: ok ? C.accent : C.textSecondary, fontSize: 12, fontWeight: ok ? "600" : "400" }}>
-      {ok ? "✓ " : ""}{label}
-    </Text>
+    <View style={{ flexDirection: "row", alignItems: "center", gap: 5 }}>
+      {ok ? <Ionicons name="checkmark-circle" size={14} color={C.accent} /> : null}
+      <Text style={{ color: ok ? C.accent : C.textSecondary, fontSize: 12, fontWeight: ok ? "600" : "400" }}>
+        {label}
+      </Text>
+    </View>
   );
 
   return (
