@@ -12,6 +12,7 @@ import ProductoDetalleScreen from "../screens/ProductoDetalle";
 import HomeEmpresaScreen from "../screens/HomeEmpresa";
 import DashboardEmpresaScreen from "../screens/DashboardEmpresa";
 import DashboardAdminScreen from "../screens/DashboardAdmin";
+import DashboardUsuarioScreen from "../screens/DashboardUsuario";
 import type { RootStackParamList } from "./types";
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -45,6 +46,7 @@ export default function RootNavigator() {
         <Stack.Screen name="HomeEmpresa" component={HomeEmpresaScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DashboardEmpresa" component={DashboardEmpresaScreen} options={{ headerShown: false }} />
         <Stack.Screen name="DashboardAdmin" component={DashboardAdminScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="DashboardUsuario" component={DashboardUsuarioScreen} options={{ headerShown: false }} />
       </Stack.Group>
     </Stack.Navigator>
   );
