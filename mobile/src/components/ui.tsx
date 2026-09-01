@@ -9,6 +9,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useTheme } from "../context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 export function Screen({
@@ -21,8 +22,17 @@ export function Screen({
   style?: object;
 }) {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.screen, { backgroundColor: C.bg }, style]}>{children}</View>
+    <View
+      style={[
+        styles.screen,
+        { backgroundColor: C.bg, paddingBottom: insets.bottom },
+        style,
+      ]}
+    >
+      {children}
+    </View>
   );
 }
 
@@ -34,8 +44,17 @@ export function ScreenScroll({
   style?: object;
 }) {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.screen, { backgroundColor: C.bg }, style]}>{children}</View>
+    <View
+      style={[
+        styles.screen,
+        { backgroundColor: C.bg, paddingBottom: insets.bottom },
+        style,
+      ]}
+    >
+      {children}
+    </View>
   );
 }
 

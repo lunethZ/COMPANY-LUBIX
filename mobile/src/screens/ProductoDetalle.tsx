@@ -15,6 +15,7 @@ import { LinearGradient } from "expo-linear-gradient";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "../context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { ProductCard } from "../components/ProductCard";
@@ -40,6 +41,7 @@ export default function ProductoDetalleScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const { width } = useWindowDimensions();
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
@@ -453,7 +455,12 @@ export default function ProductoDetalleScreen() {
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomBar, { backgroundColor: C.bgCard, borderTopColor: C.border }]}>
+      <View
+        style={[
+          styles.bottomBar,
+          { backgroundColor: C.bgCard, borderTopColor: C.border, paddingBottom: Math.max(insets.bottom, 12) },
+        ]}
+      >
         <View style={styles.qtySelector}>
           <TouchableOpacity
             style={[styles.qtyBtn, { backgroundColor: C.bgSecondary, borderColor: C.border }]}

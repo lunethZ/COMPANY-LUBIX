@@ -4,6 +4,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { ComponentProps } from "react";
 import { useTheme } from "../context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useCart } from "../context/CartContext";
 import HomeUsuarioScreen from "../screens/HomeUsuario";
 import BuscarProductoScreen from "../screens/BuscarProducto";
@@ -26,6 +27,7 @@ const ICONS: Record<keyof MainTabParamList, { active: Glyph; inactive: Glyph }> 
 
 export default function MainTabs() {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const { totalItems } = useCart();
 
   return (
@@ -39,7 +41,8 @@ export default function MainTabs() {
           tabBarStyle: {
             backgroundColor: C.navbar,
             borderTopColor: C.border,
-            height: 60,
+            height: 60 + insets.bottom,
+            paddingBottom: insets.bottom,
           },
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
