@@ -499,7 +499,7 @@ export default function BuyerDashboard() {
                 { label: 'Guardados', value: favoriteProducts.length, icon: <HeartIcon className="w-5 h-5 text-pink-400" /> },
                 { label: 'Direcciones', value: userData.addresses, icon: <MapPinIcon className="w-5 h-5 text-yellow-400" /> },
               ].map((stat) => (
-                <div key={stat.label} className={`${themeClasses.card} rounded-xl p-5 hover:border-slate-700 transition-all`>
+                <div key={stat.label} className={`${themeClasses.card} rounded-xl p-5 hover:border-slate-700 transition-all`}>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-gray-400 text-sm">{stat.label}</span>
                     {stat.icon}
@@ -510,7 +510,7 @@ export default function BuyerDashboard() {
             </div>
 
             {favoriteProducts.length > 0 && (
-              <div className={`${themeClasses.card} rounded-xl p-6`>
+              <div className={`${themeClasses.card} rounded-xl p-6`}>
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="text-lg font-bold text-white">Productos guardados</h2>
                   <button onClick={() => setActiveTab('saved')} className="flex items-center gap-1 text-green-400 hover:text-green-300 text-sm">
