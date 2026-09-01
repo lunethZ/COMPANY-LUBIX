@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import NavbarAuto from '../components/navbar-auto';
+import Footer from '../components/footer';
 import api from '../api/axios';
 import { errorDetailMessage } from '../utils/errors';
 import {
@@ -122,14 +123,15 @@ export default function PQRSPage() {
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
+        <Footer />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-slate-950 flex flex-col">
       <NavbarAuto />
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
 
         {message && (
           <div className={`fixed top-4 left-1/2 -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg border ${
@@ -349,6 +351,7 @@ export default function PQRSPage() {
         </div>
 
       </div>
+      <Footer />
     </div>
   );
 }
