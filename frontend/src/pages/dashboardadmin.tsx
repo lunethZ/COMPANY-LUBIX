@@ -125,6 +125,25 @@ export default function DashboardAdminPage() {
     }
   };
 
+  const handleDeleteCompany = async (company: CompanyItem) => {
+    const confirmed = window.confirm(
+      `¿Eliminar la empresa "${company.nameCompany}" (${company.email})?\n\nEsta acción no se puede deshacer. Se eliminarán sus productos, pedidos y la cuenta del dueño.`
+    );
+    if (!confirmed) return;
+
+    setDeletingId(company.id);
+    try {
+      await api.delete(`/admin/companies/${company.id}`);
+      const [statsRes, companiesRes, usersRes, pqrsRes] = await reloadData();
+      applyData(statsRes.data, companiesRes.data, usersRes.data, pqrsRes.data);
+    } catch (err) {
+      console.error("Error deleting company:", err);
+      setError("No se pudo eliminar la empresa.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const handleResolvePQRS = async (pqrsId: string) => {
     setResolvingId(pqrsId);
     try {
@@ -295,6 +314,7 @@ export default function DashboardAdminPage() {
                       <th className="py-3 pr-4">Contacto</th>
                       <th className="py-3 pr-4">Registro</th>
                       <th className="py-3">Estado</th>
+                      <th className="py-3">Acciones</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -322,6 +342,22 @@ export default function DashboardAdminPage() {
                               Pendiente
                             </span>
                           )}
+                        </td>
+                        <td className="py-3">
+                          <button
+                            onClick={() => handleDeleteCompany(company)}
+                            disabled={deletingId === company.id}
+                            className="text-xs px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition disabled:opacity-50 whitespace-nowrap"
+                          >
+                            {deletingId === company.id ? (
+                              <span className="flex items-center gap-1.5">
+                                <div className="w-3 h-3 border-2 border-rose-400/30 border-t-rose-400 rounded-full animate-spin"></div>
+                                Eliminando...
+                              </span>
+                            ) : (
+                              "Eliminar"
+                            )}
+                          </button>
                         </td>
                       </tr>
                     ))}

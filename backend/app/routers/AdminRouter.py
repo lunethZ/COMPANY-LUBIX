@@ -4,6 +4,14 @@ from app.database.Connection import get_db
 from app.models.ModelUser import Users
 from app.models.ModelCompany import Company
 from app.models.ModelRole import Role
+from app.models.ModelProduct import Product
+from app.models.ModelReview import Review
+from app.models.ModelFavorite import Favorite
+from app.models.ModelCart import Cart, CartItem
+from app.models.ModelOrder import Order, OrderItem
+from app.models.ModelAddress import Address
+from app.models.ModelCode import Codes
+from app.models.ModelRefreshToken import RefreshToken
 from app.models.ModelPQRS import PQRS
 
 router = APIRouter(
@@ -102,6 +110,58 @@ def delete_user(user_id: str, request: Request, database: Session = Depends(get_
     database.commit()
 
     return {"message": "Usuario eliminado correctamente", "id": user_id}
+
+
+@router.delete("/companies/{company_id}")
+def delete_company(company_id: str, request: Request, database: Session = Depends(get_db)):
+    company = database.query(Company).filter(Company.id == company_id).first()
+
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+
+    user = database.query(Users).filter(Users.id == company.user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario de la empresa no encontrado")
+
+    role_admin = _get_role_id(database, "admin")
+    if user.role_id == role_admin:
+        raise HTTPException(status_code=400, detail="No se puede eliminar un administrador")
+
+    try:
+        product_ids = [
+            p.id for p in database.query(Product.id).filter(Product.company_id == company.id).all()
+        ]
+
+        if product_ids:
+            database.query(OrderItem).filter(OrderItem.product_id.in_(product_ids)).delete(synchronize_session=False)
+            database.query(CartItem).filter(CartItem.product_id.in_(product_ids)).delete(synchronize_session=False)
+            database.query(Favorite).filter(Favorite.product_id.in_(product_ids)).delete(synchronize_session=False)
+            database.query(Review).filter(Review.product_id.in_(product_ids)).delete(synchronize_session=False)
+            database.query(Product).filter(Product.id.in_(product_ids)).delete(synchronize_session=False)
+
+        order_ids = [
+            o.id for o in database.query(Order.id).filter(Order.user_id == user.id).all()
+        ]
+        if order_ids:
+            database.query(OrderItem).filter(OrderItem.order_id.in_(order_ids)).delete(synchronize_session=False)
+            database.query(Order).filter(Order.id.in_(order_ids)).delete(synchronize_session=False)
+
+        database.query(Cart).filter(Cart.user_id == user.id).delete(synchronize_session=False)
+        database.query(Address).filter(Address.user_id == user.id).delete(synchronize_session=False)
+        database.query(Codes).filter(Codes.user_id == user.id).delete(synchronize_session=False)
+        database.query(RefreshToken).filter(RefreshToken.user_id == user.id).delete(synchronize_session=False)
+        database.query(PQRS).filter(PQRS.user_id == user.id).delete(synchronize_session=False)
+
+        database.delete(user)
+        database.delete(company)
+        database.commit()
+    except Exception as e:
+        database.rollback()
+        print("ERROR:", e)
+        raise HTTPException(status_code=500, detail="Error al eliminar la empresa")
+
+    return {"message": "Empresa eliminada correctamente", "id": company_id}
 
 
 @router.patch("/companies/{company_id}/validate")
