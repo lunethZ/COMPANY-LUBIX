@@ -101,3 +101,17 @@ def upload_logo(request: Request, file: UploadFile = File(...), database: Sessio
 def upload_banner(request: Request, file: UploadFile = File(...), database: Session = Depends(get_db)):
     user_id = request.state.user_id
     return company_upload_banner_service(user_id, file, database)
+
+@router.post("/products/upload-image")
+def upload_product_image(request: Request, file: UploadFile = File(...), database: Session = Depends(get_db)):
+    user_id = request.state.user_id
+    from app.models.ModelUser import Users
+    from fastapi import HTTPException
+    user = database.query(Users).filter(Users.id == user_id).first()
+    if not user or not user.company:
+        raise HTTPException(status_code=403, detail="No tienes una empresa registrada")
+    result = subir.upload_file(file, "products/")
+    if not result or not result.get("success"):
+        raise HTTPException(status_code=500, detail=result.get("message", "Error al subir la imagen") if result else "Error al subir la imagen")
+    object_name = result["object_name"]
+    return {"success": True, "path": object_name, "url": f"/files/{object_name}", "object_name": object_name}

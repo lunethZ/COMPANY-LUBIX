@@ -141,6 +141,8 @@ export default function SellerDashboard() {
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [imagePreview, setImagePreview] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
@@ -310,9 +312,53 @@ export default function SellerDashboard() {
     return map[status] || "bg-gray-500/20 border-gray-500/40 text-gray-300";
   };
 
+  const resolveImageUrl = (img?: string) => {
+    if (!img) return REFERENCE_IMAGE;
+    if (img.startsWith("http://") || img.startsWith("https://")) return img;
+    const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+    const path = img.startsWith("/files") ? img : `/files/${img.replace(/^\/+/, "")}`;
+    return `${base}${path.replace("/files/files", "/files")}`;
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    if (file) {
+      const localUrl = URL.createObjectURL(file);
+      setImagePreview(localUrl);
+      setForm((prev) => ({ ...prev, imageUrl: "" }));
+    } else {
+      setImagePreview(form.imageUrl || "");
+    }
+  };
+
+  const uploadProductImage = async (file: File): Promise<string> => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await api.post("/company/products/upload-image", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data?.url || res.data?.path || "";
+  };
+
   const handleFormChange = (field: keyof ProductForm, value: string) => {
+    // Validación especial para garantía: solo números
+    if (field === 'warranty') {
+      const clean = value.replace(/\D/g, "");
+      setForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
+    // Para peso, permitir números y punto
+    if (field === 'weight') {
+      const clean = value.replace(/[^0-9.]/g, "");
+      setForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (field === 'imageUrl') setImagePreview(value);
+    if (field === 'imageUrl') {
+      setImagePreview(value);
+      if (value) setSelectedFile(null);
+    }
   };
 
   const handleAddProduct = async () => {
@@ -322,22 +368,42 @@ export default function SellerDashboard() {
     const stockNum = parseInt(form.stock) || 0;
 
     try {
+      setUploadingImage(true);
+      let finalImage = form.imageUrl.trim();
+      if (selectedFile) {
+        finalImage = await uploadProductImage(selectedFile);
+      }
+      // Peso con unidad kg predeterminada
+      const weightWithUnit = form.weight ? `${form.weight} kg` : "";
+      // Garantía con meses
+      const warrantyWithUnit = form.warranty ? `${form.warranty} meses` : "";
+      const techSpec: Record<string, string> = {};
+      if (form.brand) techSpec.brand = form.brand;
+      if (form.model) techSpec.model = form.model;
+      if (warrantyWithUnit) techSpec.warranty = warrantyWithUnit;
+      if (weightWithUnit) techSpec.weight = weightWithUnit;
+      if (form.dimensions) techSpec.dimensions = form.dimensions;
+
       await api.post("/company/products", {
         name: form.name,
         price: priceNum,
-        images: form.imageUrl ? [form.imageUrl] : [],
+        images: finalImage ? [finalImage] : [],
         discount_enable: false,
         discount_value: 0,
         stock: stockNum,
-        descripcion: [form.description, form.brand, form.model, form.warranty, form.weight, form.dimensions].filter(Boolean).join(" · ") || form.name,
+        descripcion: [form.description, form.brand, form.model, warrantyWithUnit, weightWithUnit, form.dimensions].filter(Boolean).join(" · ") || form.name,
+        technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
         catalog_name: form.category || undefined,
       });
       setForm(EMPTY_FORM);
       setImagePreview('');
+      setSelectedFile(null);
       setShowAddModal(false);
       await fetchDashboardData();
     } catch (err) {
       console.error("Error creating product:", err);
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -508,7 +574,7 @@ export default function SellerDashboard() {
                   >
                     <div className="relative aspect-square bg-slate-800">
                       <img
-                        src={product.image}
+                        src={resolveImageUrl(product.image)}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
@@ -716,7 +782,7 @@ export default function SellerDashboard() {
                     const maxSold = Math.max(...products.map((x) => x.sold), 1);
                     return (
                       <div key={p.id} className="flex items-center gap-4">
-                        <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                        <img src={resolveImageUrl(p.image)} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-white text-sm font-medium line-clamp-1">{p.name}</span>
@@ -824,7 +890,7 @@ export default function SellerDashboard() {
                 Agregar nuevo producto
               </h2>
               <button
-                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); }}
+                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
                 className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -835,16 +901,24 @@ export default function SellerDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    URL de imagen del producto
+                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
                   </label>
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      type="text"
-                      placeholder="https://..."
-                      value={form.imageUrl}
-                      onChange={(e) => handleFormChange('imageUrl', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
-                    />
+                  <div className="space-y-3 mb-3">
+                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-green-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
+                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
+                      <span className="truncate">{selectedFile ? selectedFile.name : "Click para seleccionar archivo (JPG, PNG, WEBP)"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="o pega URL https://..."
+                        value={form.imageUrl}
+                        onChange={(e) => handleFormChange('imageUrl', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      />
+                    </div>
+                    {uploadingImage && <p className="text-xs text-green-400 animate-pulse">Subiendo imagen...</p>}
                   </div>
                   <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
                     {imagePreview ? (
@@ -859,6 +933,7 @@ export default function SellerDashboard() {
                       </div>
                     )}
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">Se guardará en MinIO y se mostrará en la tienda.</p>
                 </div>
 
                 <div className="space-y-4">
@@ -938,40 +1013,80 @@ export default function SellerDashboard() {
                   Especificaciones técnicas
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { field: 'brand' as keyof ProductForm, label: 'Marca', placeholder: 'Ej: Samsung' },
-                    { field: 'model' as keyof ProductForm, label: 'Modelo', placeholder: 'Ej: Galaxy S24 Ultra' },
-                    { field: 'warranty' as keyof ProductForm, label: 'Garantía', placeholder: 'Ej: 1 año' },
-                    { field: 'weight' as keyof ProductForm, label: 'Peso', placeholder: 'Ej: 250g' },
-                    { field: 'dimensions' as keyof ProductForm, label: 'Dimensiones', placeholder: 'Ej: 15 x 7 x 0.9 cm' },
-                  ].map(({ field, label, placeholder }) => (
-                    <div key={field} className={field === 'dimensions' ? 'col-span-2' : ''}>
-                      <label className="block text-xs font-medium text-gray-400 mb-1.5">{label}</label>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Samsung"
+                      value={form.brand}
+                      onChange={(e) => handleFormChange('brand', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Galaxy S24 Ultra"
+                      value={form.model}
+                      onChange={(e) => handleFormChange('model', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía (meses) <span className="text-gray-500 font-normal">solo números</span></label>
+                    <div className="relative">
                       <input
                         type="text"
-                        placeholder={placeholder}
-                        value={form[field]}
-                        onChange={(e) => handleFormChange(field, e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                        inputMode="numeric"
+                        placeholder="Ej: 12"
+                        value={form.warranty}
+                        onChange={(e) => handleFormChange('warranty', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-16 text-sm focus:outline-none focus:border-green-500 transition-colors"
                       />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 bg-slate-700 px-2 py-1 rounded">meses</span>
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Ej: 0.25"
+                        value={form.weight}
+                        onChange={(e) => handleFormChange('weight', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 15 x 7 x 0.9 cm"
+                      value={form.dimensions}
+                      onChange={(e) => handleFormChange('dimensions', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); }}
+                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
                   className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleAddProduct}
-                  disabled={!form.name || !form.price || !form.stock}
+                  disabled={!form.name || !form.price || !form.stock || uploadingImage}
                   className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
                 >
-                  Publicar producto
+                  {uploadingImage ? "Subiendo imagen..." : "Publicar producto"}
                 </button>
               </div>
             </div>
