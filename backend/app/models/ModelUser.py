@@ -35,6 +35,16 @@ class Users(Base):
         default=False
     )
 
+    avatar: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True
+    )
+
+    banner: Mapped[str | None] = mapped_column(
+        String(255),
+        nullable=True
+    )
+
     isActive: Mapped[bool] = mapped_column(
         Boolean, 
         default=True, 

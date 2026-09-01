@@ -10,6 +10,14 @@ const formatCOP = (value: number) => {
   return "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 };
 
+const resolveFileUrl = (path?: string | null) => {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const clean = path.replace(/^\/+/, "").replace(/^files\//, "");
+  return `${base}/files/${clean}`;
+};
+
 interface Producto {
   id: string;
   nombre: string;
@@ -86,6 +94,8 @@ export default function BuyerDashboard() {
     phone: '',
     memberSince: '',
     avatar: '',
+    avatarUrl: '',
+    bannerUrl: '',
     totalOrders: 0,
     totalSpent: 0,
     savedProducts: 0,
@@ -381,6 +391,8 @@ export default function BuyerDashboard() {
         phone: data.tell || "",
         memberSince: data.memberSince ? new Date(data.memberSince).toLocaleDateString() : "",
         avatar: (data.fullName || "U").charAt(0).toUpperCase(),
+        avatarUrl: data.avatar ? resolveFileUrl(data.avatar) : "",
+        bannerUrl: data.banner ? resolveFileUrl(data.banner) : "",
         totalOrders: data.totalOrders || 0,
         totalSpent: data.totalSpent || 0,
         savedProducts: data.savedProducts || 0,
@@ -398,6 +410,41 @@ export default function BuyerDashboard() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await api.post("/user/avatar/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const url = res.data?.url ? resolveFileUrl(res.data.url) : "";
+      setUserData(prev => ({ ...prev, avatarUrl: url || prev.avatarUrl }));
+      // actualizar AuthContext si es necesario
+      if (res.data?.avatar) {
+        const newUrl = resolveFileUrl(res.data.avatar);
+        setUserData(prev => ({ ...prev, avatarUrl: newUrl }));
+      }
+      await fetchUserData();
+    } catch (err) {
+      console.error("Error uploading avatar:", err);
+    }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await api.post("/user/banner/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const url = res.data?.url ? resolveFileUrl(res.data.url) : "";
+      setUserData(prev => ({ ...prev, bannerUrl: url || prev.bannerUrl }));
+      await fetchUserData();
+    } catch (err) {
+      console.error("Error uploading banner:", err);
     }
   };
 
@@ -440,12 +487,26 @@ export default function BuyerDashboard() {
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        <div className="bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl p-8 mb-8 shadow-xl shadow-blue-500/20">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div className="relative rounded-2xl p-8 mb-8 shadow-xl shadow-blue-500/20 overflow-hidden" style={userData.bannerUrl ? { backgroundImage: `url(${userData.bannerUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: 'linear-gradient(to right, #2563eb, #16a34a)' }}>
+          {userData.bannerUrl && <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>}
+          <label className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10">
+            <CameraIcon className="w-4 h-4" />
+            Cambiar banner
+            <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
+          </label>
+          <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
-              <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-blue-400 shadow-lg border-4 border-white/20">
-                {userData.avatar}
-              </div>
+              {userData.avatarUrl ? (
+                <img src={userData.avatarUrl} alt="Avatar" className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white/20" />
+              ) : (
+                <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-blue-400 shadow-lg border-4 border-white/20">
+                  {userData.avatar}
+                </div>
+              )}
+              <label className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center shadow-lg cursor-pointer transition">
+                <PencilSquareIcon className="w-4 h-4 text-white" />
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              </label>
             </div>
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-3xl font-bold text-white mb-1">{userData.name}</h1>
@@ -742,12 +803,20 @@ export default function BuyerDashboard() {
                       <div className="flex items-center justify-between">
                         <span className="text-green-400 font-bold text-lg">${p.precio.toLocaleString('es-CO')}</span>
                       </div>
-                      <button
-                        onClick={() => addToCart(p)}
-                        className="w-full mt-3 py-2 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors"
-                      >
-                        Agregar al carrito
-                      </button>
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        <button
+                          onClick={() => addToCart(p)}
+                          className="py-2 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors text-sm"
+                        >
+                          Agregar al carrito
+                        </button>
+                        <button
+                          onClick={() => { addToCart(p); navigate("/pagar"); }}
+                          className="py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors text-sm"
+                        >
+                          Pagar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}

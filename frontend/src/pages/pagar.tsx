@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import api from "../api/axios";
 import { useCart } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
 import {
   CheckCircleIcon,
   CreditCardIcon,
@@ -34,8 +35,6 @@ const BANCOS = [
 
 const COSTO_ENVIO = 15000;
 const ENVIO_GRATIS_MIN = 100000;
-const PROMO_CODE = "LUBIX10";
-const PROMO_DESCUENTO = 0.1;
 
 function detectCardType(num: string): string {
   const n = num.replace(/\s/g, "");
@@ -100,9 +99,18 @@ function generateOrderNumber(): string {
   return `LUBX-${ts.slice(-6)}${rnd}`;
 }
 
+const resolveImage = (img?: string) => {
+  if (!img) return "/placeholder.png";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
+  return `${base}${path.replace("/files/files", "/files")}`;
+};
+
 const PagarPage = () => {
   const navigate = useNavigate();
   const { items, subtotal, emptyCart } = useCart();
+  const { user } = useAuth();
   const cart = items;
 
   const [step, setStep] = useState<Step>("envio");
@@ -113,9 +121,6 @@ const PagarPage = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [metodo, setMetodo] = useState<MetodoPago>("tarjeta");
-  const [promoCode, setPromoCode] = useState("");
-  const [promoApplied, setPromoApplied] = useState(false);
-  const [promoMsg, setPromoMsg] = useState("");
 
   const [envio, setEnvio] = useState({
     nombre: "",
@@ -138,7 +143,32 @@ const PagarPage = () => {
 
   const [banco, setBanco] = useState("");
 
-  const descuentoPromo = promoApplied ? subtotal * PROMO_DESCUENTO : 0;
+  useEffect(() => {
+    const prefill = async () => {
+      try {
+        const [meRes, addrRes] = await Promise.all([
+          api.get("/user/dashboard/me").catch(() => ({ data: {} })),
+          api.get("/user/addresses").catch(() => ({ data: [] })),
+        ]);
+        const me: any = meRes.data || {};
+        const addrs: any[] = addrRes.data || [];
+        const defAddr = addrs.find((a: any) => a.is_default) || addrs[0];
+        setEnvio(prev => ({
+          ...prev,
+          nombre: me.fullName || (user as any)?.name || prev.nombre,
+          email: me.email || (user as any)?.email || prev.email,
+          telefono: me.tell || prev.telefono,
+          direccion: defAddr?.address || prev.direccion,
+          ciudad: defAddr?.city || prev.ciudad,
+          departamento: defAddr?.department || prev.departamento,
+          codigoPostal: defAddr?.postal_code || prev.codigoPostal,
+        }));
+      } catch {}
+    };
+    prefill();
+  }, [user]);
+
+  const descuentoPromo = 0;
   const baseEnvio = subtotal - descuentoPromo >= ENVIO_GRATIS_MIN ? 0 : COSTO_ENVIO;
   const total = subtotal - descuentoPromo + baseEnvio;
 
@@ -190,21 +220,6 @@ const PagarPage = () => {
     if (metodo === "pse" && !banco) e.banco = "Selecciona tu banco";
     setErrors(e);
     return Object.keys(e).length === 0;
-  };
-
-  const applyPromo = () => {
-    if (promoApplied) {
-      setPromoApplied(false);
-      setPromoCode("");
-      setPromoMsg("Cupón eliminado");
-      return;
-    }
-    if (promoCode.trim().toUpperCase() === PROMO_CODE) {
-      setPromoApplied(true);
-      setPromoMsg("Cupón LUBIX10 aplicado (10% de descuento)");
-    } else {
-      setPromoMsg("Código de cupón inválido");
-    }
   };
 
   const goNext = () => {
@@ -617,7 +632,7 @@ const PagarPage = () => {
                     <div className="space-y-2">
                       {cart.map((item) => (
                         <div key={item.id} className="flex items-center gap-3">
-                          <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                          <img src={resolveImage(item.image)} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{item.name}</p>
                             <p className="text-xs text-muted">Cantidad: {item.quantity}</p>
@@ -652,7 +667,7 @@ const PagarPage = () => {
               <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
                 {cart.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <img src={item.image} alt={item.name} className="w-14 h-14 rounded-lg object-cover" />
+                    <img src={resolveImage(item.image)} alt={item.name} className="w-14 h-14 rounded-lg object-cover" />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{item.name}</p>
                       <p className="text-xs text-muted">Cantidad: {item.quantity}</p>
@@ -667,12 +682,6 @@ const PagarPage = () => {
                   <span className="text-muted">Subtotal</span>
                   <span className="font-semibold">${subtotal.toLocaleString("es-CO")}</span>
                 </div>
-                {promoApplied && (
-                  <div className="flex justify-between items-center py-1 text-sm">
-                    <span className="text-emerald-600">Descuento (LUBIX10)</span>
-                    <span className="font-semibold text-emerald-600">-${descuentoPromo.toLocaleString("es-CO")}</span>
-                  </div>
-                )}
                 <div className="flex justify-between items-center py-1 text-sm">
                   <span className="text-muted">Envío</span>
                   <span className="font-semibold">
@@ -687,31 +696,6 @@ const PagarPage = () => {
                   <span className="font-bold">Total</span>
                   <span className="text-xl font-extrabold text-emerald-600">${total.toLocaleString("es-CO")}</span>
                 </div>
-              </div>
-
-              <div className="mt-4">
-                <label className="label-base">Cupón de descuento</label>
-                <div className="flex gap-2">
-                  <input
-                    value={promoCode}
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    className="input-base"
-                    placeholder="Ej: LUBIX10"
-                    disabled={promoApplied}
-                  />
-                  <button
-                    onClick={applyPromo}
-                    className={`px-4 rounded-lg font-semibold transition flex items-center gap-1 ${
-                      promoApplied
-                        ? "bg-red-500/10 text-red-500 hover:bg-red-500/20"
-                        : "bg-emerald-600 text-white hover:bg-emerald-700"
-                    }`}
-                  >
-                    <TicketIcon className="w-4 h-4" />
-                    {promoApplied ? "Quitar" : "Aplicar"}
-                  </button>
-                </div>
-                {promoMsg && <p className="text-xs mt-1 text-muted">{promoMsg}</p>}
               </div>
 
               <div className="mt-5 pt-4 border-t border-gray-100 dark:border-gray-800 space-y-2 text-xs text-muted">

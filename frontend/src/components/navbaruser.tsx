@@ -2,8 +2,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
+import api from "../api/axios";
 import { UserCircleIcon, ShoppingCartIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function NavbarUsuario() {
   const { user, logout } = useAuth();
@@ -12,6 +13,22 @@ export default function NavbarUsuario() {
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  const resolveFileUrl = (path?: string | null) => {
+    if (!path) return "";
+    if (path.startsWith("http://") || path.startsWith("https://")) return path;
+    const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+    const clean = path.replace(/^\/+/, "").replace(/^files\//, "");
+    return `${base}/files/${clean}`;
+  };
+
+  useEffect(() => {
+    if (!user) return;
+    api.get("/user/dashboard/me").then(res => {
+      if (res.data?.avatar) setAvatarUrl(resolveFileUrl(res.data.avatar));
+    }).catch(() => {});
+  }, [user]);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -94,7 +111,9 @@ export default function NavbarUsuario() {
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 border-l border-gray-600 pl-4"
             >
-              {user.name ? (
+              {avatarUrl ? (
+                <img src={avatarUrl} alt="Avatar" className="w-9 h-9 rounded-full object-cover border-2 border-green-400" />
+              ) : user.name ? (
                 <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-black bg-green-400">
                   {user.name.charAt(0).toUpperCase()}
                 </div>
