@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbaruser';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios';
 import { errorDetailMessage } from '../utils/errors';
 const formatCOP = (value: number) => {
@@ -34,7 +35,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 
-type Tab = 'overview' | 'orders' | 'saved' | 'profile' | 'integrated' | 'delete-product';
+type Tab = 'overview' | 'orders' | 'saved' | 'integrated' | 'delete-product';
 
 interface OrderItem {
   id: string;
@@ -64,6 +65,7 @@ interface Order {
 export default function BuyerDashboard() {
   const { user, logout, updateUser } = useAuth();
   const { addToCart: addCartItem } = useCart();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
@@ -126,11 +128,14 @@ export default function BuyerDashboard() {
 
   useEffect(() => {
     loadOrders();
-    if (activeTab === 'profile') {
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (showProfileDrawer) {
       loadAddresses();
       setProfileForm({ name: userData.name, phone: userData.phone });
     }
-  }, [activeTab]);
+  }, [showProfileDrawer]);
 
   const loadOrders = async () => {
     try {
@@ -319,19 +324,18 @@ export default function BuyerDashboard() {
     { id: 'integrated', label: 'Producto Integrado', icon: <CheckCircleIcon className="w-4 h-4" /> },
     { id: 'delete-product', label: 'Eliminar Producto', icon: <TrashIcon className="w-4 h-4" /> },
     { id: 'saved', label: 'Guardados', icon: <HeartIcon className="w-4 h-4" /> },
-    { id: 'profile', label: 'Mi Perfil', icon: <ShieldCheckIcon className="w-4 h-4" /> },
   ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-slate-950' : 'bg-gray-50'}`}>
         <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-slate-950' : 'bg-gray-50'}`}>
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
@@ -738,133 +742,6 @@ export default function BuyerDashboard() {
           </div>
         )}
 
-        {activeTab === 'profile' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                  <UserIcon className="w-5 h-5 text-blue-400" /> Editar información
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Nombre completo</label>
-                    <input
-                      value={profileForm.name}
-                      onChange={(e) => setProfileForm((prev) => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Teléfono</label>
-                    <input
-                      value={profileForm.phone}
-                      onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Correo electrónico</label>
-                    <input value={userData.email} disabled className="w-full px-3 py-2 bg-slate-800/50 border border-slate-800 rounded-lg text-gray-500 text-sm cursor-not-allowed" />
-                  </div>
-                  {profileMsg && <p className={`text-sm ${profileMsg.startsWith("Perfil") ? "text-green-400" : "text-red-400"}`}>{profileMsg}</p>}
-                  <button onClick={saveProfile} className="w-full py-2.5 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors">
-                    Guardar cambios
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                  <ShieldCheckIcon className="w-5 h-5 text-green-400" /> Seguridad
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Contraseña actual</label>
-                    <input
-                      type="password"
-                      value={passForm.current}
-                      onChange={(e) => setPassForm((prev) => ({ ...prev, current: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Nueva contraseña</label>
-                    <input
-                      type="password"
-                      value={passForm.newPass}
-                      onChange={(e) => setPassForm((prev) => ({ ...prev, newPass: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  {passMsg && <p className={`text-sm ${passMsg.startsWith("Contraseña actualizada") ? "text-green-400" : "text-red-400"}`}>{passMsg}</p>}
-                  <button onClick={savePassword} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors">
-                    Cambiar contraseña
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-blue-400" /> Mis datos
-                </h2>
-                <button onClick={downloadData} className="w-full flex items-center justify-between p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors mb-3">
-                  <span className="text-white text-sm">Descargar mis datos</span>
-                  <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-                </button>
-                <button onClick={deleteAccount} className="w-full flex items-center justify-between p-3 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors">
-                  <span className="text-red-400 text-sm">Eliminar mi cuenta</span>
-                  <ChevronRightIcon className="w-4 h-4 text-red-400" />
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                <MapPinIcon className="w-5 h-5 text-yellow-400" /> Mis direcciones
-              </h2>
-
-              <div className="space-y-4 mb-6">
-                <div className="grid grid-cols-2 gap-3">
-                  <input value={addressForm.label} onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))} placeholder="Etiqueta (Casa, Oficina)" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                  <input value={addressForm.postal_code} onChange={(e) => setAddressForm((prev) => ({ ...prev, postal_code: e.target.value }))} placeholder="Código postal" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                </div>
-                <input value={addressForm.address} onChange={(e) => setAddressForm((prev) => ({ ...prev, address: e.target.value }))} placeholder="Dirección" className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                <div className="grid grid-cols-2 gap-3">
-                  <input value={addressForm.city} onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))} placeholder="Ciudad" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                  <input value={addressForm.department} onChange={(e) => setAddressForm((prev) => ({ ...prev, department: e.target.value }))} placeholder="Departamento" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                </div>
-                <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                  <input type="checkbox" checked={addressForm.is_default} onChange={(e) => setAddressForm((prev) => ({ ...prev, is_default: e.target.checked }))} className="w-4 h-4 accent-green-500" />
-                  Usar como dirección principal
-                </label>
-                {addressMsg && <p className={`text-sm ${addressMsg.startsWith("Dirección agregada") ? "text-green-400" : "text-red-400"}`}>{addressMsg}</p>}
-                <button onClick={addAddress} className="w-full py-2.5 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors">
-                  Agregar dirección
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {addresses.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-4">No tienes direcciones guardadas</p>
-                ) : (
-                  addresses.map((addr) => (
-                    <div key={addr.id} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
-                      <div className="min-w-0">
-                        <p className="text-white text-sm font-medium">
-                          {addr.label || "Dirección"} {addr.is_default && <span className="text-xs text-green-400 ml-1">(principal)</span>}
-                        </p>
-                        <p className="text-gray-500 text-xs truncate">{addr.address}, {addr.city}, {addr.department}</p>
-                      </div>
-                      <button onClick={() => removeAddress(addr.id)} className="ml-3 text-red-400 hover:text-red-300 text-sm whitespace-nowrap">
-                        Eliminar
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {showProfileDrawer && (
