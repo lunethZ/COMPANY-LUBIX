@@ -5,6 +5,7 @@ import Footer from "../components/footer";
 import { TrashIcon, ShoppingBagIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { resolveImage } from "../pages/producto-detalle";
 
 const CartPage = () => {
   const { items, subtotal, totalItems, increment, decrement, removeItem } = useCart();
@@ -57,7 +58,7 @@ const CartPage = () => {
                 style={{ backgroundColor: "var(--color-bg-card)", borderColor: "var(--color-border)" }}
               >
                 {item.image ? (
-                  <img src={item.image} alt={item.name} className="w-20 h-20 rounded-lg object-cover" />
+                  <img src={resolveImage(item.image)} alt={item.name} className="w-20 h-20 rounded-lg object-cover" />
                 ) : (
                   <div className="w-20 h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
                     <ShoppingBagIcon className="w-8 h-8 opacity-30" />

@@ -3,6 +3,7 @@
     "name": "Lubix",
     "slug": "lubix-mobile",
     "version": "1.0.0",
+    "updates": { "enabled": false },
     "orientation": "portrait",
     "userInterfaceStyle": "automatic",
     "splash": {
@@ -26,3 +27,8 @@
     ]
   }
 }
+
+
+
+
+

@@ -4,6 +4,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Field, Button, Popup, Screen, StrengthBar } from "../components/ui";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import axios from "axios";
@@ -17,6 +18,7 @@ export default function NewPasswordScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState(route.params?.email || "");
   const [code, setCode] = useState("");
   const [password, setPassword] = useState("");
@@ -83,8 +85,15 @@ export default function NewPasswordScreen() {
 
   return (
     <Screen>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 20 }}>
+      <KeyboardAvoidingView style={{ flex: 1, paddingTop: insets.top }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            padding: 20,
+            paddingTop: Math.max(insets.top, 20),
+          }}
+        >
           {message ? <Popup message={message} type={messageType as "success" | "error"} /> : null}
 
           <View style={{ alignItems: "center", marginBottom: 24 }}>

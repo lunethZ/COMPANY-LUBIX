@@ -14,6 +14,7 @@ import {
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "../context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { MainTabParamList, RootStackParamList } from "../navigation/types";
 
@@ -42,6 +43,7 @@ export function UserTopBar({
   right,
 }: Props) {
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const navigation = useNavigation<Nav>();
 
   const submit = (q: string) => {
@@ -56,7 +58,7 @@ export function UserTopBar({
   };
 
   return (
-    <View style={[styles.bar, { backgroundColor: C.navy }]}>
+    <View style={[styles.bar, { backgroundColor: C.navy, paddingTop: Math.max(insets.top, 12) + 8 }]}>
       {back ? (
         <TouchableOpacity
           style={styles.backBtn}

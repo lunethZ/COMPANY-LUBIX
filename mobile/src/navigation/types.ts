@@ -27,4 +27,5 @@ export type RootStackParamList = {
   HomeEmpresa: undefined;
   DashboardEmpresa: undefined;
   DashboardAdmin: undefined;
+  DashboardUsuario: undefined;
 };

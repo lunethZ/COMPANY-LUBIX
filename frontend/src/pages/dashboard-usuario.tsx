@@ -3,10 +3,19 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbaruser';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios';
 import { errorDetailMessage } from '../utils/errors';
 const formatCOP = (value: number) => {
   return "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
+};
+
+const resolveFileUrl = (path?: string | null) => {
+  if (!path) return "";
+  if (path.startsWith("http://") || path.startsWith("https://")) return path;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const clean = path.replace(/^\/+/, "").replace(/^files\//, "");
+  return `${base}/files/${clean}`;
 };
 
 interface Producto {
@@ -30,11 +39,12 @@ import {
   CreditCardIcon,
   XMarkIcon,
   CheckCircleIcon,
-  TrashIcon
+  TrashIcon,
+  CameraIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 
-type Tab = 'overview' | 'orders' | 'saved' | 'profile' | 'integrated' | 'delete-product';
+type Tab = 'overview' | 'orders' | 'saved' | 'integrated' | 'delete-product';
 
 interface OrderItem {
   id: string;
@@ -64,8 +74,20 @@ interface Order {
 export default function BuyerDashboard() {
   const { user, logout, updateUser } = useAuth();
   const { addToCart: addCartItem } = useCart();
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const themeClasses = {
+    page: isDark ? 'bg-slate-950' : 'bg-gray-100',
+    card: isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200 shadow-sm',
+    cardInner: isDark ? 'bg-slate-800' : 'bg-gray-50',
+    input: isDark ? 'bg-slate-800 border-slate-700 text-white placeholder-gray-500' : 'bg-white border-gray-300 text-gray-900 placeholder-gray-400',
+    text: isDark ? 'text-white' : 'text-gray-900',
+    textMuted: isDark ? 'text-gray-400' : 'text-gray-600',
+    border: isDark ? 'border-slate-800' : 'border-gray-200',
+    drawer: isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-gray-200',
+  };
   const [showProfileDrawer, setShowProfileDrawer] = useState(false);
   const [userData, setUserData] = useState({
     name: '',
@@ -73,6 +95,8 @@ export default function BuyerDashboard() {
     phone: '',
     memberSince: '',
     avatar: '',
+    avatarUrl: '',
+    bannerUrl: '',
     totalOrders: 0,
     totalSpent: 0,
     savedProducts: 0,
@@ -126,11 +150,14 @@ export default function BuyerDashboard() {
 
   useEffect(() => {
     loadOrders();
-    if (activeTab === 'profile') {
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (showProfileDrawer) {
       loadAddresses();
       setProfileForm({ name: userData.name, phone: userData.phone });
     }
-  }, [activeTab]);
+  }, [showProfileDrawer]);
 
   const loadOrders = async () => {
     try {
@@ -225,13 +252,29 @@ export default function BuyerDashboard() {
 
   const addAddress = async () => {
     setAddressMsg("");
+    if (!addressForm.address.trim() || !addressForm.city.trim() || !addressForm.department.trim()) {
+      setAddressMsg("Dirección, ciudad y departamento son obligatorios");
+      return;
+    }
     try {
-      await api.post("/user/addresses", addressForm);
+      await api.post("/user/addresses", {
+        label: addressForm.label?.trim() || null,
+        address: addressForm.address.trim(),
+        city: addressForm.city.trim(),
+        department: addressForm.department.trim(),
+        postal_code: addressForm.postal_code?.trim() || null,
+        is_default: !!addressForm.is_default,
+      });
       setAddressMsg("Dirección agregada correctamente");
       setAddressForm({ label: "", address: "", city: "", department: "", postal_code: "", is_default: false });
-      loadAddresses();
+      await loadAddresses();
     } catch (err: any) {
-      setAddressMsg(errorDetailMessage(err, "Error al agregar la dirección"));
+      const detail = err?.response?.data?.detail;
+      if (Array.isArray(detail)) {
+        setAddressMsg(detail.map((d:any)=> d.msg).join(", "));
+      } else {
+        setAddressMsg(errorDetailMessage(err, "Error al agregar la dirección"));
+      }
     }
   };
 
@@ -246,12 +289,67 @@ export default function BuyerDashboard() {
 
   const downloadData = async () => {
     try {
-      const res = await api.get("/user/export");
-      const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: "application/json" });
+      const [exportRes, ordersRes, favRes, addrRes] = await Promise.all([
+        api.get("/user/export").catch(() => ({ data: {} })),
+        api.get("/user/orders").catch(() => ({ data: [] })),
+        api.get("/user/favorites").catch(() => ({ data: [] })),
+        api.get("/user/addresses").catch(() => ({ data: [] })),
+      ]);
+      const exportData = exportRes.data || {};
+      const orders = ordersRes.data || [];
+      const favorites = favRes.data || [];
+      const addresses = addrRes.data || [];
+      // Generar HTML bonito
+      const html = `<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8"><title>Mis datos - Lubix</title>
+<style>
+  body{font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;background:#f8fafc;color:#0f172a;margin:0;padding:32px}
+  .header{background:linear-gradient(90deg,#16a34a,#2563eb);color:white;padding:24px;border-radius:16px;margin-bottom:24px}
+  .card{background:white;border:1px solid #e2e8f0;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,0.1)}
+  h2{margin:0 0 12px 0;font-size:18px;color:#0f172a;border-bottom:2px solid #16a34a;padding-bottom:8px}
+  h3{margin:16px 0 8px 0;font-size:14px;color:#475569}
+  table{width:100%;border-collapse:collapse;font-size:13px}
+  th{background:#f1f5f9;text-align:left;padding:8px;border:1px solid #e2e8f0}
+  td{padding:8px;border:1px solid #e2e8f0}
+  .badge{background:#dcfce7;color:#166534;padding:2px 8px;border-radius:999px;font-size:11px}
+  .muted{color:#64748b;font-size:12px}
+</style></head>
+<body>
+  <div class="header">
+    <h1 style="margin:0;font-size:28px">Lubix - Mis Datos Personales</h1>
+    <p style="margin:8px 0 0 0;opacity:0.9">Exportado el ${new Date().toLocaleString('es-CO')} &bull; ${exportData.email || ''}</p>
+  </div>
+  <div class="card">
+    <h2>👤 Información Personal</h2>
+    <table>
+      <tr><th>Nombre</th><td>${exportData.fullName || ''}</td></tr>
+      <tr><th>Email</th><td>${exportData.email || ''}</td></tr>
+      <tr><th>Teléfono</th><td>${exportData.tell || ''}</td></tr>
+      <tr><th>Rol</th><td><span class="badge">${exportData.role || ''}</span></td></tr>
+      <tr><th>Verificado</th><td>${exportData.verified ? 'Sí' : 'No'}</td></tr>
+      <tr><th>Miembro desde</th><td>${exportData.memberSince ? new Date(exportData.memberSince).toLocaleDateString('es-CO') : ''}</td></tr>
+    </table>
+  </div>
+  <div class="card">
+    <h2>📍 Direcciones (${addresses.length})</h2>
+    ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map(a=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
+  </div>
+  <div class="card">
+    <h2>🛒 Pedidos (${orders.length})</h2>
+    ${orders.length ? orders.map(o=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map(i=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
+  </div>
+  <div class="card">
+    <h2>❤️ Favoritos (${favorites.length})</h2>
+    ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map(f=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
+  </div>
+  <p class="muted" style="text-align:center;margin-top:24px">Documento generado por Lubix - Tus datos están protegidos</p>
+</body></html>`;
+      const blob = new Blob([html], { type: "text/html" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "mis-datos-lubix.json";
+      a.download = `mis-datos-lubix-${new Date().toISOString().slice(0,10)}.html`;
       a.click();
       URL.revokeObjectURL(url);
     } catch (err) {
@@ -260,7 +358,26 @@ export default function BuyerDashboard() {
   };
 
   const deleteAccount = async () => {
-    navigate('/pqrs?type=eliminacion&subject=Solicitud de eliminación de cuenta');
+    const confirmed = window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible y borrará todos tus datos, pedidos y direcciones.\n\nSi prefieres, puedes solicitar la eliminación vía PQRS.");
+    if (!confirmed) return;
+    const doubleConfirm = window.prompt("Escribe ELIMINAR para confirmar:");
+    if (doubleConfirm !== "ELIMINAR") return;
+    try {
+      await api.delete("/user/account");
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      localStorage.removeItem("user");
+      logout();
+      navigate("/login", { replace: true });
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "Error al eliminar la cuenta";
+      // Fallback a PQRS si el backend no permite borrado directo
+      if (msg.includes("permiso") || err?.response?.status === 401) {
+        navigate('/pqrs?type=eliminacion&subject=Solicitud de eliminación de cuenta');
+      } else {
+        alert(msg);
+      }
+    }
   };
 
   const fetchUserData = async () => {
@@ -275,6 +392,8 @@ export default function BuyerDashboard() {
         phone: data.tell || "",
         memberSince: data.memberSince ? new Date(data.memberSince).toLocaleDateString() : "",
         avatar: (data.fullName || "U").charAt(0).toUpperCase(),
+        avatarUrl: data.avatar ? resolveFileUrl(data.avatar) : "",
+        bannerUrl: data.banner ? resolveFileUrl(data.banner) : "",
         totalOrders: data.totalOrders || 0,
         totalSpent: data.totalSpent || 0,
         savedProducts: data.savedProducts || 0,
@@ -292,6 +411,41 @@ export default function BuyerDashboard() {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await api.post("/user/avatar/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const url = res.data?.url ? resolveFileUrl(res.data.url) : "";
+      setUserData(prev => ({ ...prev, avatarUrl: url || prev.avatarUrl }));
+      // actualizar AuthContext si es necesario
+      if (res.data?.avatar) {
+        const newUrl = resolveFileUrl(res.data.avatar);
+        setUserData(prev => ({ ...prev, avatarUrl: newUrl }));
+      }
+      await fetchUserData();
+    } catch (err) {
+      console.error("Error uploading avatar:", err);
+    }
+  };
+
+  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await api.post("/user/banner/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
+      const url = res.data?.url ? resolveFileUrl(res.data.url) : "";
+      setUserData(prev => ({ ...prev, bannerUrl: url || prev.bannerUrl }));
+      await fetchUserData();
+    } catch (err) {
+      console.error("Error uploading banner:", err);
     }
   };
 
@@ -319,28 +473,41 @@ export default function BuyerDashboard() {
     { id: 'integrated', label: 'Producto Integrado', icon: <CheckCircleIcon className="w-4 h-4" /> },
     { id: 'delete-product', label: 'Eliminar Producto', icon: <TrashIcon className="w-4 h-4" /> },
     { id: 'saved', label: 'Guardados', icon: <HeartIcon className="w-4 h-4" /> },
-    { id: 'profile', label: 'Mi Perfil', icon: <ShieldCheckIcon className="w-4 h-4" /> },
   ];
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className={`min-h-screen flex items-center justify-center ${theme === 'dark' ? 'bg-slate-950' : 'bg-gray-50'}`}>
         <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className={`min-h-screen ${theme === 'dark' ? 'bg-slate-950' : 'bg-gray-50'}`}>
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        <div className="bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl p-8 mb-8 shadow-xl shadow-blue-500/20">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div className="relative rounded-2xl p-8 mb-8 shadow-xl shadow-blue-500/20 overflow-hidden" style={userData.bannerUrl ? { backgroundImage: `url(${userData.bannerUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: 'linear-gradient(to right, #2563eb, #16a34a)' }}>
+          {userData.bannerUrl && <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>}
+          <label className="absolute bottom-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10">
+            <CameraIcon className="w-4 h-4" />
+            Cambiar banner
+            <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
+          </label>
+          <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
-              <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-blue-400 shadow-lg border-4 border-white/20">
-                {userData.avatar}
-              </div>
+              {userData.avatarUrl ? (
+                <img src={userData.avatarUrl} alt="Avatar" className="w-24 h-24 rounded-full object-cover shadow-lg border-4 border-white/20" />
+              ) : (
+                <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-blue-400 shadow-lg border-4 border-white/20">
+                  {userData.avatar}
+                </div>
+              )}
+              <label className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center shadow-lg cursor-pointer transition">
+                <PencilSquareIcon className="w-4 h-4 text-white" />
+                <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
+              </label>
             </div>
             <div className="flex-1 text-center md:text-left">
               <h1 className="text-3xl font-bold text-white mb-1">{userData.name}</h1>
@@ -395,7 +562,7 @@ export default function BuyerDashboard() {
                 { label: 'Guardados', value: favoriteProducts.length, icon: <HeartIcon className="w-5 h-5 text-pink-400" /> },
                 { label: 'Direcciones', value: userData.addresses, icon: <MapPinIcon className="w-5 h-5 text-yellow-400" /> },
               ].map((stat) => (
-                <div key={stat.label} className="bg-slate-900 rounded-xl border border-slate-800 p-5 hover:border-slate-700 transition-all">
+                <div key={stat.label} className={`${themeClasses.card} rounded-xl p-5 hover:border-slate-700 transition-all`}>
                   <div className="flex items-center justify-between mb-3">
                     <span className="text-gray-400 text-sm">{stat.label}</span>
                     {stat.icon}
@@ -406,7 +573,7 @@ export default function BuyerDashboard() {
             </div>
 
             {favoriteProducts.length > 0 && (
-              <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
+              <div className={`${themeClasses.card} rounded-xl p-6`}>
                 <div className="flex items-center justify-between mb-5">
                   <h2 className="text-lg font-bold text-white">Productos guardados</h2>
                   <button onClick={() => setActiveTab('saved')} className="flex items-center gap-1 text-green-400 hover:text-green-300 text-sm">
@@ -448,7 +615,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'orders' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Todos mis pedidos ({orders.length})</h2>
             {orders.length === 0 ? (
               <div className="text-center py-16 text-gray-400">
@@ -611,7 +778,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'saved' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Productos guardados ({favoriteProducts.length})</h2>
             {favoriteProducts.length === 0 ? (
               <div className="text-center py-16 text-gray-400">
@@ -637,12 +804,20 @@ export default function BuyerDashboard() {
                       <div className="flex items-center justify-between">
                         <span className="text-green-400 font-bold text-lg">${p.precio.toLocaleString('es-CO')}</span>
                       </div>
-                      <button
-                        onClick={() => addToCart(p)}
-                        className="w-full mt-3 py-2 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors"
-                      >
-                        Agregar al carrito
-                      </button>
+                      <div className="grid grid-cols-2 gap-2 mt-3">
+                        <button
+                          onClick={() => addToCart(p)}
+                          className="py-2 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors text-sm"
+                        >
+                          Agregar al carrito
+                        </button>
+                        <button
+                          onClick={() => { addToCart(p); navigate("/pago"); }}
+                          className="py-2 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-medium transition-colors text-sm"
+                        >
+                          Pagar
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -652,7 +827,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'integrated' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Productos Integrados</h2>
             {orders.filter(o => o.estado === 'delivered').length === 0 ? (
               <div className="text-center py-16 text-gray-400">
@@ -697,7 +872,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'delete-product' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Eliminar Producto</h2>
             <p className="text-gray-400 text-sm mb-6">Selecciona un producto de tus pedidos para solicitar su eliminación o reportar un problema.</p>
             {orders.length === 0 ? (
@@ -738,140 +913,13 @@ export default function BuyerDashboard() {
           </div>
         )}
 
-        {activeTab === 'profile' && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div className="space-y-6">
-              <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                  <UserIcon className="w-5 h-5 text-blue-400" /> Editar información
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Nombre completo</label>
-                    <input
-                      value={profileForm.name}
-                      onChange={(e) => setProfileForm((prev) => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Teléfono</label>
-                    <input
-                      value={profileForm.phone}
-                      onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Correo electrónico</label>
-                    <input value={userData.email} disabled className="w-full px-3 py-2 bg-slate-800/50 border border-slate-800 rounded-lg text-gray-500 text-sm cursor-not-allowed" />
-                  </div>
-                  {profileMsg && <p className={`text-sm ${profileMsg.startsWith("Perfil") ? "text-green-400" : "text-red-400"}`}>{profileMsg}</p>}
-                  <button onClick={saveProfile} className="w-full py-2.5 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors">
-                    Guardar cambios
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                  <ShieldCheckIcon className="w-5 h-5 text-green-400" /> Seguridad
-                </h2>
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Contraseña actual</label>
-                    <input
-                      type="password"
-                      value={passForm.current}
-                      onChange={(e) => setPassForm((prev) => ({ ...prev, current: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-1">Nueva contraseña</label>
-                    <input
-                      type="password"
-                      value={passForm.newPass}
-                      onChange={(e) => setPassForm((prev) => ({ ...prev, newPass: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
-                    />
-                  </div>
-                  {passMsg && <p className={`text-sm ${passMsg.startsWith("Contraseña actualizada") ? "text-green-400" : "text-red-400"}`}>{passMsg}</p>}
-                  <button onClick={savePassword} className="w-full py-2.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg font-medium transition-colors">
-                    Cambiar contraseña
-                  </button>
-                </div>
-              </div>
-
-              <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-                <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
-                  <CalendarIcon className="w-5 h-5 text-blue-400" /> Mis datos
-                </h2>
-                <button onClick={downloadData} className="w-full flex items-center justify-between p-3 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors mb-3">
-                  <span className="text-white text-sm">Descargar mis datos</span>
-                  <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-                </button>
-                <button onClick={deleteAccount} className="w-full flex items-center justify-between p-3 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors">
-                  <span className="text-red-400 text-sm">Eliminar mi cuenta</span>
-                  <ChevronRightIcon className="w-4 h-4 text-red-400" />
-                </button>
-              </div>
-            </div>
-
-            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                <MapPinIcon className="w-5 h-5 text-yellow-400" /> Mis direcciones
-              </h2>
-
-              <div className="space-y-4 mb-6">
-                <div className="grid grid-cols-2 gap-3">
-                  <input value={addressForm.label} onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))} placeholder="Etiqueta (Casa, Oficina)" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                  <input value={addressForm.postal_code} onChange={(e) => setAddressForm((prev) => ({ ...prev, postal_code: e.target.value }))} placeholder="Código postal" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                </div>
-                <input value={addressForm.address} onChange={(e) => setAddressForm((prev) => ({ ...prev, address: e.target.value }))} placeholder="Dirección" className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                <div className="grid grid-cols-2 gap-3">
-                  <input value={addressForm.city} onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))} placeholder="Ciudad" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                  <input value={addressForm.department} onChange={(e) => setAddressForm((prev) => ({ ...prev, department: e.target.value }))} placeholder="Departamento" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                </div>
-                <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
-                  <input type="checkbox" checked={addressForm.is_default} onChange={(e) => setAddressForm((prev) => ({ ...prev, is_default: e.target.checked }))} className="w-4 h-4 accent-green-500" />
-                  Usar como dirección principal
-                </label>
-                {addressMsg && <p className={`text-sm ${addressMsg.startsWith("Dirección agregada") ? "text-green-400" : "text-red-400"}`}>{addressMsg}</p>}
-                <button onClick={addAddress} className="w-full py-2.5 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors">
-                  Agregar dirección
-                </button>
-              </div>
-
-              <div className="space-y-3">
-                {addresses.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-4">No tienes direcciones guardadas</p>
-                ) : (
-                  addresses.map((addr) => (
-                    <div key={addr.id} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
-                      <div className="min-w-0">
-                        <p className="text-white text-sm font-medium">
-                          {addr.label || "Dirección"} {addr.is_default && <span className="text-xs text-green-400 ml-1">(principal)</span>}
-                        </p>
-                        <p className="text-gray-500 text-xs truncate">{addr.address}, {addr.city}, {addr.department}</p>
-                      </div>
-                      <button onClick={() => removeAddress(addr.id)} className="ml-3 text-red-400 hover:text-red-300 text-sm whitespace-nowrap">
-                        Eliminar
-                      </button>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-          </div>
-        )}
       </div>
 
       {showProfileDrawer && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowProfileDrawer(false)} />
-          <div className="relative w-full max-w-md bg-slate-900 border-l border-slate-700 shadow-2xl overflow-y-auto animate-slide-in-right">
-            <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-800 p-6 flex items-center justify-between">
+          <div className={`relative w-full max-w-md ${themeClasses.drawer} border-l shadow-2xl overflow-y-auto animate-slide-in-right`}>
+            <div className={`sticky top-0 z-10 ${themeClasses.drawer} border-b p-6 flex items-center justify-between`}>
               <h2 className="text-xl font-bold text-white flex items-center gap-2">
                 <PencilSquareIcon className="w-5 h-5 text-blue-400" />
                 Mi perfil
@@ -895,7 +943,7 @@ export default function BuyerDashboard() {
                     <input
                       value={profileForm.name}
                       onChange={(e) => setProfileForm((prev) => ({ ...prev, name: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
+                      className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
                   <div>
@@ -903,12 +951,12 @@ export default function BuyerDashboard() {
                     <input
                       value={profileForm.phone}
                       onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
+                      className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
                   <div>
                     <label className="block text-sm text-gray-400 mb-1">Correo electrónico</label>
-                    <input value={userData.email} disabled className="w-full px-3 py-2 bg-slate-800/50 border border-slate-800 rounded-lg text-gray-500 text-sm cursor-not-allowed" />
+                    <input value={userData.email} disabled className={`w-full px-3 py-2 ${isDark ? "bg-slate-800/50 border-slate-800 text-gray-500" : "bg-gray-100 border-gray-200 text-gray-500"} rounded-lg text-sm cursor-not-allowed`} />
                   </div>
                   {profileMsg && <p className={`text-sm ${profileMsg.startsWith("Perfil") ? "text-green-400" : "text-red-400"}`}>{profileMsg}</p>}
                   <button onClick={saveProfile} className="w-full py-2.5 bg-green-500 hover:bg-green-400 text-white rounded-lg font-medium transition-colors">
@@ -928,7 +976,7 @@ export default function BuyerDashboard() {
                       type="password"
                       value={passForm.current}
                       onChange={(e) => setPassForm((prev) => ({ ...prev, current: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
+                      className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
                   <div>
@@ -937,7 +985,7 @@ export default function BuyerDashboard() {
                       type="password"
                       value={passForm.newPass}
                       onChange={(e) => setPassForm((prev) => ({ ...prev, newPass: e.target.value }))}
-                      className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500"
+                      className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
                   {passMsg && <p className={`text-sm ${passMsg.startsWith("Contraseña actualizada") ? "text-green-400" : "text-red-400"}`}>{passMsg}</p>}
@@ -953,13 +1001,13 @@ export default function BuyerDashboard() {
                 </h3>
                 <div className="space-y-3 mb-4">
                   <div className="grid grid-cols-2 gap-3">
-                    <input value={addressForm.label} onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))} placeholder="Etiqueta (Casa, Oficina)" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                    <input value={addressForm.postal_code} onChange={(e) => setAddressForm((prev) => ({ ...prev, postal_code: e.target.value }))} placeholder="Código postal" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
+                    <input value={addressForm.label} onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))} placeholder="Etiqueta (Casa, Oficina)" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
+                    <input value={addressForm.postal_code} onChange={(e) => setAddressForm((prev) => ({ ...prev, postal_code: e.target.value }))} placeholder="Código postal" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   </div>
-                  <input value={addressForm.address} onChange={(e) => setAddressForm((prev) => ({ ...prev, address: e.target.value }))} placeholder="Dirección" className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
+                  <input value={addressForm.address} onChange={(e) => setAddressForm((prev) => ({ ...prev, address: e.target.value }))} placeholder="Dirección" className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   <div className="grid grid-cols-2 gap-3">
-                    <input value={addressForm.city} onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))} placeholder="Ciudad" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
-                    <input value={addressForm.department} onChange={(e) => setAddressForm((prev) => ({ ...prev, department: e.target.value }))} placeholder="Departamento" className="px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500" />
+                    <input value={addressForm.city} onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))} placeholder="Ciudad" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
+                    <input value={addressForm.department} onChange={(e) => setAddressForm((prev) => ({ ...prev, department: e.target.value }))} placeholder="Departamento" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   </div>
                   <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input type="checkbox" checked={addressForm.is_default} onChange={(e) => setAddressForm((prev) => ({ ...prev, is_default: e.target.checked }))} className="w-4 h-4 accent-green-500" />
@@ -975,7 +1023,7 @@ export default function BuyerDashboard() {
                     <p className="text-gray-500 text-sm text-center py-3">No tienes direcciones guardadas</p>
                   ) : (
                     addresses.map((addr) => (
-                      <div key={addr.id} className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
+                      <div key={addr.id} className={`flex items-center justify-between p-3 ${themeClasses.cardInner} rounded-lg`}>
                         <div className="min-w-0">
                           <p className="text-white text-sm font-medium">
                             {addr.label || "Dirección"} {addr.is_default && <span className="text-xs text-green-400 ml-1">(principal)</span>}

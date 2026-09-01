@@ -3,15 +3,22 @@ import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useTheme } from "../context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const STEPS = ["Resumen", "Envío", "Pago"];
 
 export default function CheckoutHeader({ step }: { step: number }) {
   const navigation = useNavigation();
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={[styles.header, { backgroundColor: C.navbar, borderBottomColor: C.border }]}>
+    <View
+      style={[
+        styles.header,
+        { backgroundColor: C.navbar, borderBottomColor: C.border, paddingTop: Math.max(insets.top, 12) + 8 },
+      ]}
+    >
       <View style={styles.topRow}>
         <TouchableOpacity onPress={() => navigation.goBack()} style={{ padding: 4 }}>
           <Text style={[styles.back, { color: C.text }]}>←</Text>

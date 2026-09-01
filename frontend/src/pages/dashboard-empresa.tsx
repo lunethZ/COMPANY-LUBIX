@@ -24,7 +24,7 @@ import {
   ShoppingBagIcon        
 } from "@heroicons/react/24/outline";
 
-type Tab = 'products' | 'orders' | 'profile' | 'stats';
+type Tab = 'products' | 'orders' | 'profile' | 'stats' | 'reviews';
 
 interface Product {
   id: string;
@@ -138,9 +138,25 @@ export default function SellerDashboard() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [companyOrders, setCompanyOrders] = useState<CompanyOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const [logoSuccess, setLogoSuccess] = useState<boolean | null>(null);
+  const [bannerSuccess, setBannerSuccess] = useState<boolean | null>(null);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [imagePreview, setImagePreview] = useState('');
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<ProductForm>(EMPTY_FORM);
+  const [editImagePreview, setEditImagePreview] = useState('');
+  const [editSelectedFile, setEditSelectedFile] = useState<File | null>(null);
+  const [editUploading, setEditUploading] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
@@ -150,6 +166,10 @@ export default function SellerDashboard() {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    fetchReviewsData();
+  }, [activeTab]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -227,6 +247,40 @@ export default function SellerDashboard() {
     }
   };
 
+  const fetchReviewsData = async () => {
+    if (activeTab !== 'reviews') return;
+    setReviewsLoading(true);
+    try {
+      const productsRes = await api.get("/company/products");
+      const products = productsRes.data || [];
+      
+      // Fetch reviews for each product (limited to 3 most recent per product)
+      const allReviews: any[] = [];
+      for (const product of products) {
+        try {
+          const reviewsRes = await api.get(`/products/${product.id}/reviews`);
+          const productReviews = reviewsRes.data || [];
+          // Take only 3 most recent reviews per product
+          const limitedReviews = productReviews.slice(0, 3);
+          allReviews.push(
+            ...limitedReviews.map((r: any) => ({
+              ...r,
+              productName: product.name,
+            }))
+          );
+        } catch (err) {
+          console.error(`Error fetching reviews for product ${product.id}:`, err);
+        }
+      }
+      setReviews(allReviews);
+    } catch (err) {
+      console.error("Error fetching reviews data:", err);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
   const totalRevenue = products.reduce((acc, p) => acc + p.price * p.sold, 0);
   const activeProducts = products.filter((p) => p.active);
 
@@ -252,30 +306,44 @@ export default function SellerDashboard() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setLogoUploading(true);
+    setLogoError(null);
+    setLogoSuccess(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
       await api.patch("/company/dashboard/upload-logo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      setLogoSuccess(true);
       await fetchDashboardData();
-    } catch (err) {
+    } catch (err: any) {
+      setLogoError(err?.response?.data?.detail || "Error al subir la foto de perfil");
       console.error("Error uploading logo:", err);
+    } finally {
+      setLogoUploading(false);
     }
   };
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setBannerUploading(true);
+    setBannerError(null);
+    setBannerSuccess(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
       await api.patch("/company/dashboard/upload-banner", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      setBannerSuccess(true);
       await fetchDashboardData();
-    } catch (err) {
+    } catch (err: any) {
+      setBannerError(err?.response?.data?.detail || "Error al subir el banner");
       console.error("Error uploading banner:", err);
+    } finally {
+      setBannerUploading(false);
     }
   };
 
@@ -310,9 +378,53 @@ export default function SellerDashboard() {
     return map[status] || "bg-gray-500/20 border-gray-500/40 text-gray-300";
   };
 
+  const resolveImageUrl = (img?: string) => {
+    if (!img) return REFERENCE_IMAGE;
+    if (img.startsWith("http://") || img.startsWith("https://")) return img;
+    const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+    const path = img.startsWith("/files") ? img : `/files/${img.replace(/^\/+/, "")}`;
+    return `${base}${path.replace("/files/files", "/files")}`;
+  };
+
+  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setSelectedFile(file);
+    if (file) {
+      const localUrl = URL.createObjectURL(file);
+      setImagePreview(localUrl);
+      setForm((prev) => ({ ...prev, imageUrl: "" }));
+    } else {
+      setImagePreview(form.imageUrl || "");
+    }
+  };
+
+  const uploadProductImage = async (file: File): Promise<string> => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await api.post("/company/products/upload-image", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data?.url || res.data?.path || "";
+  };
+
   const handleFormChange = (field: keyof ProductForm, value: string) => {
+    // Validación especial para garantía: solo números
+    if (field === 'warranty') {
+      const clean = value.replace(/\D/g, "");
+      setForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
+    // Para peso, permitir números y punto
+    if (field === 'weight') {
+      const clean = value.replace(/[^0-9.]/g, "");
+      setForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (field === 'imageUrl') setImagePreview(value);
+    if (field === 'imageUrl') {
+      setImagePreview(value);
+      if (value) setSelectedFile(null);
+    }
   };
 
   const handleAddProduct = async () => {
@@ -322,22 +434,139 @@ export default function SellerDashboard() {
     const stockNum = parseInt(form.stock) || 0;
 
     try {
+      setUploadingImage(true);
+      let finalImage = form.imageUrl.trim();
+      if (selectedFile) {
+        finalImage = await uploadProductImage(selectedFile);
+      }
+      // Peso con unidad kg predeterminada
+      const weightWithUnit = form.weight ? `${form.weight} kg` : "";
+      // Garantía con meses
+      const warrantyWithUnit = form.warranty ? `${form.warranty} meses` : "";
+      const techSpec: Record<string, string> = {};
+      if (form.brand) techSpec.brand = form.brand;
+      if (form.model) techSpec.model = form.model;
+      if (warrantyWithUnit) techSpec.warranty = warrantyWithUnit;
+      if (weightWithUnit) techSpec.weight = weightWithUnit;
+      if (form.dimensions) techSpec.dimensions = form.dimensions;
+
       await api.post("/company/products", {
         name: form.name,
         price: priceNum,
-        images: form.imageUrl ? [form.imageUrl] : [],
+        images: finalImage ? [finalImage] : [],
         discount_enable: false,
         discount_value: 0,
         stock: stockNum,
-        descripcion: [form.description, form.brand, form.model, form.warranty, form.weight, form.dimensions].filter(Boolean).join(" · ") || form.name,
+        descripcion: [form.description, form.brand, form.model, warrantyWithUnit, weightWithUnit, form.dimensions].filter(Boolean).join(" · ") || form.name,
+        technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
         catalog_name: form.category || undefined,
       });
       setForm(EMPTY_FORM);
       setImagePreview('');
+      setSelectedFile(null);
       setShowAddModal(false);
       await fetchDashboardData();
     } catch (err) {
       console.error("Error creating product:", err);
+    } finally {
+      setUploadingImage(false);
+    }
+  };
+
+  const openEditModal = async (productId: string) => {
+    try {
+      const res = await api.get(`/company/products/${productId}`);
+      const p = res.data;
+      const spec = p.technical_spec || {};
+      const warrantyNum = (spec.warranty || "").replace(/\D/g, "");
+      const weightNum = (spec.weight || "").replace(/[^0-9.]/g, "");
+      setEditingId(productId);
+      setEditForm({
+        name: p.name || "",
+        price: String(p.price || ""),
+        stock: String(p.stock || ""),
+        category: p.catalog_name || "",
+        description: p.descripcion || "",
+        brand: spec.brand || "",
+        model: spec.model || "",
+        warranty: warrantyNum,
+        weight: weightNum,
+        dimensions: spec.dimensions || "",
+        imageUrl: p.images?.[0] || "",
+      });
+      setEditImagePreview(p.images?.[0] ? resolveImageUrl(p.images[0]) : "");
+      setEditSelectedFile(null);
+      setShowEditModal(true);
+    } catch (err) {
+      console.error("Error loading product:", err);
+    }
+  };
+
+  const handleEditFormChange = (field: keyof ProductForm, value: string) => {
+    if (field === 'warranty') {
+      const clean = value.replace(/\D/g, "");
+      setEditForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
+    if (field === 'weight') {
+      const clean = value.replace(/[^0-9.]/g, "");
+      setEditForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+    if (field === 'imageUrl') {
+      setEditImagePreview(value);
+      if (value) setEditSelectedFile(null);
+    }
+  };
+
+  const handleEditImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setEditSelectedFile(file);
+    if (file) {
+      const localUrl = URL.createObjectURL(file);
+      setEditImagePreview(localUrl);
+      setEditForm((prev) => ({ ...prev, imageUrl: "" }));
+    }
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingId || !editForm.name || !editForm.price || !editForm.stock) return;
+    const priceNum = parseInt(editForm.price.replace(/\D/g, '')) || 0;
+    const stockNum = parseInt(editForm.stock) || 0;
+    try {
+      setEditUploading(true);
+      let finalImage = editForm.imageUrl.trim();
+      if (editSelectedFile) {
+        finalImage = await uploadProductImage(editSelectedFile);
+      }
+      const weightWithUnit = editForm.weight ? `${editForm.weight} kg` : "";
+      const warrantyWithUnit = editForm.warranty ? `${editForm.warranty} meses` : "";
+      const techSpec: Record<string, string> = {};
+      if (editForm.brand) techSpec.brand = editForm.brand;
+      if (editForm.model) techSpec.model = editForm.model;
+      if (warrantyWithUnit) techSpec.warranty = warrantyWithUnit;
+      if (weightWithUnit) techSpec.weight = weightWithUnit;
+      if (editForm.dimensions) techSpec.dimensions = editForm.dimensions;
+
+      await api.patch(`/company/products/${editingId}`, {
+        name: editForm.name,
+        price: priceNum,
+        images: finalImage ? [finalImage] : [],
+        stock: stockNum,
+        descripcion: [editForm.description, editForm.brand, editForm.model, warrantyWithUnit, weightWithUnit, editForm.dimensions].filter(Boolean).join(" · ") || editForm.name,
+        technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
+      });
+      setShowEditModal(false);
+      setEditingId(null);
+      setEditForm(EMPTY_FORM);
+      setEditImagePreview('');
+      setEditSelectedFile(null);
+      await fetchDashboardData();
+    } catch (err) {
+      console.error("Error updating product:", err);
+    } finally {
+      setEditUploading(false);
     }
   };
 
@@ -378,6 +607,7 @@ export default function SellerDashboard() {
     { id: 'orders', label: 'Pedidos', icon: <ShoppingBagIcon className="w-4 h-4" /> },
     { id: 'stats', label: 'Estadísticas', icon: <ChartBarIcon className="w-4 h-4" /> },
     { id: 'profile', label: 'Mi Perfil', icon: <ShieldCheckIcon className="w-4 h-4" /> },
+    { id: 'reviews', label: 'Reseñas', icon: <StarIcon className="w-4 h-4 fill-yellow-400" /> },
   ];
 
   const getLevelColor = (level: string) => {
@@ -423,6 +653,21 @@ export default function SellerDashboard() {
                 <CameraIcon className="w-4 h-4 text-white" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
               </label>
+              {logoUploading && (
+                <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center z-10">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+              )}
+              {logoError && (
+                <div className="absolute top-0 left-0 w-full h-full bg-black/50 rounded-full flex items-center justify-center text-white text-sm z-10">
+                  {logoError}
+                </div>
+              )}
+              {logoSuccess && (
+                <div className="absolute top-0 left-0 w-full h-full bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-sm z-10">
+                  Foto de perfil actualizada
+                </div>
+              )}
             </div>
             <div className="flex-1 text-center md:text-left">
               <div className="flex items-center gap-2 justify-center md:justify-start mb-1">
@@ -508,7 +753,7 @@ export default function SellerDashboard() {
                   >
                     <div className="relative aspect-square bg-slate-800">
                       <img
-                        src={product.image}
+                        src={resolveImageUrl(product.image)}
                         alt={product.name}
                         className="w-full h-full object-cover"
                       />
@@ -564,6 +809,13 @@ export default function SellerDashboard() {
                             <span className={`bg-white w-2.5 h-2.5 rounded-full shadow-md transform duration-300 ease-in-out ${product.active ? 'translate-x-0' : 'translate-x-2.5'}`}></span>
                           </span>
                           {product.active ? 'Desactivar' : 'Activar'}
+                        </button>
+                        <button
+                          onClick={() => openEditModal(product.id)}
+                          className="w-9 h-9 flex items-center justify-center bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all"
+                          title="Editar producto"
+                        >
+                          <PencilSquareIcon className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(product.id)}
@@ -716,7 +968,7 @@ export default function SellerDashboard() {
                     const maxSold = Math.max(...products.map((x) => x.sold), 1);
                     return (
                       <div key={p.id} className="flex items-center gap-4">
-                        <img src={p.image} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
+                        <img src={resolveImageUrl(p.image)} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
                             <span className="text-white text-sm font-medium line-clamp-1">{p.name}</span>
@@ -815,6 +1067,52 @@ export default function SellerDashboard() {
         )}
       </div>
 
+      {activeTab === 'reviews' && (
+        <div className="bg-slate-900 rounded-xl border border-slate-800 p-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Reseñas de productos</h2>
+          {reviewsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">
+              <StarIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium">No hay reseñas aún</p>
+              <p className="text-sm">Los clientes aún no han dejado reseñas para tus productos</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-800"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-sm">
+                    {review.user_name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white">{review.user_name}</h3>
+                    <p className="text-gray-400 text-sm">{review.comment?.substring(0, 100) || ""}...</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <StarIcon
+                        key={i}
+                        className={`w-4 h-4 fill-yellow-400 text-yellow-400 ${i < review.rating ? "fill-yellow-400" : "text-gray-300"}`}
+                      />
+                    ))}
+                    <span className="text-xs text-gray-400">{review.rating}/5</span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(review.created_at).toLocaleDateString("es-CO")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {showAddModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -824,7 +1122,7 @@ export default function SellerDashboard() {
                 Agregar nuevo producto
               </h2>
               <button
-                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); }}
+                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
                 className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -835,16 +1133,24 @@ export default function SellerDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    URL de imagen del producto
+                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
                   </label>
-                  <div className="flex gap-2 mb-3">
-                    <input
-                      type="text"
-                      placeholder="https://..."
-                      value={form.imageUrl}
-                      onChange={(e) => handleFormChange('imageUrl', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
-                    />
+                  <div className="space-y-3 mb-3">
+                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-green-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
+                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
+                      <span className="truncate">{selectedFile ? selectedFile.name : "Click para seleccionar archivo (JPG, PNG, WEBP)"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="o pega URL https://..."
+                        value={form.imageUrl}
+                        onChange={(e) => handleFormChange('imageUrl', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      />
+                    </div>
+                    {uploadingImage && <p className="text-xs text-green-400 animate-pulse">Subiendo imagen...</p>}
                   </div>
                   <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
                     {imagePreview ? (
@@ -859,6 +1165,7 @@ export default function SellerDashboard() {
                       </div>
                     )}
                   </div>
+                  <p className="text-xs text-gray-500 mt-2">Se guardará en MinIO y se mostrará en la tienda.</p>
                 </div>
 
                 <div className="space-y-4">
@@ -938,40 +1245,292 @@ export default function SellerDashboard() {
                   Especificaciones técnicas
                 </h3>
                 <div className="grid grid-cols-2 gap-4">
-                  {[
-                    { field: 'brand' as keyof ProductForm, label: 'Marca', placeholder: 'Ej: Samsung' },
-                    { field: 'model' as keyof ProductForm, label: 'Modelo', placeholder: 'Ej: Galaxy S24 Ultra' },
-                    { field: 'warranty' as keyof ProductForm, label: 'Garantía', placeholder: 'Ej: 1 año' },
-                    { field: 'weight' as keyof ProductForm, label: 'Peso', placeholder: 'Ej: 250g' },
-                    { field: 'dimensions' as keyof ProductForm, label: 'Dimensiones', placeholder: 'Ej: 15 x 7 x 0.9 cm' },
-                  ].map(({ field, label, placeholder }) => (
-                    <div key={field} className={field === 'dimensions' ? 'col-span-2' : ''}>
-                      <label className="block text-xs font-medium text-gray-400 mb-1.5">{label}</label>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Samsung"
+                      value={form.brand}
+                      onChange={(e) => handleFormChange('brand', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Galaxy S24 Ultra"
+                      value={form.model}
+                      onChange={(e) => handleFormChange('model', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía (meses) <span className="text-gray-500 font-normal">solo números</span></label>
+                    <div className="relative">
                       <input
                         type="text"
-                        placeholder={placeholder}
-                        value={form[field]}
-                        onChange={(e) => handleFormChange(field, e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                        inputMode="numeric"
+                        placeholder="Ej: 12"
+                        value={form.warranty}
+                        onChange={(e) => handleFormChange('warranty', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-16 text-sm focus:outline-none focus:border-green-500 transition-colors"
                       />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 bg-slate-700 px-2 py-1 rounded">meses</span>
                     </div>
-                  ))}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Ej: 0.25"
+                        value={form.weight}
+                        onChange={(e) => handleFormChange('weight', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 15 x 7 x 0.9 cm"
+                      value={form.dimensions}
+                      onChange={(e) => handleFormChange('dimensions', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); }}
+                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
                   className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleAddProduct}
-                  disabled={!form.name || !form.price || !form.stock}
+                  disabled={!form.name || !form.price || !form.stock || uploadingImage}
                   className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
                 >
-                  Publicar producto
+                  {uploadingImage ? "Subiendo imagen..." : "Publicar producto"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <PencilSquareIcon className="w-5 h-5 text-blue-400" />
+                Editar producto
+              </h2>
+              <button
+                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
+                  </label>
+                  <div className="space-y-3 mb-3">
+                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-blue-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
+                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
+                      <span className="truncate">{editSelectedFile ? editSelectedFile.name : "Click para cambiar archivo (JPG, PNG, WEBP)"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleEditImageFileChange} />
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="o pega URL https://..."
+                        value={editForm.imageUrl}
+                        onChange={(e) => handleEditFormChange('imageUrl', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+                    {editUploading && <p className="text-xs text-blue-400 animate-pulse">Subiendo imagen...</p>}
+                  </div>
+                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
+                    {editImagePreview ? (
+                      <img src={editImagePreview} alt="Preview" className="w-full h-full object-cover" onError={() => setEditImagePreview(REFERENCE_IMAGE)} />
+                    ) : (
+                      <div className="text-center">
+                        <img src={REFERENCE_IMAGE} alt="Referencia" className="w-full h-full object-cover opacity-30" />
+                        <div className="absolute inset-0 flex items-center justify-center flex-col gap-2">
+                          <ArrowUpTrayIcon className="w-8 h-8 text-gray-400" />
+                          <p className="text-gray-400 text-xs">Vista previa</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Nombre del producto <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Smartphone Samsung Galaxy S24"
+                      value={editForm.name}
+                      onChange={(e) => handleEditFormChange('name', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Precio (COP) <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 3500000"
+                      value={editForm.price}
+                      onChange={(e) => handleEditFormChange('price', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Stock disponible <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Ej: 20"
+                      value={editForm.stock}
+                      onChange={(e) => handleEditFormChange('stock', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría</label>
+                    <select
+                      value={editForm.category}
+                      onChange={(e) => handleEditFormChange('category', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Selecciona una categoría</option>
+                      <option value="Computadores">Computadores</option>
+                      <option value="Smartphones">Smartphones</option>
+                      <option value="Audio">Audio</option>
+                      <option value="Fotografía">Fotografía</option>
+                      <option value="Gaming">Gaming</option>
+                      <option value="Tablets">Tablets</option>
+                      <option value="Accesorios">Accesorios</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción</label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe las características principales del producto..."
+                  value={editForm.description}
+                  onChange={(e) => handleEditFormChange('description', e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                />
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                  <ChevronRightIcon className="w-4 h-4 text-blue-400" />
+                  Especificaciones técnicas
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Samsung"
+                      value={editForm.brand}
+                      onChange={(e) => handleEditFormChange('brand', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Galaxy S24 Ultra"
+                      value={editForm.model}
+                      onChange={(e) => handleEditFormChange('model', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía (meses) <span className="text-gray-500 font-normal">solo números</span></label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Ej: 12"
+                        value={editForm.warranty}
+                        onChange={(e) => handleEditFormChange('warranty', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-16 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 bg-slate-700 px-2 py-1 rounded">meses</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Ej: 0.25"
+                        value={editForm.weight}
+                        onChange={(e) => handleEditFormChange('weight', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 15 x 7 x 0.9 cm"
+                      value={editForm.dimensions}
+                      onChange={(e) => handleEditFormChange('dimensions', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleUpdateProduct}
+                  disabled={!editForm.name || !editForm.price || !editForm.stock || editUploading}
+                  className="flex-1 py-3 bg-blue-500 hover:bg-blue-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/30"
+                >
+                  {editUploading ? "Guardando..." : "Guardar cambios"}
                 </button>
               </div>
             </div>
@@ -1026,7 +1585,22 @@ export default function SellerDashboard() {
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
                 </label>
-              </div>
+              {bannerUploading && (
+                <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center z-10">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+              )}
+              {bannerError && (
+                <div className="absolute top-0 left-0 w-full h-full bg-black/50 rounded-full flex items-center justify-center text-white text-sm z-10">
+                  {bannerError}
+                </div>
+              )}
+              {bannerSuccess && (
+                <div className="absolute top-0 left-0 w-full h-full bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-sm z-10">
+                  Banner actualizado
+                </div>
+              )}
+            </div>
 
               <div className="border-t border-slate-800 pt-6">
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Información de la tienda</h3>

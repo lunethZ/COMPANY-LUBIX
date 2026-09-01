@@ -25,7 +25,8 @@ PUBLIC_ROUTES = [
     "/health/internet",
     "/products/search",
     "/docs",
-    "/openapi.json"
+    "/openapi.json",
+    "/files",
 ]
 
 ROLES_PERMISSIONS_ROUTERS = {
@@ -44,7 +45,8 @@ ROLES_PERMISSIONS_ROUTERS = {
         "/company/dashboard/upload-banner",
         "/company/products",
         "/company/orders",
-        "/pqrs"
+        "/pqrs",
+        "/company/products/upload-image",
     ],
 
     "user": [
@@ -56,6 +58,8 @@ ROLES_PERMISSIONS_ROUTERS = {
         "/user/addresses",
         "/user/orders",
         "/user/favorites",
+        "/user/avatar",
+        "/user/banner",
         "/cart",
         "/pqrs"
     ]
@@ -75,6 +79,9 @@ async def auth_middleware(request: Request, call_next):
         return await call_next(request)
 
     path = request.url.path
+
+    if path.startswith("/files/"):
+        return await call_next(request)
 
     if path in PUBLIC_ROUTES:
         return await call_next(request)

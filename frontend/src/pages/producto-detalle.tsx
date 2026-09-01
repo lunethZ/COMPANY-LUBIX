@@ -88,11 +88,19 @@ const EstrellasEditables = ({
 const formatCOP = (value: number) =>
   "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 
+export const resolveImage = (img?: string) => {
+  if (!img || img === "/placeholder.png") return "/placeholder.png";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
+  return `${base}${path.replace("/files/files", "/files")}`;
+};
+
 const ProductoDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { addToCart } = useCart();
+  const { addToCart, items } = useCart();
   const [activeImage, setActiveImage] = useState(0);
   const [cartMsg, setCartMsg] = useState(false);
   const [producto, setProducto] = useState<ProductDetail | null>(null);
@@ -102,10 +110,15 @@ const ProductoDetalle: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [quantity, setQuantity] = useState(1);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, title: "", comment: "" });
   const [reviewMsg, setReviewMsg] = useState("");
   const [submittingReview, setSubmittingReview] = useState(false);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
@@ -194,6 +207,7 @@ const ProductoDetalle: React.FC = () => {
       price: producto.price,
       image: producto.images?.[0] || "/placeholder.png",
       stock: producto.stock,
+      quantity,
     });
     setCartMsg(true);
     setTimeout(() => setCartMsg(false), 1500);
@@ -294,7 +308,7 @@ const ProductoDetalle: React.FC = () => {
           <div>
             <div className="rounded-2xl overflow-hidden border bg-white dark:bg-slate-900 mb-4">
               <img
-                src={images[activeImage]}
+                src={resolveImage(images[activeImage])}
                 alt={producto.name}
                 className="w-full h-96 object-cover"
               />
@@ -312,7 +326,7 @@ const ProductoDetalle: React.FC = () => {
                     }`}
                   >
                     <img
-                      src={img}
+                      src={resolveImage(img)}
                       alt=""
                       className="w-full h-full object-cover"
                     />
@@ -399,20 +413,38 @@ const ProductoDetalle: React.FC = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="card-compact flex flex-col items-center gap-1">
-                <TruckIcon className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">Envío 24-72h</span>
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-sm text-muted">Cantidad:</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-800"
+                >
+                  −
+                </button>
+                <span className="w-10 text-center font-bold">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(q => Math.min(producto.stock || 99, q + 1))}
+                  className="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-800"
+                >
+                  +
+                </button>
               </div>
-              <div className="card-compact flex flex-col items-center gap-1">
-                <ShieldCheckIcon className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">Garantía 12 meses</span>
-              </div>
-              <div className="card-compact flex flex-col items-center gap-1">
-                <ShoppingBagIcon className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">Devolución fácil</span>
-              </div>
+              <span className="text-xs text-muted">{producto.stock} disponibles</span>
             </div>
+
+            <button
+              onClick={() => {
+                const alreadyInCart = items.some(i => String(i.product_id) === String(producto.id) || String(i.id) === String(producto.id));
+                if (!alreadyInCart) handleAddToCart();
+                setTimeout(() => navigate("/pago"), 300);
+              }}
+              disabled={producto.stock <= 0}
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
+            >
+              <ShoppingBagIcon className="w-5 h-5" />
+              Comprar
+            </button>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { useCart } from "../context/CartContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import type { RootStackParamList } from "../navigation/types";
 
 type Nav = NativeStackNavigationProp<RootStackParamList>;
@@ -18,6 +19,7 @@ export default function AppHeader({ role = "guest" }: Props) {
   const { user, logout } = useAuth();
   const { C } = useTheme();
   const { totalItems } = useCart();
+  const insets = useSafeAreaInsets();
 
   const handleLogout = async () => {
     await logout();
@@ -25,7 +27,16 @@ export default function AppHeader({ role = "guest" }: Props) {
   };
 
   return (
-    <View style={[styles.nav, { backgroundColor: C.navbar, borderBottomColor: C.border }]}>
+    <View
+      style={[
+        styles.nav,
+        {
+          backgroundColor: C.navbar,
+          borderBottomColor: C.border,
+          paddingTop: Math.max(insets.top, 12) + 8,
+        },
+      ]}
+    >
       <TouchableOpacity
         onPress={() => navigation.navigate("Main", { screen: "Inicio" })}
       >

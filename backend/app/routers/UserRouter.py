@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi import APIRouter, Request, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database.Connection import get_db
 from app.models.ModelUser import Users
 from app.models.ModelAddress import Address
 from app.models.ModelOrder import Order, OrderItem
 from app.models.ModelProduct import Product
+from app.services.NasService import subir
 from app.schemas.SchemaUser import (
     UpdateUserProfileRequest,
     ChangePasswordRequest,
@@ -43,7 +44,9 @@ def user_dashboard_me(request: Request, database: Session = Depends(get_db)):
         "totalOrders": total_orders,
         "totalSpent": float(total_spent),
         "savedProducts": saved_products,
-        "addresses": len(user.addresses)
+        "addresses": len(user.addresses),
+        "avatar": user.avatar,
+        "banner": user.banner,
     }
 
 @router.patch("/profile")
@@ -233,6 +236,32 @@ def delete_address(address_id: str, request: Request, database: Session = Depend
     return {
         "message": "Dirección eliminada correctamente"
     }
+
+@router.post("/avatar/upload")
+def upload_avatar(request: Request, file: UploadFile = File(...), database: Session = Depends(get_db)):
+    user = database.query(Users).filter(Users.id == request.state.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    result = subir.upload_file(file, "avatars/")
+    if not result or not result.get("success"):
+        raise HTTPException(status_code=500, detail="Error al subir avatar")
+    user.avatar = result["object_name"]
+    database.commit()
+    database.refresh(user)
+    return {"success": True, "avatar": user.avatar, "url": f"/files/{user.avatar}"}
+
+@router.post("/banner/upload")
+def upload_banner(request: Request, file: UploadFile = File(...), database: Session = Depends(get_db)):
+    user = database.query(Users).filter(Users.id == request.state.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    result = subir.upload_file(file, "banners/")
+    if not result or not result.get("success"):
+        raise HTTPException(status_code=500, detail="Error al subir banner")
+    user.banner = result["object_name"]
+    database.commit()
+    database.refresh(user)
+    return {"success": True, "banner": user.banner, "url": f"/files/{user.banner}"}
 
 def _order_to_dict(order: Order):
     from datetime import datetime, timedelta

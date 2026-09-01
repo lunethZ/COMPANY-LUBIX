@@ -27,13 +27,13 @@ interface ProductResult {
   company_name?: string;
 }
 
-const CATEGORIES = [
-  "Computadoras",
-  "Celulares",
+const FALLBACK_CATEGORIES = [
+  "Computadores",
+  "Smartphones",
   "Audio",
-  "Cámaras",
-  "Wearables",
+  "Fotografía",
   "Gaming",
+  "Tablets",
   "Accesorios",
 ];
 
@@ -61,6 +61,7 @@ function BuscarProducto() {
   const [results, setResults] = useState<ProductResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [categories, setCategories] = useState<string[]>(FALLBACK_CATEGORIES);
 
   const userRole = user?.role_id;
 
@@ -73,7 +74,8 @@ function BuscarProducto() {
   const buildSearchParams = useCallback(() => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
-    if (category) params.set("categoria", category);
+    const cat = category?.trim();
+    if (cat && cat.toLowerCase() !== "todas") params.set("categoria", cat);
     if (sortBy !== "relevance") params.set("orden", sortBy);
     if (minPrice) params.set("min", minPrice);
     if (maxPrice) params.set("max", maxPrice);
@@ -101,11 +103,17 @@ function BuscarProducto() {
     setQuery(qParam);
   }, [searchParams]);
 
-  // Disparar la búsqueda cuando cambie cualquier parámetro de consulta o filtro
+  // Cargar categorías reales desde backend
   useEffect(() => {
-    if (query || category || minPrice || maxPrice || sortBy !== "relevance") {
-      doSearch();
-    }
+    api.get("/products/catalogs").then(res => {
+      const cats = (res.data || []).map((c: any) => c.name).filter(Boolean);
+      if (cats.length) setCategories(cats);
+    }).catch(() => {});
+  }, []);
+
+  // Disparar la búsqueda siempre (sin filtros muestra todos los productos de empresas)
+  useEffect(() => {
+    doSearch();
   }, [query, category, sortBy, minPrice, maxPrice, doSearch]);
 
   const clearFilters = () => {
@@ -113,6 +121,15 @@ function BuscarProducto() {
     setSortBy("relevance");
     setMinPrice("");
     setMaxPrice("");
+  };
+
+  const clearSearch = () => {
+    setQuery("");
+    setCategory("");
+    setSortBy("relevance");
+    setMinPrice("");
+    setMaxPrice("");
+    setSearchParams(new URLSearchParams(), { replace: true });
   };
 
   const formatPrice = (price: number) =>
@@ -133,6 +150,16 @@ function BuscarProducto() {
   };
 
   const hasActiveFilters = category || minPrice || maxPrice || sortBy !== "relevance";
+
+  const resolveImage = (img?: string) => {
+    if (!img || img === "/placeholder.png") return "/placeholder.png";
+    if (img.startsWith("http://") || img.startsWith("https://")) return img;
+    const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+    const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
+    // Si ya es /files/products/... lo deja, si es products/... lo convierte
+    if (path.startsWith("/files/files")) return `${base}${path.replace("/files/files", "/files")}`;
+    return `${base}${path}`;
+  };
 
   return (
     <div className="page-container">
@@ -200,7 +227,7 @@ function BuscarProducto() {
                   >
                     Todas
                   </button>
-                  {CATEGORIES.map((cat) => (
+                  {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setCategory(cat)}
@@ -255,7 +282,7 @@ function BuscarProducto() {
                   >
                     <div className="relative h-52 overflow-hidden bg-gray-100 dark:bg-slate-800">
                       <img
-                        src={product.images?.[0] || "/placeholder.png"}
+                        src={resolveImage(product.images?.[0])}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -299,22 +326,25 @@ function BuscarProducto() {
                   </Link>
                 ))}
               </div>
-            ) : query ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <MagnifyingGlassIcon className="w-16 h-16 text-muted mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Sin resultados</h2>
-                <p className="text-muted max-w-md">
-                  No encontramos productos para "{query}".
-                  {hasActiveFilters ? " Intenta con otros filtros." : " Prueba con otros términos."}
-                </p>
-              </div>
             ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <MagnifyingGlassIcon className="w-16 h-16 text-muted mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Busca productos</h2>
-                <p className="text-muted max-w-md">
-                  Encuentra los mejores productos de tecnología en Lubix. Escribe lo que buscas en la barra superior.
+                <h2 className="text-xl font-semibold mb-2">Sin resultados</h2>
+                <p className="text-muted max-w-md mb-6">
+                  {query
+                    ? `No encontramos productos para "${query}"${category ? ` en "${category}"` : ""}.`
+                    : category
+                    ? `No hay productos en la categoría "${category}".`
+                    : "No hay productos disponibles."}
+                  {hasActiveFilters ? " Intenta con otros filtros." : query ? " Prueba con otros términos." : category ? "" : " Las empresas aún no han publicado productos."}
                 </p>
+                <button
+                  onClick={clearSearch}
+                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-semibold transition"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                  Ver todos los productos
+                </button>
               </div>
             )}
           </div>
