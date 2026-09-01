@@ -88,7 +88,7 @@ const EstrellasEditables = ({
 const formatCOP = (value: number) =>
   "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 
-const resolveImage = (img?: string) => {
+export const resolveImage = (img?: string) => {
   if (!img || img === "/placeholder.png") return "/placeholder.png";
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
   const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
