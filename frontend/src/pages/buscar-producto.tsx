@@ -73,7 +73,8 @@ function BuscarProducto() {
   const buildSearchParams = useCallback(() => {
     const params = new URLSearchParams();
     if (query) params.set("q", query);
-    if (category) params.set("categoria", category);
+    const cat = category?.trim();
+    if (cat && cat.toLowerCase() !== "todas") params.set("categoria", cat);
     if (sortBy !== "relevance") params.set("orden", sortBy);
     if (minPrice) params.set("min", minPrice);
     if (maxPrice) params.set("max", maxPrice);
