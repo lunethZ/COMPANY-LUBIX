@@ -100,7 +100,7 @@ const ProductoDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { addToCart } = useCart();
+  const { addToCart, items } = useCart();
   const [activeImage, setActiveImage] = useState(0);
   const [cartMsg, setCartMsg] = useState(false);
   const [producto, setProducto] = useState<ProductDetail | null>(null);
@@ -411,13 +411,34 @@ const ProductoDetalle: React.FC = () => {
               </button>
             </div>
 
+            <div className="flex items-center gap-3 mb-4">
+              <span className="text-sm text-muted">Cantidad:</span>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setQuantity(q => Math.max(1, q - 1))}
+                  className="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-800"
+                >
+                  −
+                </button>
+                <span className="w-10 text-center font-bold">{quantity}</span>
+                <button
+                  onClick={() => setQuantity(q => Math.min(producto.stock || 99, q + 1))}
+                  className="w-8 h-8 rounded-lg border border-gray-300 dark:border-gray-700 flex items-center justify-center hover:bg-gray-100 dark:hover:bg-slate-800"
+                >
+                  +
+                </button>
+              </div>
+              <span className="text-xs text-muted">{producto.stock} disponibles</span>
+            </div>
+
             <button
               onClick={() => {
-                handleAddToCart();
+                const alreadyInCart = items.some(i => String(i.product_id) === String(producto.id) || String(i.id) === String(producto.id));
+                if (!alreadyInCart) handleAddToCart();
                 setTimeout(() => navigate("/pago"), 300);
               }}
               disabled={producto.stock <= 0}
-              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+              className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20"
             >
               <ShoppingBagIcon className="w-5 h-5" />
               Comprar

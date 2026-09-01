@@ -490,7 +490,7 @@ export default function BuyerDashboard() {
 
         <div className="relative rounded-2xl p-8 mb-8 shadow-xl shadow-blue-500/20 overflow-hidden" style={userData.bannerUrl ? { backgroundImage: `url(${userData.bannerUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: 'linear-gradient(to right, #2563eb, #16a34a)' }}>
           {userData.bannerUrl && <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>}
-          <label className="absolute top-4 right-4 bg-black/30 hover:bg-black/50 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10">
+          <label className="absolute bottom-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10">
             <CameraIcon className="w-4 h-4" />
             Cambiar banner
             <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
