@@ -132,8 +132,8 @@ export default function BuyerDashboard() {
         precio: f.product.price,
         antes: null,
         descuento: f.product.discount_enable && f.product.discount_value > 0 ? `-${f.product.discount_value}%` : null,
-        imagen: f.product.images?.[0] || "/placeholder.png",
-        imagenes: f.product.images?.length ? f.product.images : ["/placeholder.png"],
+        imagen: resolveFileUrl(f.product.images?.[0]),
+        imagenes: f.product.images?.length ? f.product.images.map(resolveFileUrl) : [],
         categoria: "General",
         stock: f.product.stock,
         tienda: { nombre: f.product.company_name || "Tienda", logo: (f.product.company_name || "T").charAt(0), direccion: "", ciudad: "", calificacion: 0, numResenas: 0, ventas: 0, miembrosDesde: "" },
@@ -790,17 +790,23 @@ export default function BuyerDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                 {favoriteProducts.map((p) => (
                     <div key={p.id} className="rounded-xl overflow-hidden bg-slate-800 hover:shadow-lg hover:shadow-blue-500/10 transition-all group">
-                    <div className="relative">
-                      <img src={p.imagen} alt={p.nombre} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="relative cursor-pointer" onClick={() => navigate(`/producto/${p.id}`)}>
+                      {p.imagen ? (
+                        <img src={p.imagen} alt={p.nombre} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-44 bg-slate-700 flex items-center justify-center">
+                          <CubeIcon className="w-10 h-10 text-gray-500" />
+                        </div>
+                      )}
                       <button
-                        onClick={() => removeFavorite(String(p.id))}
+                        onClick={(e) => { e.stopPropagation(); removeFavorite(String(p.id)); }}
                         className="absolute top-3 right-3 w-8 h-8 bg-slate-900/80 rounded-full flex items-center justify-center hover:bg-red-500/20 transition-colors"
                       >
                         <HeartSolid className="w-4 h-4 text-pink-400" />
                       </button>
                     </div>
                     <div className="p-4">
-                      <p className="text-white font-semibold mb-2">{p.nombre}</p>
+                      <p className="text-white font-semibold mb-2 cursor-pointer hover:text-green-400 transition-colors" onClick={() => navigate(`/producto/${p.id}`)}>{p.nombre}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-green-400 font-bold text-lg">${p.precio.toLocaleString('es-CO')}</span>
                       </div>

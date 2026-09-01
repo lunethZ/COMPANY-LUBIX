@@ -107,6 +107,10 @@ const Home: React.FC = () => {
   };
 
   const handleAddToCart = (prod: Producto) => {
+    if (!isAuthenticated) {
+      setShowAuthFav(true);
+      return;
+    }
     void addToCart({
       id: prod.id,
       name: prod.nombre,

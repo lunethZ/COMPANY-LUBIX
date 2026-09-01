@@ -201,6 +201,10 @@ const ProductoDetalle: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!producto) return;
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     void addToCart({
       id: producto.id,
       name: producto.name,

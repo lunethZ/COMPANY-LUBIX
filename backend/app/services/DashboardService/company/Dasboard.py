@@ -73,6 +73,7 @@ def company_dashboard_me_service(user_id, database: Session):
         "memberAT": user.created_at,
         "role": role.name,
         "sales": metrics["completeSales"],
+        "totalRevenue": metrics["totalRevenue"],
         "stars": metrics["averageRating"],
         "reviews": metrics["totalReviews"],
     }
@@ -96,6 +97,7 @@ def company_dashboard_my_profile_service(user_id: str, database: Session):
         "averageRating": metrics["averageRating"],
         "totalReviews": metrics["totalReviews"],
         "completeSales": metrics["completeSales"],
+        "totalRevenue": metrics["totalRevenue"],
         "sellerLevel": metrics["sellerLevel"],
     }
 

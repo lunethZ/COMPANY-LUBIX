@@ -22,7 +22,7 @@ const Login: React.FC = () => {
   // Si ya está autenticado, redirigir y evitar que el botón volver deje ver el login
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role_id === "empresa") navigate("/home-empresa", { replace: true });
+      if (user.role_id === "empresa") navigate("/dashboard-empresa", { replace: true });
       else if (user.role_id === "admin") navigate("/dashboard-admin", { replace: true });
       else navigate("/home-usuario", { replace: true });
     }
@@ -88,7 +88,7 @@ const Login: React.FC = () => {
 
       // Redirigir según el tipo de usuario (replace evita que volver regrese al login con sesión abierta)
       if (mappedRole === "empresa") {
-        setTimeout(() => navigate("/home-empresa", { replace: true }), 1000);
+        setTimeout(() => navigate("/dashboard-empresa", { replace: true }), 1000);
       } else if (mappedRole === "admin") {
         setTimeout(() => navigate("/dashboard-admin", { replace: true }), 1000);
       } else {

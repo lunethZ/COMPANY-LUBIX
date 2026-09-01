@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { UserCircleIcon, ChartBarIcon, ShoppingBagIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, ChartBarIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 export default function NavbarEmpresa() {
@@ -9,14 +9,6 @@ export default function NavbarEmpresa() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchValue.trim()) {
-      navigate(`/buscar?q=${encodeURIComponent(searchValue.trim())}`);
-    }
-  };
 
   const handleLogout = () => {
     logout();
@@ -25,22 +17,9 @@ export default function NavbarEmpresa() {
 
   return (
     <div className="flex items-center justify-between px-6 py-4 bg-[#162238] w-full">
-      <Link to="/home-empresa" className="text-green-500 text-2xl font-bold hover:text-green-400 transition">
+      <Link to="/dashboard-empresa" className="text-green-500 text-2xl font-bold hover:text-green-400 transition">
         Lubix
       </Link>
-
-      <form onSubmit={handleSearch} className="flex w-[500px] bg-[#1c2a4a] rounded-full overflow-hidden">
-        <input
-          type="text"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="Buscar en tu tienda..."
-          className="flex-1 px-4 py-2 bg-transparent text-white placeholder-gray-400 focus:outline-none"
-        />
-        <button type="submit" className="bg-green-500 px-5 text-white hover:bg-green-600 transition flex items-center justify-center">
-          <MagnifyingGlassIcon className="w-5 h-5" />
-        </button>
-      </form>
 
       <div className="flex items-center gap-6 text-white">
         <button
@@ -76,11 +55,6 @@ export default function NavbarEmpresa() {
         <Link to="/dashboard-empresa" className="flex items-center gap-1 hover:text-green-400 transition">
           <ChartBarIcon className="w-5 h-5" />
           <span>Dashboard</span>
-        </Link>
-
-        <Link to="/productos" className="flex items-center gap-1 hover:text-green-400 transition">
-          <ShoppingBagIcon className="w-5 h-5" />
-          <span>Productos</span>
         </Link>
 
         <Link to="/pqrs" className="flex items-center gap-1 hover:text-green-400 transition">

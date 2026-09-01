@@ -56,7 +56,10 @@ const HomeUsuario: React.FC = () => {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const carouselProducts = productos.slice(0, 3);
+  const carouselProducts = (() => {
+    const withImage = productos.filter((p) => p.imagen && p.imagen !== "/placeholder.png");
+    return (withImage.length >= 3 ? withImage : productos).slice(0, 3);
+  })();
 
   useEffect(() => {
     if (carouselProducts.length === 0) return;
@@ -122,6 +125,10 @@ const HomeUsuario: React.FC = () => {
   };
 
   const handleAddToCart = (prod: Producto) => {
+    if (!user) {
+      navigate("/login");
+      return;
+    }
     void addToCart({
       id: prod.id,
       name: prod.nombre,
@@ -202,9 +209,6 @@ const HomeUsuario: React.FC = () => {
           <div className="text-accent mb-2 text-sm font-semibold uppercase tracking-wide">Bienvenido {user?.name || "Usuario"}</div>
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight" style={{ color: "var(--color-text)" }}>Bienvenido de nuevo a Lubix</h1>
           <p className="text-lg text-muted mb-6">Explora productos de las mejores tiendas de manera rápida y sencilla.</p>
-          {carouselProducts.length > 0 && carouselProducts.length < 3 && (
-            <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">Faltan {3 - carouselProducts.length} productos para completar el carrusel</p>
-          )}
         </div>
 
         <div className="mt-10 md:mt-0 w-[420px] h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105 cursor-pointer" style={{ backgroundColor: "var(--color-bg-card)" }} onClick={() => carouselProducts.length > 0 && navigate(`/producto/${carouselProducts[index]?.id}`)}>

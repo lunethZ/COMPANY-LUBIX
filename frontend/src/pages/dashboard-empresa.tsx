@@ -89,6 +89,7 @@ interface SellerInfo {
   memberSince: string;
   rating: number;
   totalSales: number;
+  totalRevenue: number;
   totalReviews: number;
   avatar: string;
   sellerLevel: string;
@@ -120,6 +121,7 @@ const INITIAL_SELLER_INFO: SellerInfo = {
   memberSince: '',
   rating: 0,
   totalSales: 0,
+  totalRevenue: 0,
   totalReviews: 0,
   avatar: '',
   sellerLevel: 'Bronze',
@@ -213,6 +215,7 @@ export default function SellerDashboard() {
         memberSince: me.memberAT ? new Date(me.memberAT).toLocaleDateString() : "",
         rating: avgRating,
         totalSales: totalSales,
+        totalRevenue: me.totalRevenue || profile.totalRevenue || 0,
         totalReviews: me.reviews || profile.totalReviews || 0,
         avatar: (me.nameCompany || "V").charAt(0).toUpperCase(),
         sellerLevel,
@@ -230,8 +233,8 @@ export default function SellerDashboard() {
         name: p.name,
         price: p.price,
         image: p.images?.[0] || REFERENCE_IMAGE,
-        sold: 0,
-        views: 0,
+        sold: p.sold || 0,
+        views: p.views || 0,
         rating: 0,
         stock: p.stock,
         active: p.status !== "inactive",
@@ -281,7 +284,7 @@ export default function SellerDashboard() {
     }
   };
 
-  const totalRevenue = products.reduce((acc, p) => acc + p.price * p.sold, 0);
+  const totalRevenue = sellerInfo.totalRevenue || products.reduce((acc, p) => acc + p.price * p.sold, 0);
   const activeProducts = products.filter((p) => p.active);
 
   const toggleActive = async (id: string) => {

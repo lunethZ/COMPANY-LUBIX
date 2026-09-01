@@ -24,16 +24,23 @@ export default function NavbarAdmin() {
   return (
     <div className="flex items-center justify-between px-6 py-4 bg-[#111827] border-b border-slate-700 w-full select-none">
       
-      {/* SECCIÓN MARCA: Solo texto estilizado, sin dependencias de imagen */}
+      {/* SECCIÓN MARCA: clickeable para volver al inicio */}
       <div className="flex items-center gap-3">
-        <div className="flex flex-col">
+        <button onClick={() => navigate("/")} className="flex flex-col text-left cursor-pointer" title="Ir al inicio">
           <span className="text-white text-xl font-black tracking-wide leading-none">
             Lubix Console
           </span>
           <span className="text-[10px] bg-green-950/80 text-green-400 border border-green-800/50 px-1.5 py-0.5 rounded font-mono uppercase mt-1 font-bold tracking-wider self-start">
             Admin Root
           </span>
-        </div>
+        </button>
+        <button
+          onClick={() => navigate("/")}
+          className="ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold border border-green-800/50 bg-green-950/30 text-green-400 hover:bg-green-900/40 transition"
+          title="Ir al inicio"
+        >
+          Inicio
+        </button>
       </div>
 
       {/* ACCIONES DERECHAS: Tema + Menú de Perfil */}
