@@ -123,6 +123,15 @@ function BuscarProducto() {
     setMaxPrice("");
   };
 
+  const clearSearch = () => {
+    setQuery("");
+    setCategory("");
+    setSortBy("relevance");
+    setMinPrice("");
+    setMaxPrice("");
+    setSearchParams(new URLSearchParams(), { replace: true });
+  };
+
   const formatPrice = (price: number) =>
     "$" + price.toLocaleString("es-CO");
 
@@ -321,7 +330,7 @@ function BuscarProducto() {
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <MagnifyingGlassIcon className="w-16 h-16 text-muted mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Sin resultados</h2>
-                <p className="text-muted max-w-md">
+                <p className="text-muted max-w-md mb-6">
                   {query
                     ? `No encontramos productos para "${query}"${category ? ` en "${category}"` : ""}.`
                     : category
@@ -329,6 +338,13 @@ function BuscarProducto() {
                     : "No hay productos disponibles."}
                   {hasActiveFilters ? " Intenta con otros filtros." : query ? " Prueba con otros términos." : category ? "" : " Las empresas aún no han publicado productos."}
                 </p>
+                <button
+                  onClick={clearSearch}
+                  className="inline-flex items-center gap-2 bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2.5 rounded-xl font-semibold transition"
+                >
+                  <XMarkIcon className="w-4 h-4" />
+                  Ver todos los productos
+                </button>
               </div>
             )}
           </div>
