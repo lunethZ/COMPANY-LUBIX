@@ -101,11 +101,9 @@ function BuscarProducto() {
     setQuery(qParam);
   }, [searchParams]);
 
-  // Disparar la búsqueda cuando cambie cualquier parámetro de consulta o filtro
+  // Disparar la búsqueda siempre (sin filtros muestra todos los productos de empresas)
   useEffect(() => {
-    if (query || category || minPrice || maxPrice || sortBy !== "relevance") {
-      doSearch();
-    }
+    doSearch();
   }, [query, category, sortBy, minPrice, maxPrice, doSearch]);
 
   const clearFilters = () => {
@@ -133,6 +131,16 @@ function BuscarProducto() {
   };
 
   const hasActiveFilters = category || minPrice || maxPrice || sortBy !== "relevance";
+
+  const resolveImage = (img?: string) => {
+    if (!img || img === "/placeholder.png") return "/placeholder.png";
+    if (img.startsWith("http://") || img.startsWith("https://")) return img;
+    const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+    const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
+    // Si ya es /files/products/... lo deja, si es products/... lo convierte
+    if (path.startsWith("/files/files")) return `${base}${path.replace("/files/files", "/files")}`;
+    return `${base}${path}`;
+  };
 
   return (
     <div className="page-container">
@@ -255,7 +263,7 @@ function BuscarProducto() {
                   >
                     <div className="relative h-52 overflow-hidden bg-gray-100 dark:bg-slate-800">
                       <img
-                        src={product.images?.[0] || "/placeholder.png"}
+                        src={resolveImage(product.images?.[0])}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                       />
@@ -299,21 +307,13 @@ function BuscarProducto() {
                   </Link>
                 ))}
               </div>
-            ) : query ? (
+            ) : (
               <div className="flex flex-col items-center justify-center py-20 text-center">
                 <MagnifyingGlassIcon className="w-16 h-16 text-muted mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Sin resultados</h2>
                 <p className="text-muted max-w-md">
-                  No encontramos productos para "{query}".
-                  {hasActiveFilters ? " Intenta con otros filtros." : " Prueba con otros términos."}
-                </p>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <MagnifyingGlassIcon className="w-16 h-16 text-muted mb-4" />
-                <h2 className="text-xl font-semibold mb-2">Busca productos</h2>
-                <p className="text-muted max-w-md">
-                  Encuentra los mejores productos de tecnología en Lubix. Escribe lo que buscas en la barra superior.
+                  {query ? `No encontramos productos para "${query}".` : "No hay productos disponibles."}
+                  {hasActiveFilters ? " Intenta con otros filtros." : query ? " Prueba con otros términos." : " Las empresas aún no han publicado productos."}
                 </p>
               </div>
             )}
