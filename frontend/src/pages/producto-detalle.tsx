@@ -110,6 +110,7 @@ const ProductoDetalle: React.FC = () => {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
   const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
+  const [quantity, setQuantity] = useState(1);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, title: "", comment: "" });
   const [reviewMsg, setReviewMsg] = useState("");
@@ -206,6 +207,7 @@ const ProductoDetalle: React.FC = () => {
       price: producto.price,
       image: producto.images?.[0] || "/placeholder.png",
       stock: producto.stock,
+      quantity,
     });
     setCartMsg(true);
     setTimeout(() => setCartMsg(false), 1500);
