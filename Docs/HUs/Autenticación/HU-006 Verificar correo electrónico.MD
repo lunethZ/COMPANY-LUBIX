@@ -1,12 +1,12 @@
-# HU-006 — Ver perfil de usuario
+# HU-006 — Verificar correo electrónico
 
 ## Identificación
 
 | Campo | Valor |
 |---------|---------|
 | ID | HU-006 |
-| Título | Ver perfil de usuario |
-| Módulo | Perfil |
+| Título | Verificar correo electrónico |
+| Módulo | Autenticación |
 | Prioridad | Media |
 | Estado | Pendiente |
 | RF asociados | RF-006 |
@@ -15,27 +15,68 @@
 
 ## Historia
 
-Como usuario de Lubix, quiero ver mi perfil personal, para consultar mi información registrada en la plataforma.
+Como usuario de Lubix, quiero verificar mi correo electrónico ingresando un código de verificación, para activar mi cuenta y acceder a todas las funcionalidades de la plataforma.
 
 ---
 
 ## Criterios de aceptación
 
-### CA-006.1 — Visualización de datos
-Dado que ingreso a mi perfil,
-cuando se carga la vista,
-entonces debo ver mis datos personales.
+### CA-006.1 — Formulario de ingreso de código
 
-### CA-006.2 — Información básica
-Deben mostrarse:
-- Nombre
-- Correo electrónico
-- Rol del usuario
+**Dado que** el usuario acaba de registrarse y ha recibido un correo con un código de verificación,
 
-### CA-006.3 — Acceso restringido
-Solo usuarios autenticados pueden ver su perfil.
+**cuando** accede a la pantalla de verificación,
 
-### CA-006.4 — Manejo de carga
-El sistema debe mostrar indicador mientras carga datos.
+**entonces** debe visualizarse un campo de entrada para ingresar el código de verificación.
+
+---
+
+### CA-006.2 — Código correcto activa la cuenta
+
+**Dado que** el usuario ingresa a la pantalla de verificación,
+
+**cuando** ingresa un código que coincide con el enviado por correo,
+
+**entonces** la cuenta se activa correctamente y el usuario recibe un mensaje de confirmación indicando que su cuenta está verificada.
+
+---
+
+### CA-006.3 — Código incorrecto muestra error
+
+**Dado que** el usuario está en la pantalla de verificación,
+
+**cuando** ingresa un código que no coincide con el enviado,
+
+**entonces** el sistema debe mostrar un mensaje de error indicando que el código ingresado es incorrecto, sin desactivar la cuenta.
+
+---
+
+### CA-006.4 — Código expirado
+
+**Dado que** el usuario recibe un código de verificación,
+
+**cuando** transcurre el tiempo de vigencia del código y el usuario intenta ingresarlo,
+
+**entonces** el sistema debe informar que el código ha expirado y ofrecer la opción de solicitar uno nuevo.
+
+---
+
+### CA-006.5 — Opción de reenviar código
+
+**Dado que** el usuario se encuentra en la pantalla de verificación,
+
+**cuando** no recibió el correo o el código expiró,
+
+**entonces** debe existir un botón o enlace que permita solicitar el reenvío del correo de verificación.
+
+---
+
+### CA-006.6 — Mensaje de éxito
+
+**Dado que** el usuario ingresa un código válido,
+
+**cuando** el sistema valida el código correctamente,
+
+**entonces** debe mostrarse un mensaje claro de éxito y el usuario debe ser redirigido al inicio de sesión o al panel principal de la plataforma.
 
 ---
