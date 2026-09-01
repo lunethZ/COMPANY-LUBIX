@@ -1,9 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { View, Text, TextInput, TouchableOpacity, ScrollView, KeyboardAvoidingView, Platform, StyleSheet } from "react-native";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Button, Popup, Screen, Field } from "../components/ui";
 import { useTheme } from "../context/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import api from "../api/axios";
 import axios from "axios";
 import type { RootStackParamList } from "../navigation/types";
@@ -16,11 +17,13 @@ export default function VerificationCodeScreen() {
   const navigation = useNavigation<Nav>();
   const route = useRoute<Route>();
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const [email, setEmail] = useState(route.params?.email || "");
   const [code, setCode] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState<"success" | "error" | "">("");
+  const refs = useRef<(TextInput | null)[]>([]);
 
   const showMessage = (msg: string, type: "success" | "error") => {
     setMessage(msg);
@@ -33,9 +36,29 @@ export default function VerificationCodeScreen() {
 
   const setDigit = (index: number, value: string) => {
     const clean = value.replace(/\D/g, "");
+    // Paste de 6 dígitos en cualquier casilla
+    if (clean.length > 1) {
+      const digits = clean.slice(0, 6).split("");
+      const next = [...code];
+      for (let i = 0; i < 6; i++) next[i] = digits[i] || "";
+      setCode(next);
+      const nextIndex = Math.min(digits.length, 5);
+      refs.current[nextIndex]?.focus();
+      return;
+    }
     const next = [...code];
     next[index] = clean.slice(-1);
     setCode(next);
+    if (clean && index < 5) refs.current[index + 1]?.focus();
+  };
+
+  const handleKeyPress = (index: number, key: string) => {
+    if (key === "Backspace" && !code[index] && index > 0) {
+      const next = [...code];
+      next[index - 1] = "";
+      setCode(next);
+      refs.current[index - 1]?.focus();
+    }
   };
 
   const handleVerify = async () => {
@@ -82,8 +105,15 @@ export default function VerificationCodeScreen() {
 
   return (
     <Screen>
-      <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
-        <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: "center", padding: 20 }}>
+      <KeyboardAvoidingView style={{ flex: 1, paddingTop: insets.top }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            justifyContent: "center",
+            padding: 20,
+            paddingTop: Math.max(insets.top, 20),
+          }}
+        >
           {message ? <Popup message={message} type={messageType as "success" | "error"} /> : null}
 
           <View style={{ alignItems: "center", marginBottom: 24 }}>
@@ -111,15 +141,21 @@ export default function VerificationCodeScreen() {
             {code.map((digit, index) => (
               <TextInput
                 key={index}
+                ref={(el) => {
+                  refs.current[index] = el;
+                }}
                 value={digit}
                 onChangeText={(v) => setDigit(index, v)}
+                onKeyPress={({ nativeEvent }) => handleKeyPress(index, nativeEvent.key)}
                 keyboardType="number-pad"
-                maxLength={1}
+                maxLength={6}
+                selectTextOnFocus
+                autoFocus={index === 0}
                 style={[
                   styles.otp,
                   {
                     backgroundColor: C.inputBg,
-                    borderColor: C.inputBorder,
+                    borderColor: digit ? C.accent : C.inputBorder,
                     color: C.text,
                   },
                 ]}

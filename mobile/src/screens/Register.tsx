@@ -5,6 +5,7 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Field, Button, Popup, Screen, StrengthBar } from "../components/ui";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import axios from "axios";
@@ -18,6 +19,7 @@ type Mode = "usuario" | "empresa";
 export default function RegisterScreen() {
   const navigation = useNavigation<Nav>();
   const { C } = useTheme();
+  const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<Mode>("usuario");
 
   const [form, setForm] = useState({
@@ -161,10 +163,16 @@ export default function RegisterScreen() {
   return (
     <Screen>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
+        style={{ flex: 1, paddingTop: insets.top }}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <ScrollView contentContainerStyle={{ padding: 20, paddingBottom: 40 }}>
+        <ScrollView
+          contentContainerStyle={{
+            padding: 20,
+            paddingTop: Math.max(insets.top, 20),
+            paddingBottom: 40 + insets.bottom,
+          }}
+        >
           {message ? <Popup message={message} type={type as "success" | "error"} /> : null}
 
           <View style={{ alignItems: "center", marginBottom: 20 }}>
