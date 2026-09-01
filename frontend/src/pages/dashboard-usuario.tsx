@@ -552,7 +552,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'orders' && (
-          <div className={`${themeClasses.card} rounded-xl p-6`>
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Todos mis pedidos ({orders.length})</h2>
             {orders.length === 0 ? (
               <div className="text-center py-16 text-gray-400">
@@ -715,7 +715,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'saved' && (
-          <div className={`${themeClasses.card} rounded-xl p-6`>
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Productos guardados ({favoriteProducts.length})</h2>
             {favoriteProducts.length === 0 ? (
               <div className="text-center py-16 text-gray-400">
@@ -756,7 +756,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'integrated' && (
-          <div className={`${themeClasses.card} rounded-xl p-6`>
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Productos Integrados</h2>
             {orders.filter(o => o.estado === 'delivered').length === 0 ? (
               <div className="text-center py-16 text-gray-400">
@@ -801,7 +801,7 @@ export default function BuyerDashboard() {
         )}
 
         {activeTab === 'delete-product' && (
-          <div className={`${themeClasses.card} rounded-xl p-6`>
+          <div className={`${themeClasses.card} rounded-xl p-6`}>
             <h2 className="text-xl font-bold text-white mb-6">Eliminar Producto</h2>
             <p className="text-gray-400 text-sm mb-6">Selecciona un producto de tus pedidos para solicitar su eliminación o reportar un problema.</p>
             {orders.length === 0 ? (
