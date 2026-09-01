@@ -116,6 +116,10 @@ const ProductoDetalle: React.FC = () => {
   const [submittingReview, setSubmittingReview] = useState(false);
 
   useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+  }, [id]);
+
+  useEffect(() => {
     if (!id) return;
     setLoading(true);
     Promise.all([
