@@ -24,7 +24,7 @@ import {
   ShoppingBagIcon        
 } from "@heroicons/react/24/outline";
 
-type Tab = 'products' | 'orders' | 'profile' | 'stats';
+type Tab = 'products' | 'orders' | 'profile' | 'stats' | 'reviews';
 
 interface Product {
   id: string;
@@ -138,6 +138,8 @@ export default function SellerDashboard() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [companyOrders, setCompanyOrders] = useState<CompanyOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
+  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [imagePreview, setImagePreview] = useState('');
@@ -158,6 +160,10 @@ export default function SellerDashboard() {
   useEffect(() => {
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    fetchReviewsData();
+  }, [activeTab]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -232,6 +238,40 @@ export default function SellerDashboard() {
       console.error("Error fetching dashboard data:", err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchReviewsData = async () => {
+    if (activeTab !== 'reviews') return;
+    setReviewsLoading(true);
+    try {
+      const productsRes = await api.get("/company/products");
+      const products = productsRes.data || [];
+      
+      // Fetch reviews for each product (limited to 3 most recent per product)
+      const allReviews: any[] = [];
+      for (const product of products) {
+        try {
+          const reviewsRes = await api.get(`/products/${product.id}/reviews`);
+          const productReviews = reviewsRes.data || [];
+          // Take only 3 most recent reviews per product
+          const limitedReviews = productReviews.slice(0, 3);
+          allReviews.push(
+            ...limitedReviews.map((r: any) => ({
+              ...r,
+              productName: product.name,
+            }))
+          );
+        } catch (err) {
+          console.error(`Error fetching reviews for product ${product.id}:`, err);
+        }
+      }
+      setReviews(allReviews);
+    } catch (err) {
+      console.error("Error fetching reviews data:", err);
+      setReviews([]);
+    } finally {
+      setReviewsLoading(false);
     }
   };
 
@@ -547,6 +587,7 @@ export default function SellerDashboard() {
     { id: 'orders', label: 'Pedidos', icon: <ShoppingBagIcon className="w-4 h-4" /> },
     { id: 'stats', label: 'Estadísticas', icon: <ChartBarIcon className="w-4 h-4" /> },
     { id: 'profile', label: 'Mi Perfil', icon: <ShieldCheckIcon className="w-4 h-4" /> },
+    { id: 'reviews', label: 'Reseñas', icon: <StarIcon className="w-4 h-4 fill-yellow-400" /> },
   ];
 
   const getLevelColor = (level: string) => {
@@ -990,6 +1031,52 @@ export default function SellerDashboard() {
           </div>
         )}
       </div>
+
+      {activeTab === 'reviews' && (
+        <div className="bg-slate-900 rounded-xl border border-slate-800 p-8">
+          <h2 className="text-2xl font-bold text-white mb-6">Reseñas de productos</h2>
+          {reviewsLoading ? (
+            <div className="flex justify-center py-8">
+              <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
+            </div>
+          ) : reviews.length === 0 ? (
+            <div className="text-center py-12 text-gray-400">
+              <StarIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
+              <p className="text-lg font-medium">No hay reseñas aún</p>
+              <p className="text-sm">Los clientes aún no han dejado reseñas para tus productos</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {reviews.map((review) => (
+                <div
+                  key={review.id}
+                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-800"
+                >
+                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-sm">
+                    {review.user_name?.charAt(0)?.toUpperCase() || "U"}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold text-white">{review.user_name}</h3>
+                    <p className="text-gray-400 text-sm">{review.comment?.substring(0, 100) || ""}...</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <StarIcon
+                        key={i}
+                        className={`w-4 h-4 fill-yellow-400 text-yellow-400 ${i < review.rating ? "fill-yellow-400" : "text-gray-300"}`}
+                      />
+                    ))}
+                    <span className="text-xs text-gray-400">{review.rating}/5</span>
+                  </div>
+                  <span className="text-xs text-gray-400">
+                    {new Date(review.created_at).toLocaleDateString("es-CO")}
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
