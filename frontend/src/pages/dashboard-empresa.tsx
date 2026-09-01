@@ -143,6 +143,12 @@ export default function SellerDashboard() {
   const [imagePreview, setImagePreview] = useState('');
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<ProductForm>(EMPTY_FORM);
+  const [editImagePreview, setEditImagePreview] = useState('');
+  const [editSelectedFile, setEditSelectedFile] = useState<File | null>(null);
+  const [editUploading, setEditUploading] = useState(false);
   const [profileForm, setProfileForm] = useState({
     name: '',
     email: '',
@@ -407,6 +413,103 @@ export default function SellerDashboard() {
     }
   };
 
+  const openEditModal = async (productId: string) => {
+    try {
+      const res = await api.get(`/company/products/${productId}`);
+      const p = res.data;
+      const spec = p.technical_spec || {};
+      const warrantyNum = (spec.warranty || "").replace(/\D/g, "");
+      const weightNum = (spec.weight || "").replace(/[^0-9.]/g, "");
+      setEditingId(productId);
+      setEditForm({
+        name: p.name || "",
+        price: String(p.price || ""),
+        stock: String(p.stock || ""),
+        category: p.catalog_name || "",
+        description: p.descripcion || "",
+        brand: spec.brand || "",
+        model: spec.model || "",
+        warranty: warrantyNum,
+        weight: weightNum,
+        dimensions: spec.dimensions || "",
+        imageUrl: p.images?.[0] || "",
+      });
+      setEditImagePreview(p.images?.[0] ? resolveImageUrl(p.images[0]) : "");
+      setEditSelectedFile(null);
+      setShowEditModal(true);
+    } catch (err) {
+      console.error("Error loading product:", err);
+    }
+  };
+
+  const handleEditFormChange = (field: keyof ProductForm, value: string) => {
+    if (field === 'warranty') {
+      const clean = value.replace(/\D/g, "");
+      setEditForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
+    if (field === 'weight') {
+      const clean = value.replace(/[^0-9.]/g, "");
+      setEditForm((prev) => ({ ...prev, [field]: clean }));
+      return;
+    }
+    setEditForm((prev) => ({ ...prev, [field]: value }));
+    if (field === 'imageUrl') {
+      setEditImagePreview(value);
+      if (value) setEditSelectedFile(null);
+    }
+  };
+
+  const handleEditImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setEditSelectedFile(file);
+    if (file) {
+      const localUrl = URL.createObjectURL(file);
+      setEditImagePreview(localUrl);
+      setEditForm((prev) => ({ ...prev, imageUrl: "" }));
+    }
+  };
+
+  const handleUpdateProduct = async () => {
+    if (!editingId || !editForm.name || !editForm.price || !editForm.stock) return;
+    const priceNum = parseInt(editForm.price.replace(/\D/g, '')) || 0;
+    const stockNum = parseInt(editForm.stock) || 0;
+    try {
+      setEditUploading(true);
+      let finalImage = editForm.imageUrl.trim();
+      if (editSelectedFile) {
+        finalImage = await uploadProductImage(editSelectedFile);
+      }
+      const weightWithUnit = editForm.weight ? `${editForm.weight} kg` : "";
+      const warrantyWithUnit = editForm.warranty ? `${editForm.warranty} meses` : "";
+      const techSpec: Record<string, string> = {};
+      if (editForm.brand) techSpec.brand = editForm.brand;
+      if (editForm.model) techSpec.model = editForm.model;
+      if (warrantyWithUnit) techSpec.warranty = warrantyWithUnit;
+      if (weightWithUnit) techSpec.weight = weightWithUnit;
+      if (editForm.dimensions) techSpec.dimensions = editForm.dimensions;
+
+      await api.patch(`/company/products/${editingId}`, {
+        name: editForm.name,
+        price: priceNum,
+        images: finalImage ? [finalImage] : [],
+        stock: stockNum,
+        descripcion: [editForm.description, editForm.brand, editForm.model, warrantyWithUnit, weightWithUnit, editForm.dimensions].filter(Boolean).join(" · ") || editForm.name,
+        technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
+      });
+      setShowEditModal(false);
+      setEditingId(null);
+      setEditForm(EMPTY_FORM);
+      setEditImagePreview('');
+      setEditSelectedFile(null);
+      await fetchDashboardData();
+    } catch (err) {
+      console.error("Error updating product:", err);
+    } finally {
+      setEditUploading(false);
+    }
+  };
+
   const openEditProfile = () => {
     setProfileForm({
       name: sellerInfo.name,
@@ -630,6 +733,13 @@ export default function SellerDashboard() {
                             <span className={`bg-white w-2.5 h-2.5 rounded-full shadow-md transform duration-300 ease-in-out ${product.active ? 'translate-x-0' : 'translate-x-2.5'}`}></span>
                           </span>
                           {product.active ? 'Desactivar' : 'Activar'}
+                        </button>
+                        <button
+                          onClick={() => openEditModal(product.id)}
+                          className="w-9 h-9 flex items-center justify-center bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all"
+                          title="Editar producto"
+                        >
+                          <PencilSquareIcon className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(product.id)}
@@ -1087,6 +1197,218 @@ export default function SellerDashboard() {
                   className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
                 >
                   {uploadingImage ? "Subiendo imagen..." : "Publicar producto"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <PencilSquareIcon className="w-5 h-5 text-blue-400" />
+                Editar producto
+              </h2>
+              <button
+                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
+                  </label>
+                  <div className="space-y-3 mb-3">
+                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-blue-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
+                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
+                      <span className="truncate">{editSelectedFile ? editSelectedFile.name : "Click para cambiar archivo (JPG, PNG, WEBP)"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleEditImageFileChange} />
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="o pega URL https://..."
+                        value={editForm.imageUrl}
+                        onChange={(e) => handleEditFormChange('imageUrl', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+                    {editUploading && <p className="text-xs text-blue-400 animate-pulse">Subiendo imagen...</p>}
+                  </div>
+                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
+                    {editImagePreview ? (
+                      <img src={editImagePreview} alt="Preview" className="w-full h-full object-cover" onError={() => setEditImagePreview(REFERENCE_IMAGE)} />
+                    ) : (
+                      <div className="text-center">
+                        <img src={REFERENCE_IMAGE} alt="Referencia" className="w-full h-full object-cover opacity-30" />
+                        <div className="absolute inset-0 flex items-center justify-center flex-col gap-2">
+                          <ArrowUpTrayIcon className="w-8 h-8 text-gray-400" />
+                          <p className="text-gray-400 text-xs">Vista previa</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Nombre del producto <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Smartphone Samsung Galaxy S24"
+                      value={editForm.name}
+                      onChange={(e) => handleEditFormChange('name', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Precio (COP) <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 3500000"
+                      value={editForm.price}
+                      onChange={(e) => handleEditFormChange('price', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Stock disponible <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      placeholder="Ej: 20"
+                      value={editForm.stock}
+                      onChange={(e) => handleEditFormChange('stock', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría</label>
+                    <select
+                      value={editForm.category}
+                      onChange={(e) => handleEditFormChange('category', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Selecciona una categoría</option>
+                      <option value="Computadores">Computadores</option>
+                      <option value="Smartphones">Smartphones</option>
+                      <option value="Audio">Audio</option>
+                      <option value="Fotografía">Fotografía</option>
+                      <option value="Gaming">Gaming</option>
+                      <option value="Tablets">Tablets</option>
+                      <option value="Accesorios">Accesorios</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción</label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe las características principales del producto..."
+                  value={editForm.description}
+                  onChange={(e) => handleEditFormChange('description', e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                />
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                  <ChevronRightIcon className="w-4 h-4 text-blue-400" />
+                  Especificaciones técnicas
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Samsung"
+                      value={editForm.brand}
+                      onChange={(e) => handleEditFormChange('brand', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Galaxy S24 Ultra"
+                      value={editForm.model}
+                      onChange={(e) => handleEditFormChange('model', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía (meses) <span className="text-gray-500 font-normal">solo números</span></label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        placeholder="Ej: 12"
+                        value={editForm.warranty}
+                        onChange={(e) => handleEditFormChange('warranty', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-16 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 bg-slate-700 px-2 py-1 rounded">meses</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Ej: 0.25"
+                        value={editForm.weight}
+                        onChange={(e) => handleEditFormChange('weight', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 15 x 7 x 0.9 cm"
+                      value={editForm.dimensions}
+                      onChange={(e) => handleEditFormChange('dimensions', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleUpdateProduct}
+                  disabled={!editForm.name || !editForm.price || !editForm.stock || editUploading}
+                  className="flex-1 py-3 bg-blue-500 hover:bg-blue-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/30"
+                >
+                  {editUploading ? "Guardando..." : "Guardar cambios"}
                 </button>
               </div>
             </div>
