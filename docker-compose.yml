@@ -66,8 +66,8 @@ services:
       - ./mobile:/app
       - /app/node_modules
     environment:
-      EXPO_PUBLIC_API_URL: http://${LAN_IP:-192.168.1.39}:8002
-      REACT_NATIVE_PACKAGER_HOSTNAME: ${LAN_IP:-192.168.1.39}
+      EXPO_PUBLIC_API_URL: http://${LAN_IP:-192.168.1.37}:8002
+      REACT_NATIVE_PACKAGER_HOSTNAME: ${LAN_IP:-192.168.1.37}
     stdin_open: true
     tty: true
     restart: always
