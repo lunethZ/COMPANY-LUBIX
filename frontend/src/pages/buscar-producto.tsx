@@ -27,13 +27,13 @@ interface ProductResult {
   company_name?: string;
 }
 
-const CATEGORIES = [
-  "Computadoras",
-  "Celulares",
+const FALLBACK_CATEGORIES = [
+  "Computadores",
+  "Smartphones",
   "Audio",
-  "Cámaras",
-  "Wearables",
+  "Fotografía",
   "Gaming",
+  "Tablets",
   "Accesorios",
 ];
 
@@ -61,6 +61,7 @@ function BuscarProducto() {
   const [results, setResults] = useState<ProductResult[]>([]);
   const [loading, setLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [categories, setCategories] = useState<string[]>(FALLBACK_CATEGORIES);
 
   const userRole = user?.role_id;
 
@@ -101,6 +102,14 @@ function BuscarProducto() {
     const qParam = searchParams.get("q") || "";
     setQuery(qParam);
   }, [searchParams]);
+
+  // Cargar categorías reales desde backend
+  useEffect(() => {
+    api.get("/products/catalogs").then(res => {
+      const cats = (res.data || []).map((c: any) => c.name).filter(Boolean);
+      if (cats.length) setCategories(cats);
+    }).catch(() => {});
+  }, []);
 
   // Disparar la búsqueda siempre (sin filtros muestra todos los productos de empresas)
   useEffect(() => {
@@ -209,7 +218,7 @@ function BuscarProducto() {
                   >
                     Todas
                   </button>
-                  {CATEGORIES.map((cat) => (
+                  {categories.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => setCategory(cat)}
@@ -313,8 +322,12 @@ function BuscarProducto() {
                 <MagnifyingGlassIcon className="w-16 h-16 text-muted mb-4" />
                 <h2 className="text-xl font-semibold mb-2">Sin resultados</h2>
                 <p className="text-muted max-w-md">
-                  {query ? `No encontramos productos para "${query}".` : "No hay productos disponibles."}
-                  {hasActiveFilters ? " Intenta con otros filtros." : query ? " Prueba con otros términos." : " Las empresas aún no han publicado productos."}
+                  {query
+                    ? `No encontramos productos para "${query}"${category ? ` en "${category}"` : ""}.`
+                    : category
+                    ? `No hay productos en la categoría "${category}".`
+                    : "No hay productos disponibles."}
+                  {hasActiveFilters ? " Intenta con otros filtros." : query ? " Prueba con otros términos." : category ? "" : " Las empresas aún no han publicado productos."}
                 </p>
               </div>
             )}
