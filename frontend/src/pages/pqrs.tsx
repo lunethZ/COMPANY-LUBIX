@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import NavbarAuto from '../components/navbar-auto';
 import api from '../api/axios';
 import { errorDetailMessage } from '../utils/errors';
 import {
@@ -116,14 +117,18 @@ export default function PQRSPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+      <div className="min-h-screen bg-slate-950 flex flex-col">
+        <NavbarAuto />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
       </div>
     );
   }
 
   return (
     <div className="min-h-screen bg-slate-950">
+      <NavbarAuto />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
         {message && (
