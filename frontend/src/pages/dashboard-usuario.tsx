@@ -66,6 +66,7 @@ export default function BuyerDashboard() {
   const { user, logout, updateUser } = useAuth();
   const { addToCart: addCartItem } = useCart();
   const { theme } = useTheme();
+  const isDark = theme === 'dark';
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<Tab>('overview');
   const themeClasses = {
