@@ -410,7 +410,7 @@ const ProductoDetalle: React.FC = () => {
             <button
               onClick={() => {
                 handleAddToCart();
-                setTimeout(() => navigate("/pagar"), 300);
+                setTimeout(() => navigate("/pago"), 300);
               }}
               disabled={producto.stock <= 0}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
