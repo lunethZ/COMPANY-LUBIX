@@ -140,6 +140,12 @@ export default function SellerDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [reviews, setReviews] = useState<any[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [logoUploading, setLogoUploading] = useState(false);
+  const [bannerUploading, setBannerUploading] = useState(false);
+  const [logoError, setLogoError] = useState<string | null>(null);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const [logoSuccess, setLogoSuccess] = useState<boolean | null>(null);
+  const [bannerSuccess, setBannerSuccess] = useState<boolean | null>(null);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [imagePreview, setImagePreview] = useState('');
@@ -300,30 +306,44 @@ export default function SellerDashboard() {
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setLogoUploading(true);
+    setLogoError(null);
+    setLogoSuccess(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
       await api.patch("/company/dashboard/upload-logo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      setLogoSuccess(true);
       await fetchDashboardData();
-    } catch (err) {
+    } catch (err: any) {
+      setLogoError(err?.response?.data?.detail || "Error al subir la foto de perfil");
       console.error("Error uploading logo:", err);
+    } finally {
+      setLogoUploading(false);
     }
   };
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    setBannerUploading(true);
+    setBannerError(null);
+    setBannerSuccess(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
       await api.patch("/company/dashboard/upload-banner", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
+      setBannerSuccess(true);
       await fetchDashboardData();
-    } catch (err) {
+    } catch (err: any) {
+      setBannerError(err?.response?.data?.detail || "Error al subir el banner");
       console.error("Error uploading banner:", err);
+    } finally {
+      setBannerUploading(false);
     }
   };
 
@@ -633,6 +653,21 @@ export default function SellerDashboard() {
                 <CameraIcon className="w-4 h-4 text-white" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleLogoUpload} />
               </label>
+              {logoUploading && (
+                <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center z-10">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+              )}
+              {logoError && (
+                <div className="absolute top-0 left-0 w-full h-full bg-black/50 rounded-full flex items-center justify-center text-white text-sm z-10">
+                  {logoError}
+                </div>
+              )}
+              {logoSuccess && (
+                <div className="absolute top-0 left-0 w-full h-full bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-sm z-10">
+                  Foto de perfil actualizada
+                </div>
+              )}
             </div>
             <div className="flex-1 text-center md:text-left">
               <div className="flex items-center gap-2 justify-center md:justify-start mb-1">
@@ -1550,7 +1585,22 @@ export default function SellerDashboard() {
                   </div>
                   <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
                 </label>
-              </div>
+              {bannerUploading && (
+                <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center z-10">
+                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                </div>
+              )}
+              {bannerError && (
+                <div className="absolute top-0 left-0 w-full h-full bg-black/50 rounded-full flex items-center justify-center text-white text-sm z-10">
+                  {bannerError}
+                </div>
+              )}
+              {bannerSuccess && (
+                <div className="absolute top-0 left-0 w-full h-full bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-sm z-10">
+                  Banner actualizado
+                </div>
+              )}
+            </div>
 
               <div className="border-t border-slate-800 pt-6">
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Información de la tienda</h3>
