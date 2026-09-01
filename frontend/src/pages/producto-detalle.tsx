@@ -88,6 +88,14 @@ const EstrellasEditables = ({
 const formatCOP = (value: number) =>
   "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 
+const resolveImage = (img?: string) => {
+  if (!img || img === "/placeholder.png") return "/placeholder.png";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
+  return `${base}${path.replace("/files/files", "/files")}`;
+};
+
 const ProductoDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -294,7 +302,7 @@ const ProductoDetalle: React.FC = () => {
           <div>
             <div className="rounded-2xl overflow-hidden border bg-white dark:bg-slate-900 mb-4">
               <img
-                src={images[activeImage]}
+                src={resolveImage(images[activeImage])}
                 alt={producto.name}
                 className="w-full h-96 object-cover"
               />
@@ -312,7 +320,7 @@ const ProductoDetalle: React.FC = () => {
                     }`}
                   >
                     <img
-                      src={img}
+                      src={resolveImage(img)}
                       alt=""
                       className="w-full h-full object-cover"
                     />
@@ -399,20 +407,17 @@ const ProductoDetalle: React.FC = () => {
               </button>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 text-center">
-              <div className="card-compact flex flex-col items-center gap-1">
-                <TruckIcon className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">Envío 24-72h</span>
-              </div>
-              <div className="card-compact flex flex-col items-center gap-1">
-                <ShieldCheckIcon className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">Garantía 12 meses</span>
-              </div>
-              <div className="card-compact flex flex-col items-center gap-1">
-                <ShoppingBagIcon className="w-6 h-6 text-emerald-600" />
-                <span className="text-xs font-medium">Devolución fácil</span>
-              </div>
-            </div>
+            <button
+              onClick={() => {
+                handleAddToCart();
+                setTimeout(() => navigate("/pagar"), 300);
+              }}
+              disabled={producto.stock <= 0}
+              className="w-full bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white py-3 rounded-xl font-bold text-lg transition flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
+            >
+              <ShoppingBagIcon className="w-5 h-5" />
+              Comprar
+            </button>
           </div>
         </div>
 
