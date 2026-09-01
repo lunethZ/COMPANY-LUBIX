@@ -32,6 +32,14 @@ const formatCOP = (value: number) => {
   return "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 };
 
+const resolveImage = (img?: string) => {
+  if (!img || img === "/placeholder.png") return "/placeholder.png";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
+  return `${base}${path.replace("/files/files", "/files")}`;
+};
+
 const GamepadIcon = (props: React.SVGProps<SVGSVGElement>) => (
   <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className={props.className}>
     <path strokeLinecap="round" strokeLinejoin="round" d="M6 9h2m-1-1v2m7-1h2m-1-1v2m-6 6h6a5 5 0 005-5V9a5 5 0 00-5-5H9a5 5 0 00-5 5v2a5 5 0 005 5z" />
@@ -48,10 +56,13 @@ const HomeUsuario: React.FC = () => {
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const carouselProducts = productos.slice(0, 3);
+
   useEffect(() => {
-    const interval = setInterval(() => setIndex((prev) => (prev + 1) % OFERTAS.length), 3000);
+    if (carouselProducts.length === 0) return;
+    const interval = setInterval(() => setIndex((prev) => (prev + 1) % carouselProducts.length), 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [carouselProducts.length]);
 
   useEffect(() => {
     api.get("/products/search")
@@ -136,7 +147,7 @@ const HomeUsuario: React.FC = () => {
           className="cursor-pointer"
           onClick={() => navigate(`/producto/${prod.id}`)}
         >
-          <img src={prod.imagen} alt={prod.nombre} className="w-full h-56 object-cover" />
+          <img src={resolveImage(prod.imagen)} alt={prod.nombre} className="w-full h-56 object-cover" />
         </div>
 
         <div className="p-6 flex-1 flex flex-col">
@@ -191,14 +202,38 @@ const HomeUsuario: React.FC = () => {
           <div className="text-accent mb-2 text-sm font-semibold uppercase tracking-wide">Bienvenido {user?.name || "Usuario"}</div>
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight" style={{ color: "var(--color-text)" }}>Bienvenido de nuevo a Lubix</h1>
           <p className="text-lg text-muted mb-6">Explora productos de las mejores tiendas de manera rápida y sencilla.</p>
+          {carouselProducts.length > 0 && carouselProducts.length < 3 && (
+            <p className="text-sm text-yellow-600 dark:text-yellow-400 font-medium">Faltan {3 - carouselProducts.length} productos para completar el carrusel</p>
+          )}
         </div>
 
-        <div className="mt-10 md:mt-0 w-[420px] h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105" style={{ backgroundColor: "var(--color-bg-card)" }}>
-          <img src={OFERTAS[index].imagen} alt={OFERTAS[index].titulo} className="w-full h-64 object-cover" />
-          <div className={`w-full flex-1 flex flex-col items-center justify-center p-4 text-center ${OFERTAS[index].color}`}>
-            <h2 className="text-xl font-bold mb-1">{OFERTAS[index].titulo}</h2>
-            <p className="mb-3 text-sm">{OFERTAS[index].descripcion}</p>
-          </div>
+        <div className="mt-10 md:mt-0 w-[420px] h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105 cursor-pointer" style={{ backgroundColor: "var(--color-bg-card)" }} onClick={() => carouselProducts.length > 0 && navigate(`/producto/${carouselProducts[index]?.id}`)}>
+          {loading ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-8">
+              <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+              <p className="text-muted">Cargando productos...</p>
+            </div>
+          ) : carouselProducts.length === 0 ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
+              <span className="text-5xl mb-4">📦</span>
+              <h2 className="text-xl font-bold mb-2" style={{ color: "var(--color-text)" }}>No hay productos</h2>
+              <p className="text-sm text-muted">Aún no hay productos publicados por las empresas</p>
+            </div>
+          ) : (
+            <>
+              <img src={resolveImage(carouselProducts[index].imagen)} alt={carouselProducts[index].nombre} className="w-full h-64 object-cover" />
+              <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-tr from-emerald-500 to-green-700 text-white">
+                <h2 className="text-xl font-bold mb-1 line-clamp-2">{carouselProducts[index].nombre}</h2>
+                <p className="text-lg font-extrabold mb-2">{formatCOP(carouselProducts[index].precio)}</p>
+                <p className="text-xs opacity-80">Click para ver detalle</p>
+                <div className="flex gap-2 mt-3">
+                  {carouselProducts.map((_, i) => (
+                    <div key={i} className={`w-2 h-2 rounded-full transition ${i === index ? 'bg-white' : 'bg-white/40'}`} />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -214,11 +249,16 @@ const HomeUsuario: React.FC = () => {
             { nombre: "Cámaras", icono: <CameraIcon className="w-10 h-10" /> },
             { nombre: "Wearables", icono: <ClockIcon className="w-10 h-10" /> },
             { nombre: "Gaming", icono: <GamepadIcon className="w-10 h-10" /> },
-          ].map((cat, i) => (
-            <div key={i} className="card">
-              <div className="text-4xl mb-3">{cat.icono}</div>
+          ].map((cat) => (
+            <button
+              key={cat.nombre}
+              onClick={() => navigate(`/buscar?categoria=${encodeURIComponent(cat.nombre)}`)}
+              className="card hover:border-emerald-500/40 hover:shadow-lg hover:-translate-y-1 transition cursor-pointer text-center"
+            >
+              <div className="text-4xl mb-3 flex justify-center">{cat.icono}</div>
               <h3 className="font-semibold text-lg">{cat.nombre}</h3>
-            </div>
+              <p className="text-xs text-muted mt-1">Ver catálogo →</p>
+            </button>
           ))}
         </div>
       </section>
