@@ -1,0 +1,592 @@
+================================================================================
+                TABLA DE PRUEBAS DE INTEGRACIÓN (PI)
+                Proyecto: Lubix Mobile Authentication
+                Total de pruebas: 20 (PI-001 a PI-020)
+================================================================================
+
++-----------+--------------------------------------+------------------------------------------------------------+
+| ID        | Módulos a integrar                   | Descripción                                                |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-001    | Auth + Email + Usuarios              | Flujo completo de registro y verificación de email.        |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-002    | Auth + JWT + Middleware               | Login, generación de tokens y acceso a rutas protegidas.   |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-003    | Auth + JWT + Refresh Token           | Refresh token rotation y revocación de tokens.             |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-004    | Auth + Carrito (Offline→Online)      | Sincronización de carrito offline al hacer login.          |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-005    | Productos + Catálogo + Búsqueda      | Búsqueda, filtros y consulta de catálogos.                 |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-006    | Productos + Carrito + Stock          | Validación de stock al agregar al carrito.                 |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-007    | Carrito + Checkout + Órdenes         | Flujo completo de checkout y creación de orden.            |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-008    | Empresa + Productos + Catálogo       | CRUD de productos por empresa.                             |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-009    | Empresa + Pedidos + Estados          | Gestión de pedidos y actualización de estados.             |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-010    | Admin + Usuarios + Empresas          | Gestión de usuarios, empresas y validación.                |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-011    | Usuarios + Favoritos + Reseñas       | Favoritos y reseñas de productos.                          |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-012    | Auth + Recuperación Contraseña       | Flujo de recuperación de contraseña por email.             |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-013    | Archivos + MinIO + Productos         | Subida de imágenes a MinIO.                                |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-014    | Auth + RBAC + Middleware             | Control de acceso por roles.                               |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-015    | Órdenes + Cancelación + Stock        | Cancelación de orden y restauración de stock.              |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-016    | PQRS + Admin + Usuarios              | Creación y gestión de PQRS.                                |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-017    | Health Check + Docker + BD           | Verificación de salud de servicios.                        |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-018    | Carrito + Productos + Validación     | Validaciones del carrito (stock, cantidades).               |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-019    | Usuarios + Direcciones + Checkout    | Gestión de direcciones y uso en checkout.                  |
++-----------+--------------------------------------+------------------------------------------------------------+
+| PI-020    | Auth + Perfil + Cambio Password      | Actualización de perfil y cambio de contraseña.            |
++-----------+--------------------------------------+------------------------------------------------------------+
+
+
+================================================================================
+                    DETALLE COMPLETO DE CADA PRUEBA
+================================================================================
+
+
+--------------------------------------------------------------------------------
+PI-001 | Auth + Email + Usuarios | Registro y verificación
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar el flujo completo de registro de usuario: creación de
+    cuenta, envío de código de verificación por email y verificación
+    del código.
+
+  DATOS DE ENTRADA:
+    Registro: fullName='Juan Perez', email='juan@test.com',
+    password='Password123', tell='3001234567'.
+    Verificación: código de 6 dígitos recibido por email.
+
+  RESULTADO ESPERADO:
+    Usuario creado exitosamente. Código enviado por email. Verificación
+    exitosa con código correcto. Usuario queda verificado.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere configurar SMTP y base de datos.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Se necesita cuenta SMTP configurada para envío de emails. Verificar
+    que el servicio de email está operativo.
+
+
+--------------------------------------------------------------------------------
+PI-002 | Auth + JWT + Middleware | Login y acceso protegido
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar el flujo de login: validación de credenciales, generación
+    de tokens JWT y acceso a rutas protegidas con el token.
+
+  DATOS DE ENTRADA:
+    Credenciales: email='juan@test.com', password='Password123'.
+    Token: access_token del login.
+
+  RESULTADO ESPERADO:
+    Login exitoso con tokens válidos. Acceso a ruta protegida con token
+    retorna datos del usuario.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuario verificado en BD.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El usuario debe estar registrado y verificado previamente. Los tokens
+    tienen expiración (60min access, 7d refresh).
+
+
+--------------------------------------------------------------------------------
+PI-003 | Auth + JWT + Refresh Token | Rotación de tokens
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar el mecanismo de refresh token rotation: cuando el access
+    token expira, el refresh token genera nuevos tokens y el anterior
+    se revoca.
+
+  DATOS DE ENTRADA:
+    Access token expirado. Refresh token válido.
+
+  RESULTADO ESPERADO:
+    Nuevos tokens generados correctamente. Refresh token antiguo queda
+    revocado en BD.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere manipular expiración de tokens.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El access token expira en 60 minutos. El refresh token en 7 días.
+    La rotación genera nuevos tokens y revoca el anterior.
+
+
+--------------------------------------------------------------------------------
+PI-004 | Auth + Carrito (Offline→Online) | Sincronización de carrito
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el carrito offline se sincronice correctamente con
+    el servidor al hacer login (merge cart).
+
+  DATOS DE ENTRADA:
+    Carrito offline con 3 productos diferentes. Cuenta autenticada.
+
+  RESULTADO ESPERADO:
+    Carrito local se sincroniza con servidor. Los 3 productos aparecen
+    en el carrito del servidor con cantidades correctas.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere app móvil con modo offline.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El merge suma cantidades si el producto ya existía. Valida stock
+    disponible. Limpia AsyncStorage después del merge.
+
+
+--------------------------------------------------------------------------------
+PI-005 | Productos + Catálogo + Búsqueda | Consulta de productos
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que los productos sean consultables mediante búsqueda,
+    filtros y catálogos.
+
+  DATOS DE ENTRADA:
+    Productos existentes en BD con status='active'. Consultas: texto,
+    categoría, rango de precio, empresa.
+
+  RESULTADO ESPERADO:
+    Catálogos listados con conteo de productos. Búsquedas retornan
+    resultados filtrados. Detalle muestra información completa del
+    producto.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requieren productos en BD.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Solo muestra productos con status='active'. La búsqueda es
+    case-insensitive. Los filtros son acumulativos.
+
+
+--------------------------------------------------------------------------------
+PI-006 | Productos + Carrito + Stock | Validación de stock
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que agregar un producto al carrito descuente stock y que
+    no se pueda agregar si no hay stock disponible.
+
+  DATOS DE ENTRADA:
+    Producto con stock=5. Cantidad a agregar: 3.
+
+  RESULTADO ESPERADO:
+    Stock se decrementa al agregar al carrito. No se permite agregar
+    más unidades de las disponibles.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere producto con stock limitado.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El stock se valida al momento de agregar al carrito. Si la cantidad
+    solicitada excede el stock, se retorna error.
+
+
+--------------------------------------------------------------------------------
+PI-007 | Carrito + Checkout + Órdenes | Flujo completo de compra
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar el flujo completo de checkout: selección de dirección,
+    método de pago, confirmación y creación de orden.
+
+  DATOS DE ENTRADA:
+    Carrito con 2 productos. Dirección de envío válida. Método de
+    pago: efectivo.
+
+  RESULTADO ESPERADO:
+    Orden creada exitosamente con status='pending'. Stock decrementado.
+    Carrito vacío.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuario autenticado con
+    productos en carrito.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    La orden incluye: subtotal, descuento, envío, total. El costo de
+    envío es $15,000 (gratis > $100,000).
+
+
+--------------------------------------------------------------------------------
+PI-008 | Empresa + Productos + Catálogo | CRUD de productos
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que una empresa pueda crear, editar y eliminar productos
+    que sean visibles en el catálogo público.
+
+  DATOS DE ENTRADA:
+    Empresa autenticada. Nuevo producto: name='Laptop HP',
+    price=2500000, stock=10, catalog_id=1.
+
+  RESULTADO ESPERADO:
+    Producto creado y visible en catálogo. Edición exitosa.
+    Desactivación lo oculta de búsquedas públicas.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere empresa verificada y catálogo.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Solo empresas verificadas (verified=True, isActive=True) pueden
+    crear productos. El catálogo se crea automáticamente si no existe.
+
+
+--------------------------------------------------------------------------------
+PI-009 | Empresa + Pedidos + Estados | Gestión de pedidos
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que una empresa pueda ver los pedidos recibidos y
+    actualizar su estado (confirmed, shipped, delivered).
+
+  DATOS DE ENTRADA:
+    Empresa con productos. Orden existente con productos de la empresa.
+    Nuevo estado: 'confirmed'.
+
+  RESULTADO ESPERADO:
+    Pedidos listados correctamente. Cambio de estado exitoso en
+    transiciones válidas. Transiciones inválidas rechazadas.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere empresa con pedidos recibidos.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Transiciones válidas: pending→confirmed/shipped,
+    confirmed→shipped/delivered, shipped→delivered.
+
+
+--------------------------------------------------------------------------------
+PI-010 | Admin + Usuarios + Empresas | Gestión administrativa
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el admin pueda gestionar usuarios y empresas:
+    listar, habilitar/deshabilitar, y validar empresas.
+
+  DATOS DE ENTRADA:
+    Admin autenticado. Usuario existente. Empresa pendiente de
+    validación.
+
+  RESULTADO ESPERADO:
+    Listados completos. Deshabilitación de usuario exitosa.
+    Validación de empresa exitosa.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere admin autenticado y datos.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El admin no puede deshabilitar su propia cuenta. La validación
+    de empresa activa su acceso.
+
+
+--------------------------------------------------------------------------------
+PI-011 | Usuarios + Favoritos + Reseñas | Favoritos y reseñas
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que un usuario pueda agregar/quitar favoritos y crear
+    reseñas solo en productos que ha comprado.
+
+  DATOS DE ENTRADA:
+    Usuario autenticado. Producto comprado previamente. Reseña:
+    rating=5, comment='Excelente producto'.
+
+  RESULTADO ESPERADO:
+    Favorito agregado y eliminado correctamente. Reseña creada.
+    Segunda reseña rechazada (1 por usuario-producto).
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuario con compras previas.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Solo se puede crear reseña si el usuario compró el producto. Un
+    usuario solo puede tener 1 reseña por producto.
+
+
+--------------------------------------------------------------------------------
+PI-012 | Auth + Recuperación Contraseña | Recuperación de contraseña
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar el flujo de recuperación de contraseña: solicitud de
+    código, envío por email y restablecimiento.
+
+  DATOS DE ENTRADA:
+    Email registrado: 'juan@test.com'. Código recibido. Nueva
+    contraseña: 'NewPassword456'.
+
+  RESULTADO ESPERADO:
+    Código generado y enviado. Contraseña restablecida. Login exitoso
+    con nueva contraseña.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere configurar SMTP.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El código expira en 1 día. Se genera nuevo código si el anterior
+    expira o es incorrecto.
+
+
+--------------------------------------------------------------------------------
+PI-013 | Archivos + MinIO + Productos | Subida de imágenes
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que las imágenes de productos se suban correctamente a
+    MinIO y sean accesibles vía la API.
+
+  DATOS DE ENTRADA:
+    Archivo imagen válido. Producto existente.
+
+  RESULTADO ESPERADO:
+    Imagen subida a MinIO. URL accesible. Imagen visible en detalle
+    del producto.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere MinIO configurado.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    MinIO debe estar corriendo en puerto 9100. Bucket 'uploads' debe
+    existir.
+
+
+--------------------------------------------------------------------------------
+PI-014 | Auth + RBAC + Middleware | Control de acceso por roles
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el middleware de autorización controle el acceso por
+    roles: usuario no puede acceder a rutas de empresa ni admin.
+
+  DATOS DE ENTRADA:
+    Token de usuario regular. Rutas: /company/dashboard/me, /admin/users.
+
+  RESULTADO ESPERADO:
+    Usuarios sin permisos reciben 403 Forbidden. Solo admin puede
+    acceder a /admin/*.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuarios con diferentes roles.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El middleware verifica el role del JWT contra ROLES_PERMISSIONS_ROUTERS.
+    Admin tiene acceso total.
+
+
+--------------------------------------------------------------------------------
+PI-015 | Órdenes + Cancelación + Stock | Cancelación de orden
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que al cancelar una orden se restaure el stock de los
+    productos.
+
+  DATOS DE ENTRADA:
+    Orden existente con status='pending'. Productos con stock
+    decrementado.
+
+  RESULTADO ESPERADO:
+    Orden cancelada exitosamente. Stock restaurado a valor original.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere orden pendiente existente.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Solo se pueden cancelar órdenes con status='pending' o 'confirmed'.
+
+
+--------------------------------------------------------------------------------
+PI-016 | PQRS + Admin + Usuarios | Gestión de PQRS
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar el flujo de PQRS: creación por usuario, visualización
+    por admin y marcado como resuelto.
+
+  DATOS DE ENTRADA:
+    Tipo: 'queja', Subject: 'Producto dañado', Description:
+    'Llegó con defectos'.
+
+  RESULTADO ESPERADO:
+    PQRS creada exitosamente. Admin la ve en su dashboard. Marcada
+    como resuelta correctamente.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuario y admin autenticados.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El usuario solo ve sus propias PQRS. El admin ve todas las PQRS
+    del sistema.
+
+
+--------------------------------------------------------------------------------
+PI-017 | Health Check + Docker + BD | Monitoreo de servicios
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que los endpoints de health check reporten el estado
+    correcto de los servicios.
+
+  DATOS DE ENTRADA:
+    Docker ejecutándose con todos los servicios.
+
+  RESULTADO ESPERADO:
+    Health checks retornan 200 cuando servicios OK. Retornan 503
+    cuando hay problemas.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere Docker ejecutándose.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Los health checks son públicos (sin autenticación). Útiles para
+    monitoreo.
+
+
+--------------------------------------------------------------------------------
+PI-018 | Carrito + Productos + Validación | Validaciones del carrito
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el carrito valide las operaciones: producto
+    inexistente, cantidad inválida, stock insuficiente.
+
+  DATOS DE ENTRADA:
+    Producto inexistente (uuid inválido). Cantidad: 0, -1, 1000.
+    Producto sin stock.
+
+  RESULTADO ESPERADO:
+    Todos los casos inválidos retornan errores claros. No se permite
+    agregar cantidades inválidas o exceder stock.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere probar diferentes escenarios.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Validaciones: product_id válido, quantity >= 1, quantity <= stock.
+
+
+--------------------------------------------------------------------------------
+PI-019 | Usuarios + Direcciones + Checkout | Gestión de direcciones
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar la gestión de direcciones: crear, listar, editar,
+    eliminar y usar en checkout.
+
+  DATOS DE ENTRADA:
+    Dirección: label='Casa', address='Calle 123', city='Bogotá',
+    department='Cundinamarca'.
+
+  RESULTADO ESPERADO:
+    Dirección creada, listada, editada, usada en orden y eliminada
+    correctamente.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuario autenticado.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    Una dirección puede marcarse como is_default. Se puede tener
+    múltiples direcciones.
+
+
+--------------------------------------------------------------------------------
+PI-020 | Auth + Perfil + Cambio Password | Gestión de perfil
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar la gestión del perfil: actualización de datos y cambio
+    de contraseña.
+
+  DATOS DE ENTRADA:
+    Nombre actualizado: 'Juan Perez Garcia'. Contraseña actual:
+    'Password123'. Nueva contraseña: 'NewPass456'.
+
+  RESULTADO ESPERADO:
+    Perfil actualizado. Contraseña cambiada. Login exitoso con nueva
+    contraseña.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuario autenticado.
+
+  ESTADO: Pendiente
+  OBSERVACIONES:
+    El cambio de contraseña requiere la contraseña actual para
+    verificación.
+
+
+================================================================================
+                          RESUMEN DE PRUEBAS
+================================================================================
+
+  Total de pruebas:     20
+  Aprobadas:             0
+  Rechazadas:            0
+  Pendientes:           20
+
+  Distribución por módulos integrados:
+  ┌─────────────────────────────────────┬────────────┐
+  │ Módulo                              │ Cantidad   │
+  ├─────────────────────────────────────┼────────────┤
+  │ Auth + JWT + Email                  │     5      │
+  │ Productos + Catálogo                │     3      │
+  │ Carrito + Checkout + Órdenes        │     4      │
+  │ Usuarios + Perfil                   │     3      │
+  │ Empresa + Productos                 │     2      │
+  │ Admin + Gestión                     │     2      │
+  │ Infraestructura + Monitoreo         │     1      │
+  └─────────────────────────────────────┴────────────┘
+
+  Pruebas que requieren configuración:
+  ┌─────────────────────────────────────┬────────────┐
+  │ Configuración                       │ Pruebas    │
+  ├─────────────────────────────────────┼────────────┤
+  │ Servicio SMTP                       │ PI-001     │
+  │ Usuarios verificados en BD          │ PI-012     │
+  │ Productos en BD                     │ PI-002     │
+  │ Empresas verificadas                │ PI-005     │
+  │ MinIO funcionando                   │ PI-006     │
+  │ Docker ejecutándose                 │ PI-013     │
+  │ Usuarios con diferentes roles       │ PI-017     │
+  │ Órdenes pendientes                  │ PI-014     │
+  │ Usuarios con compras previas        │ PI-015     │
+  │ App móvil con modo offline          │ PI-011     │
+  │                                     │ PI-004     │
+  └─────────────────────────────────────┴────────────┘
+
+================================================================================
