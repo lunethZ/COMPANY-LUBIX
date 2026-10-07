@@ -4,10 +4,19 @@ import Navbar from "../components/navbar";
 import Footer from "../components/footer";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useAuthModal } from "../context/AuthModalContext";
 import api from "../api/axios";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { ShoppingCartIcon, CheckCircleIcon } from "@heroicons/react/24/solid";
+
+const resolveImage = (img?: string) => {
+  if (!img || img === "/placeholder.png") return "/placeholder.png";
+  if (img.startsWith("http://") || img.startsWith("https://")) return img;
+  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
+  return `${base}${path.replace("/files/files", "/files")}`;
+};
 
 interface Producto {
   id: string;
@@ -22,18 +31,6 @@ interface Producto {
   numResenas: number;
 }
 
-interface Oferta {
-  imagen: string;
-  titulo: string;
-  descripcion: string;
-}
-
-const OFERTAS: Oferta[] = [
-  { imagen: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=600", titulo: "Laptops", descripcion: "Las mejores marcas con descuentos exclusivos" },
-  { imagen: "https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=600", titulo: "Celulares", descripcion: "Smartphones de última generación" },
-  { imagen: "https://images.unsplash.com/photo-1585298723682-7115561c51b7?w=600", titulo: "Accesorios", descripcion: "Todo para tu setup" },
-];
-
 const formatCOP = (valor: number) => {
   return valor.toLocaleString("es-CO", { style: "currency", currency: "COP", maximumFractionDigits: 0 });
 };
@@ -43,18 +40,21 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
+  const { openLogin, openRegister } = useAuthModal();
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [cartMsg, setCartMsg] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [toastName, setToastName] = useState("");
-  const [showAuthFav, setShowAuthFav] = useState(false);
   const [productos, setProductos] = useState<Producto[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const carouselProducts = productos.filter(p => p.imagen && p.imagen !== "/placeholder.png");
+
   useEffect(() => {
-    const interval = setInterval(() => setIndex((prev) => (prev + 1) % OFERTAS.length), 3000);
+    if (carouselProducts.length === 0) return;
+    const interval = setInterval(() => setIndex((prev) => (prev + 1) % carouselProducts.length), 3000);
     return () => clearInterval(interval);
-  }, []);
+  }, [carouselProducts.length]);
 
   useEffect(() => {
     api.get("/products/search")
@@ -87,7 +87,7 @@ const Home: React.FC = () => {
 
   const handleFavorite = async (id: string) => {
     if (!isAuthenticated) {
-      setShowAuthFav(true);
+      openLogin();
       return;
     }
     try {
@@ -108,7 +108,7 @@ const Home: React.FC = () => {
 
   const handleAddToCart = (prod: Producto) => {
     if (!isAuthenticated) {
-      setShowAuthFav(true);
+      openLogin();
       return;
     }
     void addToCart({
@@ -140,7 +140,7 @@ const Home: React.FC = () => {
           className="cursor-pointer"
           onClick={() => navigate(`/producto/${prod.id}`)}
         >
-          <img src={prod.imagen} alt={prod.nombre} className="w-full h-56 object-cover" />
+          <img src={resolveImage(prod.imagen)} alt={prod.nombre} className="w-full h-56 object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
         </div>
 
         <div className="p-6 flex-1 flex flex-col">
@@ -203,32 +203,33 @@ const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="w-72 bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden shadow-xl flex-shrink-0 hover:border-green-500/40 transition-all">
-          <img
-            src={OFERTAS[index].imagen}
-            alt={OFERTAS[index].titulo}
-            className="w-full h-44 object-cover"
-          />
-          <div className="p-5 text-center">
-            <p className="text-green-500 text-xs font-bold uppercase tracking-widest mb-1">
-              {OFERTAS[index].titulo}
-            </p>
-            <p className="text-slate-400 text-sm mb-4">
-              {OFERTAS[index].descripcion}
-            </p>
-            <button
-              onClick={() => {
-                if (productos.length > 0) {
-                  navigate(`/producto/${productos[index % productos.length].id}`);
-                } else {
-                  navigate("/buscar");
-                }
-              }}
-              className="inline-block bg-green-500 hover:bg-green-400 text-white text-xs font-bold px-5 py-2 rounded-full transition-all"
-            >
-              Comprar ahora
-            </button>
-          </div>
+        <div className="mt-10 md:mt-0 w-[420px] h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105 cursor-pointer" style={{ backgroundColor: "var(--color-bg-card)" }} onClick={() => carouselProducts.length > 0 && navigate(`/producto/${carouselProducts[index]?.id}`)}>
+          {loading ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-8">
+              <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
+              <p className="text-muted">Cargando productos...</p>
+            </div>
+          ) : carouselProducts.length === 0 ? (
+            <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center">
+              <span className="text-5xl mb-4">📦</span>
+              <h2 className="text-xl font-bold mb-2" style={{ color: "var(--color-text)" }}>No hay productos</h2>
+              <p className="text-sm text-muted">Aún no hay productos publicados por las empresas</p>
+            </div>
+          ) : (
+            <>
+              <img src={resolveImage(carouselProducts[index].imagen)} alt={carouselProducts[index].nombre} className="w-full h-64 object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
+              <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-tr from-emerald-500 to-green-700 text-white">
+                <h2 className="text-xl font-bold mb-1 line-clamp-2">{carouselProducts[index].nombre}</h2>
+                <p className="text-lg font-extrabold mb-2">{formatCOP(carouselProducts[index].precio)}</p>
+                <p className="text-xs opacity-80">Click para ver detalle</p>
+                <div className="flex gap-2 mt-3">
+                  {carouselProducts.map((_, i) => (
+                    <div key={i} className={`w-2 h-2 rounded-full transition ${i === index ? 'bg-white' : 'bg-white/40'}`} />
+                  ))}
+                </div>
+              </div>
+            </>
+          )}
         </div>
       </section>
 
@@ -272,45 +273,6 @@ const Home: React.FC = () => {
           >
             <ShoppingCartIcon className="w-4 h-4" /> Ver carrito
           </button>
-        </div>
-      )}
-
-      {showAuthFav && (
-        <div className="fixed inset-0 z-[70] flex items-center justify-center bg-black/60 p-4" onClick={() => setShowAuthFav(false)}>
-          <div
-            className="w-full max-w-md rounded-2xl p-8 text-center shadow-2xl"
-            style={{ backgroundColor: "var(--color-bg-card)", border: "1px solid var(--color-border)" }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="mx-auto mb-4 w-16 h-16 rounded-full flex items-center justify-center bg-pink-500/10">
-              <HeartSolid className="w-8 h-8 text-pink-500" />
-            </div>
-            <h2 className="text-2xl font-bold mb-2" style={{ color: "var(--color-text)" }}>Debes iniciar sesión</h2>
-            <p className="mb-6" style={{ color: "var(--color-muted)" }}>
-              Para guardar productos en favoritos necesitas una cuenta. Regístrate gratis y sigue explorando.
-            </p>
-            <div className="space-y-3">
-              <Link
-                to="/login"
-                className="block w-full bg-pink-500 hover:bg-pink-400 text-white py-3 rounded-xl font-semibold transition"
-              >
-                Iniciar sesión
-              </Link>
-              <Link
-                to="/register"
-                className="block w-full border border-pink-500 text-pink-500 py-3 rounded-xl font-semibold transition"
-              >
-                Registrarme
-              </Link>
-              <button
-                onClick={() => setShowAuthFav(false)}
-                className="w-full py-2 text-sm hover:underline"
-                style={{ color: "var(--color-muted)" }}
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
         </div>
       )}
       <Footer />

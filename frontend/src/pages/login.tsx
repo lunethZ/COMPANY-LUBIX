@@ -56,6 +56,13 @@ const Login: React.FC = () => {
 
       const data = response.data;
 
+      // Si el usuario no está verificado, el backend retorna 200 con solo message (sin token)
+      if (!data.access_token) {
+        showMessage(data.message || "Tu correo no ha sido verificado. Revisa tu bandeja de entrada.", "error");
+        setTimeout(() => navigate("/register/VerifyEmailPage", { state: { email: email.trim() } }), 2000);
+        return;
+      }
+
       // Guardar tokens en localStorage
       localStorage.setItem("access_token", data.access_token);
       localStorage.setItem("refresh_token", data.refresh_token);
@@ -97,7 +104,37 @@ const Login: React.FC = () => {
 
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        showMessage(errorDetailMessage(error, "Error de login"), "error");
+        const errorData = error.response?.data;
+        let errorMsg = "Error de login";
+
+        if (errorData?.detail) {
+          if (typeof errorData.detail === "string") {
+            errorMsg = errorData.detail;
+          } else if (Array.isArray(errorData.detail)) {
+            errorMsg = errorData.detail.map((e: any) => e.msg).join(". ");
+          }
+        }
+
+        // Mostrar mensajes más específicos según el tipo de error
+        if (error.response?.status === 400) {
+          if (errorMsg.includes("Correo o contraseña")) {
+            errorMsg = "El correo o la contraseña son incorrectos. Verifica tus datos.";
+          } else if (errorMsg.includes("Contraseña incorrecta")) {
+            errorMsg = "La contraseña es incorrecta. Intenta de nuevo.";
+          }
+        } else if (error.response?.status === 403) {
+          if (errorMsg.includes("empresa")) {
+            errorMsg = "Esta cuenta es de tipo empresa. Cambia a la pestaña de Empresa para iniciar sesión.";
+          } else {
+            errorMsg = "Esta cuenta es de tipo usuario. Cambia a la pestaña de Usuario para iniciar sesión.";
+          }
+        } else if (error.response?.status === 500) {
+          errorMsg = "Error del servidor. Intenta de nuevo más tarde.";
+        }
+
+        showMessage(errorMsg, "error");
+      } else {
+        showMessage("Error de conexión. Verifica tu internet e intenta de nuevo.", "error");
       }
     } finally {
       setLoading(false);
