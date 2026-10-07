@@ -106,39 +106,41 @@ export default function DashboardAdminPage() {
     }
   };
 
-  const handleDeleteUser = async (user: UserItem) => {
+  const handleToggleUserStatus = async (u: UserItem) => {
+    const action = u.isActive ? "inhabilitar" : "habilitar";
     const confirmed = window.confirm(
-      `¿Eliminar al usuario "${user.fullName}" (${user.email})?\n\nEsta acción no se puede deshacer. Se eliminarán también sus direcciones, pedidos y tokens asociados.`
+      `¿${action.charAt(0).toUpperCase() + action.slice(1)} al usuario "${u.fullName}" (${u.email})?\n\n${u.isActive ? "El usuario no podrá acceder a la plataforma." : "El usuario podrá acceder nuevamente a la plataforma."}`
     );
     if (!confirmed) return;
 
-    setDeletingId(user.id);
+    setDeletingId(u.id);
     try {
-      await api.delete(`/admin/users/${user.id}`);
+      await api.patch(`/admin/users/${u.id}/toggle-status`);
       const [statsRes, companiesRes, usersRes, pqrsRes] = await reloadData();
       applyData(statsRes.data, companiesRes.data, usersRes.data, pqrsRes.data);
-    } catch (err) {
-      console.error("Error deleting user:", err);
-      setError("No se pudo eliminar el usuario.");
+    } catch (err: any) {
+      console.error("Error toggling user status:", err);
+      setError(err?.response?.data?.detail || "No se pudo cambiar el estado del usuario.");
     } finally {
       setDeletingId(null);
     }
   };
 
-  const handleDeleteCompany = async (company: CompanyItem) => {
+  const handleToggleCompanyStatus = async (company: CompanyItem) => {
+    const action = company.isActive ? "inhabilitar" : "habilitar";
     const confirmed = window.confirm(
-      `¿Eliminar la empresa "${company.nameCompany}" (${company.email})?\n\nEsta acción no se puede deshacer. Se eliminarán sus productos, pedidos y la cuenta del dueño.`
+      `¿${action.charAt(0).toUpperCase() + action.slice(1)} la empresa "${company.nameCompany}" (${company.email})?\n\n${company.isActive ? "La empresa no podrá acceder a la plataforma." : "La empresa podrá acceder nuevamente a la plataforma."}`
     );
     if (!confirmed) return;
 
     setDeletingId(company.id);
     try {
-      await api.delete(`/admin/companies/${company.id}`);
+      await api.patch(`/admin/companies/${company.id}/toggle-status`);
       const [statsRes, companiesRes, usersRes, pqrsRes] = await reloadData();
       applyData(statsRes.data, companiesRes.data, usersRes.data, pqrsRes.data);
-    } catch (err) {
-      console.error("Error deleting company:", err);
-      setError("No se pudo eliminar la empresa.");
+    } catch (err: any) {
+      console.error("Error toggling company status:", err);
+      setError(err?.response?.data?.detail || "No se pudo cambiar el estado de la empresa.");
     } finally {
       setDeletingId(null);
     }
@@ -345,17 +347,21 @@ export default function DashboardAdminPage() {
                         </td>
                         <td className="py-3">
                           <button
-                            onClick={() => handleDeleteCompany(company)}
+                            onClick={() => handleToggleCompanyStatus(company)}
                             disabled={deletingId === company.id}
-                            className="text-xs px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition disabled:opacity-50 whitespace-nowrap"
+                            className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 whitespace-nowrap ${
+                              company.isActive
+                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+                                : 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20'
+                            }`}
                           >
                             {deletingId === company.id ? (
                               <span className="flex items-center gap-1.5">
                                 <div className="w-3 h-3 border-2 border-rose-400/30 border-t-rose-400 rounded-full animate-spin"></div>
-                                Eliminando...
+                                Procesando...
                               </span>
                             ) : (
-                              "Eliminar"
+                              company.isActive ? "Inhabilitar" : "Habilitar"
                             )}
                           </button>
                         </td>
@@ -406,31 +412,44 @@ export default function DashboardAdminPage() {
                           {new Date(u.memberSince).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
                         </td>
                         <td className="py-3">
-                          {u.verified ? (
+                          {u.isActive ? (
                             <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 whitespace-nowrap">
                               Activo
                             </span>
                           ) : (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 whitespace-nowrap">
-                              Sin verificar
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 whitespace-nowrap">
+                              Inactivo
                             </span>
                           )}
                         </td>
+                        <td className="py-3 pr-4 text-gray-400">
+                          {new Date(u.memberSince).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
+                        </td>
                         <td className="py-3">
-                          <button
-                            onClick={() => handleDeleteUser(u)}
-                            disabled={deletingId === u.id}
-                            className="text-xs px-3 py-1.5 rounded-lg bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20 transition disabled:opacity-50 whitespace-nowrap"
-                          >
-                            {deletingId === u.id ? (
-                              <span className="flex items-center gap-1.5">
-                                <div className="w-3 h-3 border-2 border-rose-400/30 border-t-rose-400 rounded-full animate-spin"></div>
-                                Eliminando...
-                              </span>
-                            ) : (
-                              "Eliminar"
-                            )}
-                          </button>
+                          {u.role === 'admin' ? (
+                            <span className="text-xs px-3 py-1.5 rounded-lg bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap cursor-not-allowed">
+                              Admin
+                            </span>
+                          ) : (
+                            <button
+                              onClick={() => handleToggleUserStatus(u)}
+                              disabled={deletingId === u.id}
+                              className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 whitespace-nowrap ${
+                                u.isActive
+                                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+                                  : 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20'
+                              }`}
+                            >
+                              {deletingId === u.id ? (
+                                <span className="flex items-center gap-1.5">
+                                  <div className="w-3 h-3 border-2 border-rose-400/30 border-t-rose-400 rounded-full animate-spin"></div>
+                                  Procesando...
+                                </span>
+                              ) : (
+                                u.isActive ? "Inhabilitar" : "Habilitar"
+                              )}
+                            </button>
+                          )}
                         </td>
                       </tr>
                     ))}

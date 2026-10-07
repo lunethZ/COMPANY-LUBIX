@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useAuthModal } from "../context/AuthModalContext";
 import api from "../api/axios";
 import { errorDetailMessage } from "../utils/errors";
 import {
@@ -101,6 +102,7 @@ const ProductoDetalle: React.FC = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { addToCart, items } = useCart();
+  const { openLogin } = useAuthModal();
   const [activeImage, setActiveImage] = useState(0);
   const [cartMsg, setCartMsg] = useState(false);
   const [producto, setProducto] = useState<ProductDetail | null>(null);
@@ -202,7 +204,7 @@ const ProductoDetalle: React.FC = () => {
   const handleAddToCart = () => {
     if (!producto) return;
     if (!user) {
-      navigate("/login");
+      openLogin();
       return;
     }
     void addToCart({
@@ -211,7 +213,6 @@ const ProductoDetalle: React.FC = () => {
       price: producto.price,
       image: producto.images?.[0] || "/placeholder.png",
       stock: producto.stock,
-      quantity,
     });
     setCartMsg(true);
     setTimeout(() => setCartMsg(false), 1500);
@@ -219,7 +220,7 @@ const ProductoDetalle: React.FC = () => {
 
   const handleSubmitReview = async () => {
     if (!user) {
-      navigate("/login");
+      openLogin();
       return;
     }
     if (reviewForm.rating === 0) {
@@ -315,6 +316,7 @@ const ProductoDetalle: React.FC = () => {
                 src={resolveImage(images[activeImage])}
                 alt={producto.name}
                 className="w-full h-96 object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
               />
             </div>
             {images.length > 1 && (
@@ -333,6 +335,7 @@ const ProductoDetalle: React.FC = () => {
                       src={resolveImage(img)}
                       alt=""
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
                     />
                   </button>
                 ))}
@@ -456,19 +459,23 @@ const ProductoDetalle: React.FC = () => {
           <h2 className="text-2xl font-bold mb-6">
             Tienda que vende este producto
           </h2>
-          <div className="flex flex-col md:flex-row items-start gap-6">
+          <Link
+            to={`/empresa/${producto.company_id}`}
+            className="flex flex-col md:flex-row items-start gap-6 hover:bg-slate-800/50 p-4 rounded-xl transition-colors"
+          >
             <div className="w-20 h-20 rounded-2xl bg-gradient-to-tr from-emerald-500 to-green-700 text-white flex items-center justify-center text-2xl font-extrabold shadow-lg">
               {(producto.company_name || "T").charAt(0)}
             </div>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-3 mb-1">
-                <h3 className="text-xl font-bold">{producto.company_name}</h3>
+                <h3 className="text-xl font-bold hover:text-green-400 transition">{producto.company_name}</h3>
                 <span className="inline-flex items-center gap-1 text-xs bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-200 px-2 py-0.5 rounded-full font-semibold">
                   <CheckBadgeIcon className="w-3.5 h-3.5" /> Tienda verificada
                 </span>
               </div>
+              <p className="text-sm text-gray-400 mt-1">Ver perfil de la tienda →</p>
             </div>
-          </div>
+          </Link>
         </section>
 
         {specs.length > 0 && (

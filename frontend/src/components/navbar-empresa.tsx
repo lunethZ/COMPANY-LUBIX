@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { UserCircleIcon, ChartBarIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
 export default function NavbarEmpresa() {
@@ -51,11 +51,6 @@ export default function NavbarEmpresa() {
             />
           </svg>
         </button>
-
-        <Link to="/dashboard-empresa" className="flex items-center gap-1 hover:text-green-400 transition">
-          <ChartBarIcon className="w-5 h-5" />
-          <span>Dashboard</span>
-        </Link>
 
         <Link to="/pqrs" className="flex items-center gap-1 hover:text-green-400 transition">
           <ChatBubbleLeftEllipsisIcon className="w-5 h-5" />

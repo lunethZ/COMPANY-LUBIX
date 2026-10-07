@@ -29,12 +29,13 @@ interface ProductResult {
 
 const FALLBACK_CATEGORIES = [
   "Computadores",
-  "Smartphones",
+  "Celulares",
   "Audio",
   "Fotografía",
   "Gaming",
   "Tablets",
   "Accesorios",
+  "Televisores",
 ];
 
 const SORT_OPTIONS = [
@@ -285,6 +286,7 @@ function BuscarProducto() {
                         src={resolveImage(product.images?.[0])}
                         alt={product.name}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
                       />
                       {getDiscountLabel(product) && (
                         <span className="absolute top-3 left-3 bg-yellow-400 text-gray-900 text-xs font-bold px-2.5 py-1 rounded-lg">
@@ -298,9 +300,13 @@ function BuscarProducto() {
                       )}
                     </div>
                     <div className="p-5">
-                      <p className="text-xs text-muted mb-1 uppercase tracking-wide">
+                      <Link
+                        to={`/empresa/${product.company_id}`}
+                        className="text-xs text-muted mb-1 uppercase tracking-wide hover:text-green-400 transition"
+                        onClick={(e) => e.stopPropagation()}
+                      >
                         {product.company_name || "Tienda"}
-                      </p>
+                      </Link>
                       <h3 className="font-semibold text-base mb-2 line-clamp-2 group-hover:text-accent transition">
                         {product.name}
                       </h3>

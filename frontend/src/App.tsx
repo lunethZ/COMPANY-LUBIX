@@ -16,7 +16,9 @@ import PagarPage from "./pages/pagar";
 import { useAuth } from "./context/AuthContext";
 import DashboardAdmin from "./pages/dashboardadmin";
 import ProductoDetalle from "./pages/producto-detalle";
+import PerfilEmpresa from "./pages/perfil-empresa";
 import PQRSPage from "./pages/pqrs";
+import AuthModal from "./components/AuthModal";
 
 function ProtectedRoute({ allowedRoles, children }: { allowedRoles?: Array<"user" | "empresa" | "admin">, children: React.ReactNode }) {
   const { user, isAuthenticated } = useAuth();
@@ -76,7 +78,9 @@ function App() {
   }, []);
 
   return (
-    <Routes>
+    <>
+      <AuthModal />
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
@@ -93,10 +97,12 @@ function App() {
       <Route path="/pago" element={<ProtectedRoute allowedRoles={["user"]}><PagarPage /></ProtectedRoute>} />
       <Route path="/buscar" element={<BuscarProducto />} />
       <Route path="/producto/:id" element={<ProductoDetalle />} />
+      <Route path="/empresa/:id" element={<PerfilEmpresa />} />
       <Route path="/productos" element={<Productos />} />
       <Route path="/pqrs" element={<PQRSPage />} />
       <Route path="/dashboard-admin" element={<ProtectedAdminRoute />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 

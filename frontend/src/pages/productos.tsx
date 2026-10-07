@@ -30,6 +30,14 @@ interface ProductDetail extends Product {
 
 const REFERENCE_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop';
 
+const resolveImage = (img?: string) => {
+  if (!img || img === '/placeholder.png') return '/placeholder.png';
+  if (img.startsWith('http://') || img.startsWith('https://')) return img;
+  const base = (import.meta.env.VITE_API_URL || 'http://localhost:8002').replace(/\/$/, '');
+  const path = img.startsWith('/files') ? img : img.startsWith('/') ? `/files${img}` : `/files/${img}`;
+  return `${base}${path.replace('/files/files', '/files')}`;
+};
+
 const formatCOP = (valor: number) => {
   return valor.toLocaleString('es-CO', {
     style: 'currency',
@@ -116,9 +124,10 @@ export default function ProductosPage() {
 
           <div className="bg-[#1f2937] p-6 rounded-xl shadow-md border border-slate-700 flex flex-col md:flex-row gap-6 mb-6">
             <img
-              src={p.images?.[0] || REFERENCE_IMAGE}
+              src={resolveImage(p.images?.[0]) || REFERENCE_IMAGE}
               alt={p.name}
               className="w-full md:w-48 h-48 object-cover rounded-lg"
+              onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
             />
             <div className="flex-1 flex flex-col justify-between">
               <div>
@@ -211,9 +220,10 @@ export default function ProductosPage() {
                 >
                   <div className="relative h-44 bg-slate-900 border-b border-slate-700">
                     <img
-                      src={producto.images?.[0] || REFERENCE_IMAGE}
+                      src={resolveImage(producto.images?.[0]) || REFERENCE_IMAGE}
                       alt={producto.name}
                       className="w-full h-full object-cover"
+                      onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
                     />
                   </div>
                   <div className="p-4 flex-1 flex flex-col justify-between">

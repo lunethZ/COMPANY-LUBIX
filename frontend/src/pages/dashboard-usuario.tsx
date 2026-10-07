@@ -199,12 +199,26 @@ export default function BuyerDashboard() {
   const estadoLabel = (estado: string) => {
     const map: Record<string, string> = {
       pending: "Pendiente",
+      confirmed: "Confirmado",
       paid: "Pagado",
       shipped: "Enviado",
       delivered: "Entregado",
       cancelled: "Cancelado",
     };
     return map[estado] || estado;
+  };
+
+  const cancelOrder = async (orderId: string) => {
+    if (!window.confirm("¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.")) return;
+    try {
+      await api.patch(`/user/orders/${orderId}/cancel`);
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, estado: "cancelled", delivery_progress: 0 } : o))
+      );
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "No se pudo cancelar el pedido";
+      window.alert(msg);
+    }
   };
 
   const loadAddresses = async () => {
@@ -357,26 +371,21 @@ export default function BuyerDashboard() {
     }
   };
 
-  const deleteAccount = async () => {
-    const confirmed = window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible y borrará todos tus datos, pedidos y direcciones.\n\nSi prefieres, puedes solicitar la eliminación vía PQRS.");
+  const requestAccountDisable = async () => {
+    const confirmed = window.confirm("¿Estás seguro de que deseas solicitar la inhabilitación de tu cuenta?\n\nTu solicitud será enviada al administrador para su revisión. No se eliminarán tus datos, solo se desactivará tu cuenta.");
     if (!confirmed) return;
-    const doubleConfirm = window.prompt("Escribe ELIMINAR para confirmar:");
-    if (doubleConfirm !== "ELIMINAR") return;
+    const doubleConfirm = window.prompt("Escribe INHABILITAR para confirmar:");
+    if (doubleConfirm !== "INHABILITAR") return;
     try {
-      await api.delete("/user/account");
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("user");
-      logout();
-      navigate("/login", { replace: true });
+      await api.post("/pqrs", {
+        type: "inhabilitar_cuenta",
+        subject: "Solicitud de inhabilitación de cuenta",
+        description: "El usuario ha solicitado la inhabilitación de su cuenta.",
+      });
+      alert("Tu solicitud ha sido enviada correctamente. El administrador la revisará pronto.");
     } catch (err: any) {
-      const msg = err?.response?.data?.detail || "Error al eliminar la cuenta";
-      // Fallback a PQRS si el backend no permite borrado directo
-      if (msg.includes("permiso") || err?.response?.status === 401) {
-        navigate('/pqrs?type=eliminacion&subject=Solicitud de eliminación de cuenta');
-      } else {
-        alert(msg);
-      }
+      const msg = err?.response?.data?.detail || "Error al enviar la solicitud";
+      alert(msg);
     }
   };
 
@@ -470,7 +479,7 @@ export default function BuyerDashboard() {
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Resumen', icon: <UserIcon className="w-4 h-4" /> },
     { id: 'orders', label: 'Mis Pedidos', icon: <CubeIcon className="w-4 h-4" /> },
-    { id: 'integrated', label: 'Producto Integrado', icon: <CheckCircleIcon className="w-4 h-4" /> },
+    { id: 'integrated', label: 'Producto Entregado', icon: <CheckCircleIcon className="w-4 h-4" /> },
     { id: 'delete-product', label: 'Eliminar Producto', icon: <TrashIcon className="w-4 h-4" /> },
     { id: 'saved', label: 'Guardados', icon: <HeartIcon className="w-4 h-4" /> },
   ];
@@ -705,6 +714,18 @@ export default function BuyerDashboard() {
                           </div>
                         </div>
 
+                        {(order.estado === "pending" || order.estado === "confirmed") && (
+                          <div>
+                            <button
+                              onClick={() => cancelOrder(order.id)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl text-sm font-semibold transition-all"
+                            >
+                              <XMarkIcon className="w-4 h-4" />
+                              Cancelar pedido
+                            </button>
+                          </div>
+                        )}
+
                         <div>
                           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">Productos</h3>
                           <div className="space-y-3">
@@ -834,11 +855,11 @@ export default function BuyerDashboard() {
 
         {activeTab === 'integrated' && (
           <div className={`${themeClasses.card} rounded-xl p-6`}>
-            <h2 className="text-xl font-bold text-white mb-6">Productos Integrados</h2>
+            <h2 className="text-xl font-bold text-white mb-6">Productos Entregados</h2>
             {orders.filter(o => o.estado === 'delivered').length === 0 ? (
               <div className="text-center py-16 text-gray-400">
                 <CheckCircleIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">No tienes productos integrados aún</p>
+                <p className="text-lg font-medium">No tienes productos Entregados aún</p>
                 <p className="text-sm mt-1">Los productos de pedidos entregados aparecerán aquí</p>
               </div>
             ) : (
@@ -1054,8 +1075,8 @@ export default function BuyerDashboard() {
                     <span className="text-white text-sm">Descargar mis datos</span>
                     <ChevronRightIcon className="w-4 h-4 text-gray-400" />
                   </button>
-                  <button onClick={deleteAccount} className="w-full flex items-center justify-between p-3 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors">
-                    <span className="text-red-400 text-sm">Eliminar mi cuenta</span>
+                  <button onClick={requestAccountDisable} className="w-full flex items-center justify-between p-3 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors">
+                    <span className="text-red-400 text-sm">Solicitar inhabilitación de cuenta</span>
                     <ChevronRightIcon className="w-4 h-4 text-red-400" />
                   </button>
                 </div>

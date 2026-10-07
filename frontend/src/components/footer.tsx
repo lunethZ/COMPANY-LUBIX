@@ -10,7 +10,7 @@ const Footer = () => {
             <span className="text-xs">Tu marketplace de confianza para compras online.</span>
           </div>
           <div className="flex items-center gap-5 text-sm">
-            <Link to="/" className="hover:text-green-500">Inicio</Link>
+            <Link to="/home-usuario" className="hover:text-green-500">Inicio</Link>
             <Link to="/buscar" className="hover:text-green-500">Buscar productos</Link>
             <Link to="/pqrs" className="hover:text-green-500">PQRS</Link>
           </div>

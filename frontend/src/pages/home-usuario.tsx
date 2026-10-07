@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import NavbarUsuario from "../components/navbaruser";
 import Footer from "../components/footer";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
+import { useAuthModal } from "../context/AuthModalContext";
 import api from "../api/axios";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
@@ -17,7 +18,7 @@ interface Producto {
   antes: number | null;
   descuento: string | null;
   imagen: string;
-  tienda: { nombre: string };
+  tienda: { nombre: string; id: string };
   calificacion: number;
   numResenas: number;
 }
@@ -50,6 +51,7 @@ const HomeUsuario: React.FC = () => {
   const [index, setIndex] = useState(0);
   const { user } = useAuth();
   const { addToCart } = useCart();
+  const { openLogin } = useAuthModal();
   const navigate = useNavigate();
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [cartMsg, setCartMsg] = useState<string | null>(null);
@@ -81,7 +83,7 @@ const HomeUsuario: React.FC = () => {
           imagenes: p.images?.length ? p.images : ["/placeholder.png"],
           categoria: "General",
           stock: p.stock,
-          tienda: { nombre: p.company_name || "Tienda", logo: (p.company_name || "T").charAt(0), direccion: "", ciudad: "", calificacion: 0, numResenas: 0, ventas: 0, miembrosDesde: "" },
+          tienda: { nombre: p.company_name || "Tienda", id: p.company_id || "" },
           calificacion: p.avg_rating || 0,
           numResenas: p.review_count || 0,
           caracteristicas: [],
@@ -126,7 +128,7 @@ const HomeUsuario: React.FC = () => {
 
   const handleAddToCart = (prod: Producto) => {
     if (!user) {
-      navigate("/login");
+      openLogin();
       return;
     }
     void addToCart({
@@ -154,7 +156,7 @@ const HomeUsuario: React.FC = () => {
           className="cursor-pointer"
           onClick={() => navigate(`/producto/${prod.id}`)}
         >
-          <img src={resolveImage(prod.imagen)} alt={prod.nombre} className="w-full h-56 object-cover" />
+          <img src={resolveImage(prod.imagen)} alt={prod.nombre} className="w-full h-56 object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
         </div>
 
         <div className="p-6 flex-1 flex flex-col">
@@ -173,7 +175,7 @@ const HomeUsuario: React.FC = () => {
             {prod.nombre}
           </h3>
           <p className="text-sm text-gray-600 dark:text-gray-400 mb-1">{prod.desc}</p>
-          <p className="text-xs text-gray-400 mb-3">Vendido por: <span className="font-semibold text-gray-600 dark:text-gray-300">{prod.tienda.nombre}</span></p>
+          <p className="text-xs text-gray-400 mb-3">Vendido por: <Link to={`/empresa/${prod.tienda.id}`} className="font-semibold text-gray-600 dark:text-gray-300 hover:text-green-400 transition">{prod.tienda.nombre}</Link></p>
 
           <div className="flex items-center gap-3 mb-4">
             <span className="text-emerald-600 font-bold text-xl">{formatCOP(prod.precio)}</span>
@@ -225,7 +227,7 @@ const HomeUsuario: React.FC = () => {
             </div>
           ) : (
             <>
-              <img src={resolveImage(carouselProducts[index].imagen)} alt={carouselProducts[index].nombre} className="w-full h-64 object-cover" />
+              <img src={resolveImage(carouselProducts[index].imagen)} alt={carouselProducts[index].nombre} className="w-full h-64 object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
               <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-tr from-emerald-500 to-green-700 text-white">
                 <h2 className="text-xl font-bold mb-1 line-clamp-2">{carouselProducts[index].nombre}</h2>
                 <p className="text-lg font-extrabold mb-2">{formatCOP(carouselProducts[index].precio)}</p>
@@ -248,7 +250,7 @@ const HomeUsuario: React.FC = () => {
         <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6">
           {[
             { nombre: "Computadores", icono: <ComputerDesktopIcon className="w-10 h-10" /> },
-            { nombre: "Smartphones", icono: <DevicePhoneMobileIcon className="w-10 h-10" /> },
+            { nombre: "Celulares", icono: <DevicePhoneMobileIcon className="w-10 h-10" /> },
             { nombre: "Audio", icono: <SpeakerWaveIcon className="w-10 h-10" /> },
             { nombre: "Fotografía", icono: <CameraIcon className="w-10 h-10" /> },
             { nombre: "Gaming", icono: <GamepadIcon className="w-10 h-10" /> },
