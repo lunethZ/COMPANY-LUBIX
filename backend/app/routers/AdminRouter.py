@@ -4,14 +4,6 @@ from app.database.Connection import get_db
 from app.models.ModelUser import Users
 from app.models.ModelCompany import Company
 from app.models.ModelRole import Role
-from app.models.ModelProduct import Product
-from app.models.ModelReview import Review
-from app.models.ModelFavorite import Favorite
-from app.models.ModelCart import Cart, CartItem
-from app.models.ModelOrder import Order, OrderItem
-from app.models.ModelAddress import Address
-from app.models.ModelCode import Codes
-from app.models.ModelRefreshToken import RefreshToken
 from app.models.ModelPQRS import PQRS
 
 router = APIRouter(
@@ -91,77 +83,57 @@ def list_companies(request: Request, database: Session = Depends(get_db)):
         for company, user in companies
     ]
 
-@router.delete("/users/{user_id}")
-def delete_user(user_id: str, request: Request, database: Session = Depends(get_db)):
-    user = database.query(Users).filter(Users.id == user_id).first()
+@router.patch("/users/{user_id}/toggle-status")
+def toggle_user_status(user_id: str, request: Request, database: Session = Depends(get_db)):
+    current_user = database.query(Users).filter(Users.id == request.state.user_id).first()
+    if not current_user:
+        raise HTTPException(status_code=404, detail="Usuario administrador no encontrado")
 
+    role_admin = _get_role_id(database, "admin")
+    if current_user.role_id == role_admin and str(current_user.id) == str(user_id):
+        raise HTTPException(status_code=400, detail="No puedes inhabilitar tu propia cuenta de administrador")
+
+    user = database.query(Users).filter(Users.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    role_admin = _get_role_id(database, "admin")
     if user.role_id == role_admin:
-        raise HTTPException(status_code=400, detail="No se puede eliminar un administrador")
+        raise HTTPException(status_code=400, detail="No se puede inhabilitar un administrador")
 
-    company = database.query(Company).filter(Company.user_id == user.id).first()
-    if company:
-        database.delete(company)
-
-    database.delete(user)
+    user.isActive = not user.isActive
     database.commit()
 
-    return {"message": "Usuario eliminado correctamente", "id": user_id}
+    status_text = "inhabilitado" if not user.isActive else "habilitado"
+    return {
+        "message": f"Usuario {status_text} correctamente",
+        "id": str(user.id),
+        "isActive": user.isActive
+    }
 
 
-@router.delete("/companies/{company_id}")
-def delete_company(company_id: str, request: Request, database: Session = Depends(get_db)):
+@router.patch("/companies/{company_id}/toggle-status")
+def toggle_company_status(company_id: str, request: Request, database: Session = Depends(get_db)):
     company = database.query(Company).filter(Company.id == company_id).first()
-
     if not company:
         raise HTTPException(status_code=404, detail="Empresa no encontrada")
 
     user = database.query(Users).filter(Users.id == company.user_id).first()
-
     if not user:
         raise HTTPException(status_code=404, detail="Usuario de la empresa no encontrado")
 
     role_admin = _get_role_id(database, "admin")
     if user.role_id == role_admin:
-        raise HTTPException(status_code=400, detail="No se puede eliminar un administrador")
+        raise HTTPException(status_code=400, detail="No se puede inhabilitar un administrador")
 
-    try:
-        product_ids = [
-            p.id for p in database.query(Product.id).filter(Product.company_id == company.id).all()
-        ]
+    user.isActive = not user.isActive
+    database.commit()
 
-        if product_ids:
-            database.query(OrderItem).filter(OrderItem.product_id.in_(product_ids)).delete(synchronize_session=False)
-            database.query(CartItem).filter(CartItem.product_id.in_(product_ids)).delete(synchronize_session=False)
-            database.query(Favorite).filter(Favorite.product_id.in_(product_ids)).delete(synchronize_session=False)
-            database.query(Review).filter(Review.product_id.in_(product_ids)).delete(synchronize_session=False)
-            database.query(Product).filter(Product.id.in_(product_ids)).delete(synchronize_session=False)
-
-        order_ids = [
-            o.id for o in database.query(Order.id).filter(Order.user_id == user.id).all()
-        ]
-        if order_ids:
-            database.query(OrderItem).filter(OrderItem.order_id.in_(order_ids)).delete(synchronize_session=False)
-            database.query(Order).filter(Order.id.in_(order_ids)).delete(synchronize_session=False)
-
-        database.query(Cart).filter(Cart.user_id == user.id).delete(synchronize_session=False)
-        database.query(Address).filter(Address.user_id == user.id).delete(synchronize_session=False)
-        database.query(Codes).filter(Codes.user_id == user.id).delete(synchronize_session=False)
-        database.query(RefreshToken).filter(RefreshToken.user_id == user.id).delete(synchronize_session=False)
-        database.query(PQRS).filter(PQRS.user_id == user.id).delete(synchronize_session=False)
-
-        database.delete(user)
-        database.delete(company)
-        database.commit()
-    except Exception as e:
-        database.rollback()
-        print("ERROR:", e)
-        raise HTTPException(status_code=500, detail="Error al eliminar la empresa")
-
-    return {"message": "Empresa eliminada correctamente", "id": company_id}
+    status_text = "inhabilitada" if not user.isActive else "habilitada"
+    return {
+        "message": f"Empresa {status_text} correctamente",
+        "id": str(company.id),
+        "isActive": user.isActive
+    }
 
 
 @router.patch("/companies/{company_id}/validate")

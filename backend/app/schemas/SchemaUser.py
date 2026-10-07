@@ -25,7 +25,37 @@ class CreateOrderRequest(BaseModel):
     address: str
     city: str
     department: str
-    postal_code: Optional[str] = None
+    postal_code: str
+
+    @field_validator('recipient')
+    def validate_recipient(cls, v):
+        if not v or not v.strip():
+            raise ValueError('el nombre del destinatario es obligatorio')
+        return v
+
+    @field_validator('address')
+    def validate_address(cls, v):
+        if not v or not v.strip():
+            raise ValueError('la dirección es obligatoria')
+        return v
+
+    @field_validator('city')
+    def validate_city(cls, v):
+        if not v or not v.strip():
+            raise ValueError('la ciudad es obligatoria')
+        return v
+
+    @field_validator('department')
+    def validate_department(cls, v):
+        if not v or not v.strip():
+            raise ValueError('el departamento es obligatorio')
+        return v
+
+    @field_validator('postal_code')
+    def validate_postal_code(cls, v):
+        if not v or not v.strip():
+            raise ValueError('el código postal es obligatorio')
+        return v
 
 class UpdateUserProfileRequest(BaseModel):
     fullName: Optional[str] = None

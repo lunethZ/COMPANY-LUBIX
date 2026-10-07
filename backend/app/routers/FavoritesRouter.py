@@ -44,7 +44,7 @@ def list_favorites(request: Request, database: Session = Depends(get_db)):
                 "stock": product.stock,
                 "discount_enable": product.discount_enable,
                 "discount_value": float(product.discount_value),
-                "company_name": seller.fullName,
+                "company_name": company.nameCompany,
             },
             "created_at": fav.created_at,
         })
