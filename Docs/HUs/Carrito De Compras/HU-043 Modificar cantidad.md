@@ -1,15 +1,15 @@
-# HU-042 — Modificar cantidad
+# HU-043 — Modificar cantidad
 
 ## Identificación
 
 | Campo | Valor |
 |---------|---------|
-| ID | HU-042 |
+| ID | HU-043 |
 | Título | Modificar cantidad |
 | Módulo | Carrito de Compras |
 | Prioridad | Alta |
 | Estado | Pendiente |
-| RF asociados | RF-042 |
+| RF asociados | RF-043 |
 
 ---
 
@@ -21,7 +21,7 @@ Como usuario de Lubix, quiero modificar la cantidad de un producto en el carrito
 
 ## Criterios de aceptación
 
-### CA-042.1 — Botones de incremento y decremento
+### CA-043.1 — Botones de incremento y decremento
 
 **Dado que** tengo productos en el carrito,
 
@@ -29,7 +29,7 @@ Como usuario de Lubix, quiero modificar la cantidad de un producto en el carrito
 
 **entonces** debo ver botones de "+" y "-" para incrementar o disminuir la cantidad de unidades de ese producto.
 
-### CA-042.2 — Ingreso manual de cantidad
+### CA-043.2 — Ingreso manual de cantidad
 
 **Dado que** tengo un producto en el carrito,
 
@@ -37,7 +37,7 @@ Como usuario de Lubix, quiero modificar la cantidad de un producto en el carrito
 
 **entonces** debo poder escribir directamente un valor numérico para establecer la cantidad deseada.
 
-### CA-042.3 — Límite máximo por stock
+### CA-043.3 — Límite máximo por stock
 
 **Dado que** un producto en el carrito tiene un stock disponible de 10 unidades,
 
@@ -45,7 +45,7 @@ Como usuario de Lubix, quiero modificar la cantidad de un producto en el carrito
 
 **entonces** el sistema no debe permitir que la cantidad supere las 10 unidades y debe mostrar un mensaje indicando que se alcanzó el límite de stock.
 
-### CA-042.4 — Actualización del subtotal y total
+### CA-043.4 — Actualización del subtotal y total
 
 **Dado que** modifiqué la cantidad de un producto en el carrito,
 
@@ -53,7 +53,7 @@ Como usuario de Lubix, quiero modificar la cantidad de un producto en el carrito
 
 **entonces** el subtotal de ese producto y el total general del carrito deben recalcularse automáticamente.
 
-### CA-042.5 — Cantidad mínima
+### CA-043.5 — Cantidad mínima
 
 **Dado que** tengo un producto en el carrito con cantidad igual a 1,
 

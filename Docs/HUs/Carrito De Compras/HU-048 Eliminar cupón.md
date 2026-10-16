@@ -1,15 +1,15 @@
-# HU-047 — Eliminar cupón
+# HU-048 — Eliminar cupón
 
 ## Identificación
 
 | Campo | Valor |
 |---------|---------|
-| ID | HU-047 |
+| ID | HU-048 |
 | Título | Eliminar cupón |
 | Módulo | Carrito de Compras |
 | Prioridad | Alta |
 | Estado | Pendiente |
-| RF asociados | RF-047 |
+| RF asociados | RF-048 |
 
 ---
 
@@ -21,7 +21,7 @@ Como usuario de Lubix, quiero eliminar un cupón aplicado en el carrito, para qu
 
 ## Criterios de aceptación
 
-### CA-047.1 — Botón de eliminar cupón
+### CA-048.1 — Botón de eliminar cupón
 
 **Dado que** tengo un cupón de descuento aplicado en el carrito,
 
@@ -29,7 +29,7 @@ Como usuario de Lubix, quiero eliminar un cupón aplicado en el carrito, para qu
 
 **entonces** debe mostrarse un botón o ícono junto al código del cupón que permita eliminarlo.
 
-### CA-047.2 — Confirmación de eliminación
+### CA-048.2 — Confirmación de eliminación
 
 **Dado que** hago clic en el botón de eliminar cupón,
 
@@ -37,7 +37,7 @@ Como usuario de Lubix, quiero eliminar un cupón aplicado en el carrito, para qu
 
 **entonces** debe mostrarse un diálogo de confirmación preguntando si deseo remover el cupón de descuento aplicado.
 
-### CA-047.3 — Recálculo del total
+### CA-048.3 — Recálculo del total
 
 **Dado que** confirmé la eliminación del cupón,
 
@@ -45,7 +45,7 @@ Como usuario de Lubix, quiero eliminar un cupón aplicado en el carrito, para qu
 
 **entonces** el descuento debe removese del resumen, los impuestos deben recalcularse sobre el subtotal original y el total general debe actualizarse.
 
-### CA-047.4 — Mensaje de confirmación
+### CA-048.4 — Mensaje de confirmación
 
 **Dado que** el cupón fue eliminado exitosamente,
 

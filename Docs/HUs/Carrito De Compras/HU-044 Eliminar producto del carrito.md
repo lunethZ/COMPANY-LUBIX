@@ -1,15 +1,15 @@
-# HU-043 — Eliminar producto del carrito
+# HU-044 — Eliminar producto del carrito
 
 ## Identificación
 
 | Campo | Valor |
 |---------|---------|
-| ID | HU-043 |
+| ID | HU-044 |
 | Título | Eliminar producto del carrito |
 | Módulo | Carrito de Compras |
 | Prioridad | Media |
 | Estado | Pendiente |
-| RF asociados | RF-043 |
+| RF asociados | RF-044 |
 
 ---
 
@@ -21,7 +21,7 @@ Como usuario de Lubix, quiero eliminar un producto del carrito, para retirarlo d
 
 ## Criterios de aceptación
 
-### CA-043.1 — Botón de eliminar visible
+### CA-044.1 — Botón de eliminar visible
 
 **Dado que** tengo al menos un producto en el carrito,
 
@@ -29,7 +29,7 @@ Como usuario de Lubix, quiero eliminar un producto del carrito, para retirarlo d
 
 **entonces** cada producto debe contar con un botón o ícono de eliminar claramente identificado.
 
-### CA-043.2 — Diálogo de confirmación
+### CA-044.2 — Diálogo de confirmación
 
 **Dado que** hago clic en el botón de eliminar de un producto,
 
@@ -37,7 +37,7 @@ Como usuario de Lubix, quiero eliminar un producto del carrito, para retirarlo d
 
 **entonces** debe mostrarse un diálogo de confirmación preguntando si deseo eliminar el producto del carrito.
 
-### CA-043.3 — Actualización del carrito tras eliminación
+### CA-044.3 — Actualización del carrito tras eliminación
 
 **Dado que** confirmé la eliminación de un producto del carrito,
 
@@ -45,7 +45,7 @@ Como usuario de Lubix, quiero eliminar un producto del carrito, para retirarlo d
 
 **entonces** el producto debe desaparecer de la lista, el carrito debe actualizarse inmediatamente y el total debe recalcularse.
 
-### CA-043.4 — Estado de carrito vacío
+### CA-044.4 — Estado de carrito vacío
 
 **Dado que** eliminé el último producto del carrito,
 
@@ -53,7 +53,7 @@ Como usuario de Lubix, quiero eliminar un producto del carrito, para retirarlo d
 
 **entonces** debe mostrarse un mensaje indicando que el carrito está vacío junto con un enlace para explorar el catálogo.
 
-### CA-043.5 — Opción de deshacer
+### CA-044.5 — Opción de deshacer
 
 **Dado que** eliminé un producto del carrito,
 

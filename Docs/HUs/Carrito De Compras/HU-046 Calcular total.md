@@ -1,15 +1,15 @@
-# HU-045 — Calcular total
+# HU-046 — Calcular total
 
 ## Identificación
 
 | Campo | Valor |
 |---------|---------|
-| ID | HU-045 |
+| ID | HU-046 |
 | Título | Calcular total |
 | Módulo | Carrito de Compras |
 | Prioridad | Media |
 | Estado | Pendiente |
-| RF asociados | RF-045 |
+| RF asociados | RF-046 |
 
 ---
 
@@ -21,7 +21,7 @@ Como usuario de Lubix, quiero ver el total de mi compra, para conocer el costo f
 
 ## Criterios de aceptación
 
-### CA-045.1 — Visualización del subtotal
+### CA-046.1 — Visualización del subtotal
 
 **Dado que** tengo productos en el carrito,
 
@@ -29,7 +29,7 @@ Como usuario de Lubix, quiero ver el total de mi compra, para conocer el costo f
 
 **entonces** debe mostrarse el subtotal calculado como la suma del precio unitario multiplicado por la cantidad de cada producto.
 
-### CA-045.2 — Cálculo de impuestos
+### CA-046.2 — Cálculo de impuestos
 
 **Dado que** tengo productos en el carrito,
 
@@ -37,7 +37,7 @@ Como usuario de Lubix, quiero ver el total de mi compra, para conocer el costo f
 
 **entonces** debe incluirse el monto de impuestos aplicables calculado automáticamente según la legislación vigente.
 
-### CA-045.3 — Costo de envío
+### CA-046.3 — Costo de envío
 
 **Dado que** tengo productos en el carrito y seleccioné una dirección de envío,
 
@@ -45,7 +45,7 @@ Como usuario de Lubix, quiero ver el total de mi compra, para conocer el costo f
 
 **entonces** debe mostrarse el costo de envío estimado según la dirección y el método de envío seleccionado.
 
-### CA-045.4 — Total general
+### CA-046.4 — Total general
 
 **Dado que** el carrito contiene productos, impuestos y costo de envío,
 
@@ -53,7 +53,7 @@ Como usuario de Lubix, quiero ver el total de mi compra, para conocer el costo f
 
 **entonces** el monto total a pagar debe ser la suma del subtotal, los impuestos y el costo de envío, desglosados de forma visible.
 
-### CA-045.5 — Descuento por cupón aplicado
+### CA-046.5 — Descuento por cupón aplicado
 
 **Dado que** apliqué un cupón de descuento válido en el carrito,
 
