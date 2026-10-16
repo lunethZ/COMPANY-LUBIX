@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import Navbar from "../components/navbar";
+import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
@@ -188,7 +188,7 @@ const Home: React.FC = () => {
 
   return (
     <div className="page-container">
-      <Navbar />
+      <NavbarAuto />
 
       <section className="flex flex-col md:flex-row justify-between items-center px-8 md:px-16 py-20 min-h-[calc(100vh-80px)]" style={{ backgroundColor: "var(--color-bg)" }}>
         <div className="max-w-lg text-center md:text-left mr-8">
