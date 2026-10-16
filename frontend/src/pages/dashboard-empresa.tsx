@@ -1124,7 +1124,7 @@ export default function SellerDashboard() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <StarIcon
                         key={i}
-                        className={`w-4 h-4 fill-yellow-400 text-yellow-400 ${i < review.rating ? "fill-yellow-400" : "text-gray-300"}`}
+                        className={`w-4 h-4 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-600"}`}
                       />
                     ))}
                     <span className="text-xs text-gray-400">{review.rating}/5</span>
