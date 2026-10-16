@@ -1,15 +1,15 @@
-# HU-046 — Aplicar cupones de descuento
+# HU-047 — Aplicar cupones de descuento
 
 ## Identificación
 
 | Campo | Valor |
 |---------|---------|
-| ID | HU-046 |
+| ID | HU-047 |
 | Título | Aplicar cupones de descuento |
-| Módulo | Carrito |
+| Módulo | Carrito de Compras |
 | Prioridad | Media |
 | Estado | Pendiente |
-| RF asociados | RF-046 |
+| RF asociados | RF-047 |
 
 ---
 
@@ -21,7 +21,7 @@ Como usuario de Lubix, quiero aplicar cupones de descuento, para obtener benefic
 
 ## Criterios de aceptación
 
-### CA-046.1 — Campo de entrada de cupón
+### CA-047.1 — Campo de entrada de cupón
 
 **Dado que** estoy en la página del carrito de compras,
 
@@ -29,7 +29,7 @@ Como usuario de Lubix, quiero aplicar cupones de descuento, para obtener benefic
 
 **entonces** debe existir un campo de texto para ingresar un código de cupón junto con un botón "Aplicar".
 
-### CA-046.2 — Cupón válido
+### CA-047.2 — Cupón válido
 
 **Dado que** ingresé un código de cupón que existe y está vigente en el sistema,
 
@@ -37,7 +37,7 @@ Como usuario de Lubix, quiero aplicar cupones de descuento, para obtener benefic
 
 **entonces** el descuento asociado al cupón debe calcularse y restarse del subtotal, mostrando el monto descontado en el resumen.
 
-### CA-046.3 — Cupón inválido o expirado
+### CA-047.3 — Cupón inválido o expirado
 
 **Dado que** ingresé un código de cupón que no existe o que ya expiró,
 
@@ -45,7 +45,7 @@ Como usuario de Lubix, quiero aplicar cupones de descuento, para obtener benefic
 
 **entonces** el sistema debe mostrar un mensaje de error indicando que el cupón no es válido o ha expirado, sin modificar el total.
 
-### CA-046.4 — Cupón ya aplicado
+### CA-047.4 — Cupón ya aplicado
 
 **Dado que** ya tengo un cupón de descuento aplicado en el carrito,
 
@@ -53,7 +53,7 @@ Como usuario de Lubix, quiero aplicar cupones de descuento, para obtener benefic
 
 **entonces** el sistema debe mostrar un mensaje indicando que ya existe un cupón activo y debe solicitar confirmación para reemplazarlo.
 
-### CA-046.5 — Descuento reflejado en el total
+### CA-047.5 — Descuento reflejado en el total
 
 **Dado que** un cupón con un descuento del 10% fue aplicado correctamente,
 
