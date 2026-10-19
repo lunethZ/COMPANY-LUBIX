@@ -69,7 +69,6 @@ Componentes internos del backend: `routers/` (endpoints), `services/` (lógica d
 | SQLAlchemy | 2.0.48 | ORM |
 | Alembic | 1.18.4 | Migraciones de BD |
 | Pydantic | 2.12.5 | Validación de datos |
-| pydantic-settings | 2.13.1 | Configuración |
 | psycopg2-binary | 2.9.11 | Driver PostgreSQL |
 | python-jose | 3.5.0 | Tokens JWT |
 | bcrypt | 3.2.2 | Hash de contraseñas |
@@ -77,7 +76,6 @@ Componentes internos del backend: `routers/` (endpoints), `services/` (lógica d
 | MinIO SDK | 7.2.20 | Almacenamiento de archivos |
 | python-dotenv | 1.2.2 | Variables de entorno |
 | python-multipart | >=0.0.27 | Carga de archivos |
-| jinja2 | 3.1.6 | Plantillas de correo |
 | sentry-sdk | 2.54.0 | Monitoreo de errores |
 
 ### 3.2 Frontend web
@@ -91,7 +89,6 @@ Componentes internos del backend: `routers/` (endpoints), `services/` (lógica d
 | React Router | 7.15.1 | Enrutamiento |
 | Tailwind CSS | 3.4.19 | Estilos |
 | Axios | 1.16.1 | Cliente HTTP |
-| Swiper | 12.2.0 | Carruseles |
 | @heroicons/react | 2.2.0 | Iconografía |
 | PostCSS | 8.5.15 / autoprefixer 10.5.0 | Procesamiento CSS |
 | ESLint | 10.4.0 | Linter |
