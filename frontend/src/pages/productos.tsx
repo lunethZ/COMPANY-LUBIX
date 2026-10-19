@@ -126,7 +126,7 @@ export default function ProductosPage() {
             <img
               src={resolveImage(p.images?.[0]) || REFERENCE_IMAGE}
               alt={p.name}
-              className="w-full md:w-48 h-48 object-cover rounded-lg"
+              className="w-full md:w-48 h-48 object-contain bg-slate-800 p-2 rounded-lg"
               onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
             />
             <div className="flex-1 flex flex-col justify-between">
@@ -222,7 +222,7 @@ export default function ProductosPage() {
                     <img
                       src={resolveImage(producto.images?.[0]) || REFERENCE_IMAGE}
                       alt={producto.name}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain p-2"
                       onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
                     />
                   </div>
