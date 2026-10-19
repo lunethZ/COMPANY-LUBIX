@@ -42,11 +42,50 @@ Debe verse `Up` en: `postgres`, `minio`, `backend`, `frontend`.
 docker compose logs -f backend
 docker compose logs -f frontend
 ```
-
 ## 8. Para detener
+
 ```bash
 docker compose down
 ```
+
+---
+
+## 9. ⚡ Apagar bien al terminar (AHORRO DE RAM)
+
+`vmmemWSL` (el VM de Docker/WSL2) se come la RAM de Windows y **no la devuelve** si no lo apagas. Al terminar de trabajar, SIEMPRE hacer esto en orden:
+
+```bash
+# 1. Bajar los contenedores del proyecto
+docker compose down
+
+# 2. Apagar el VM de WSL por completo (libera la RAM al instante)
+wsl --shutdown
+```
+
+Verificar en el Administrador de tareas que el proceso `vmmemWSL`/`vmmem` desapareció.
+
+### Config aplicada (2026-10-18)
+
+Se creó `C:\Users\johan\.wslconfig` para limitar la RAM de WSL2:
+
+```ini
+[wsl2]
+memory=4GB
+processors=6
+swap=4GB
+
+[experimental]
+autoMemoryReclaim=gradual
+sparseVhd=true
+```
+
+- `memory=4GB` → WSL2 ya no puede comerse el 50% de la RAM (antes hasta ~8 GB).
+- `autoMemoryReclaim=gradual` → devuelve la memoria al sistema cuando Windows la necesita.
+- Para cambiar los límites: editar ese archivo y ejecutar `wsl --shutdown` (no olvidar levantar de nuevo con `docker compose up -d`).
+
+### Nota MinIO (2026-10-18)
+
+Docker Hub quitó acceso a `minio/minio:latest`. El `docker-compose.yml` ahora usa `bitnamilegacy/minio:latest` (misma imagen que ya se venía usando; el volumen `minio_data` conserva los datos).
 
 ---
 
