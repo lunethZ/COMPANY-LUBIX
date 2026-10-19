@@ -26,6 +26,8 @@ build/
 web-build/
 .expo/
 *.local
+test-results/
+playwright-report/
 
 # Local databases and logs
 *.db

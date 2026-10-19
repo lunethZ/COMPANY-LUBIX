@@ -201,14 +201,16 @@ const ProductoDetalle: React.FC = () => {
 
   const handleAddToCart = () => {
     if (!producto) return;
-    void addToCart({
-      id: producto.id,
-      name: producto.name,
-      price: producto.price,
-      image: producto.images?.[0] || "/placeholder.png",
-      stock: producto.stock,
-      quantity,
-    });
+    void addToCart(
+      {
+        id: producto.id,
+        name: producto.name,
+        price: producto.price,
+        image: producto.images?.[0] || "/placeholder.png",
+        stock: producto.stock,
+      },
+      quantity
+    );
     setCartMsg(true);
     setTimeout(() => setCartMsg(false), 1500);
   };
