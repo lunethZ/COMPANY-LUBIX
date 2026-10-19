@@ -347,15 +347,15 @@ export default function BuyerDashboard() {
   </div>
   <div class="card">
     <h2>📍 Direcciones (${addresses.length})</h2>
-    ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map(a=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
+    ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map((a: any)=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
   </div>
   <div class="card">
     <h2>🛒 Pedidos (${orders.length})</h2>
-    ${orders.length ? orders.map(o=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map(i=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
+    ${orders.length ? orders.map((o: any)=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map((i: any)=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
   </div>
   <div class="card">
     <h2>❤️ Favoritos (${favorites.length})</h2>
-    ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map(f=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
+    ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map((f: any)=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
   </div>
   <p class="muted" style="text-align:center;margin-top:24px">Documento generado por Lubix - Tus datos están protegidos</p>
 </body></html>`;
@@ -593,7 +593,7 @@ export default function BuyerDashboard() {
                   {favoriteProducts.slice(0, 3).map((p) => (
                     <div key={p.id} className="rounded-xl overflow-hidden bg-slate-800 hover:bg-slate-700 transition-all group cursor-pointer">
                       <div className="relative">
-                        <img src={p.imagen} alt={p.nombre} className="w-full h-28 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={p.imagen} alt={p.nombre} className="w-full h-28 object-contain bg-slate-800 p-2 group-hover:scale-105 transition-transform duration-300" />
                         <button
                           onClick={() => removeFavorite(String(p.id))}
                           className="absolute top-2 right-2 w-7 h-7 bg-slate-900/80 rounded-full flex items-center justify-center"
@@ -813,7 +813,7 @@ export default function BuyerDashboard() {
                     <div key={p.id} className="rounded-xl overflow-hidden bg-slate-800 hover:shadow-lg hover:shadow-blue-500/10 transition-all group">
                     <div className="relative cursor-pointer" onClick={() => navigate(`/producto/${p.id}`)}>
                       {p.imagen ? (
-                        <img src={p.imagen} alt={p.nombre} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={p.imagen} alt={p.nombre} className="w-full h-44 object-contain bg-slate-800 p-2 group-hover:scale-105 transition-transform duration-300" />
                       ) : (
                         <div className="w-full h-44 bg-slate-700 flex items-center justify-center">
                           <CubeIcon className="w-10 h-10 text-gray-500" />

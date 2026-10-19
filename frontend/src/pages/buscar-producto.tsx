@@ -285,7 +285,7 @@ function BuscarProducto() {
                       <img
                         src={resolveImage(product.images?.[0])}
                         alt={product.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                         onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
                       />
                       {getDiscountLabel(product) && (

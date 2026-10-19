@@ -149,7 +149,7 @@ export default function PerfilEmpresa() {
                     <img
                       src={product.images?.[0] ? resolveImageUrl(product.images[0]) : REFERENCE_IMAGE}
                       alt={product.name}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+                      className="w-full h-48 object-contain bg-slate-800 p-2 group-hover:scale-105 transition-transform duration-300"
                     />
                     {product.discount_enable && (
                       <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded-lg">

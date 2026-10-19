@@ -315,7 +315,7 @@ const ProductoDetalle: React.FC = () => {
               <img
                 src={resolveImage(images[activeImage])}
                 alt={producto.name}
-                className="w-full h-96 object-cover"
+                className="w-full h-96 object-contain bg-slate-100 dark:bg-slate-800 p-4"
                 onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }}
               />
             </div>

@@ -140,7 +140,7 @@ const Home: React.FC = () => {
           className="cursor-pointer"
           onClick={() => navigate(`/producto/${prod.id}`)}
         >
-          <img src={resolveImage(prod.imagen)} alt={prod.nombre} className="w-full h-56 object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
+          <img src={resolveImage(prod.imagen)} alt={prod.nombre} className="w-full h-56 object-contain bg-slate-100 dark:bg-slate-800 p-2" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
         </div>
 
         <div className="p-6 flex-1 flex flex-col">
@@ -217,7 +217,7 @@ const Home: React.FC = () => {
             </div>
           ) : (
             <>
-              <img src={resolveImage(carouselProducts[index].imagen)} alt={carouselProducts[index].nombre} className="w-full h-64 object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
+              <img src={resolveImage(carouselProducts[index].imagen)} alt={carouselProducts[index].nombre} className="w-full h-64 object-contain p-2" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
               <div className="w-full flex-1 flex flex-col items-center justify-center p-6 text-center bg-gradient-to-tr from-emerald-500 to-green-700 text-white">
                 <h2 className="text-xl font-bold mb-1 line-clamp-2">{carouselProducts[index].nombre}</h2>
                 <p className="text-lg font-extrabold mb-2">{formatCOP(carouselProducts[index].precio)}</p>

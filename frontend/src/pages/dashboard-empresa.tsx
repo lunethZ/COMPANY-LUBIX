@@ -82,6 +82,15 @@ interface ProductForm {
   imageUrl: string;
 }
 
+interface ProductImage {
+  id: string;
+  preview: string;
+  file?: File;
+  url?: string;
+}
+
+const MAX_PRODUCT_IMAGES = 5;
+
 interface SellerInfo {
   name: string;
   email: string;
@@ -154,8 +163,8 @@ export default function SellerDashboard() {
   const [bannerSuccess, setBannerSuccess] = useState<boolean | null>(null);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
-  const [imagePreview, setImagePreview] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -397,16 +406,41 @@ export default function SellerDashboard() {
     return `${base}${path.replace("/files/files", "/files")}`;
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setSelectedFile(file);
-    if (file) {
-      const localUrl = URL.createObjectURL(file);
-      setImagePreview(localUrl);
-      setForm((prev) => ({ ...prev, imageUrl: "" }));
-    } else {
-      setImagePreview(form.imageUrl || "");
-    }
+  const handleAddImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setImages((prev) => {
+      const next = [...prev];
+      for (const file of files) {
+        if (next.length >= MAX_PRODUCT_IMAGES) break;
+        next.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          preview: URL.createObjectURL(file),
+          file,
+        });
+      }
+      return next;
+    });
+    e.target.value = "";
+  };
+
+  const handleAddImageUrl = () => {
+    const url = imageUrlInput.trim();
+    if (!url) return;
+    if (images.length >= MAX_PRODUCT_IMAGES) return;
+    setImages((prev) => [
+      ...prev,
+      { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, preview: url, url },
+    ]);
+    setImageUrlInput("");
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setImages((prev) => {
+      const target = prev.find((img) => img.id === id);
+      if (target?.file) URL.revokeObjectURL(target.preview);
+      return prev.filter((img) => img.id !== id);
+    });
   };
 
   const uploadProductImage = async (file: File): Promise<string> => {
@@ -432,10 +466,6 @@ export default function SellerDashboard() {
       return;
     }
     setForm((prev) => ({ ...prev, [field]: value }));
-    if (field === 'imageUrl') {
-      setImagePreview(value);
-      if (value) setSelectedFile(null);
-    }
   };
 
   const handleAddProduct = async () => {
@@ -449,9 +479,14 @@ export default function SellerDashboard() {
 
     try {
       setUploadingImage(true);
-      let finalImage = form.imageUrl.trim();
-      if (selectedFile) {
-        finalImage = await uploadProductImage(selectedFile);
+      const uploadedImages: string[] = [];
+      for (const img of images) {
+        if (img.file) {
+          const url = await uploadProductImage(img.file);
+          if (url) uploadedImages.push(url);
+        } else if (img.url) {
+          uploadedImages.push(img.url);
+        }
       }
       // Peso con unidad kg predeterminada
       const weightWithUnit = form.weight ? `${form.weight} kg` : "";
@@ -467,7 +502,7 @@ export default function SellerDashboard() {
       await api.post("/company/products", {
         name: form.name,
         price: priceNum,
-        images: finalImage ? [finalImage] : [],
+        images: uploadedImages,
         discount_enable: false,
         discount_value: 0,
         stock: stockNum,
@@ -475,9 +510,10 @@ export default function SellerDashboard() {
         technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
         catalog_name: form.category || undefined,
       });
+      images.forEach((img) => img.file && URL.revokeObjectURL(img.preview));
       setForm(EMPTY_FORM);
-      setImagePreview('');
-      setSelectedFile(null);
+      setImages([]);
+      setImageUrlInput('');
       setShowAddModal(false);
       await fetchDashboardData();
     } catch (err) {
@@ -1148,7 +1184,7 @@ export default function SellerDashboard() {
                 Agregar nuevo producto
               </h2>
               <button
-                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
+                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
                 className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -1159,39 +1195,59 @@ export default function SellerDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
+                    Imágenes del producto <span className="text-gray-500 font-normal">({images.length}/{MAX_PRODUCT_IMAGES})</span>
                   </label>
-                  <div className="space-y-3 mb-3">
-                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-green-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
-                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
-                      <span className="truncate">{selectedFile ? selectedFile.name : "Click para seleccionar archivo (JPG, PNG, WEBP)"}</span>
-                      <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="o pega URL https://..."
-                        value={form.imageUrl}
-                        onChange={(e) => handleFormChange('imageUrl', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
-                      />
-                    </div>
-                    {uploadingImage && <p className="text-xs text-green-400 animate-pulse">Subiendo imagen...</p>}
-                  </div>
-                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
-                    {imagePreview ? (
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" onError={() => setImagePreview(REFERENCE_IMAGE)} />
-                    ) : (
-                      <div className="text-center">
-                        <img src={REFERENCE_IMAGE} alt="Referencia" className="w-full h-full object-cover opacity-30" />
-                        <div className="absolute inset-0 flex items-center justify-center flex-col gap-2">
-                          <ArrowUpTrayIcon className="w-8 h-8 text-gray-400" />
-                          <p className="text-gray-400 text-xs">Vista previa</p>
-                        </div>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    {images.map((img, i) => (
+                      <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-slate-700">
+                        <img
+                          src={img.preview}
+                          alt={`Imagen ${i + 1}`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => { (e.target as HTMLImageElement).src = REFERENCE_IMAGE; }}
+                        />
+                        {i === 0 && (
+                          <span className="absolute top-1 left-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">Principal</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(img.id)}
+                          className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-red-500 hover:bg-red-400 text-white rounded-full transition"
+                          title="Quitar imagen"
+                        >
+                          <XMarkIcon className="w-3.5 h-3.5" />
+                        </button>
                       </div>
+                    ))}
+                    {images.length < MAX_PRODUCT_IMAGES && (
+                      <label className="aspect-square rounded-xl border-2 border-dashed border-slate-600 hover:border-green-500 hover:bg-slate-700/50 flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-white cursor-pointer transition text-center px-1">
+                        <PlusIcon className="w-6 h-6" />
+                        <span className="text-[10px] leading-tight">Agregar foto</span>
+                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} />
+                      </label>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">Se guardará en MinIO y se mostrará en la tienda.</p>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="o pega URL https://..."
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddImageUrl(); } }}
+                      disabled={images.length >= MAX_PRODUCT_IMAGES}
+                      className="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      disabled={!imageUrlInput.trim() || images.length >= MAX_PRODUCT_IMAGES}
+                      className="px-3 rounded-lg bg-slate-800 border border-slate-700 text-gray-300 hover:text-white hover:border-green-500 disabled:opacity-40 disabled:cursor-not-allowed transition text-sm"
+                    >
+                      Agregar
+                    </button>
+                  </div>
+                  {uploadingImage && <p className="text-xs text-green-400 animate-pulse">Subiendo imágenes...</p>}
+                  <p className="text-xs text-gray-500">Puedes subir hasta {MAX_PRODUCT_IMAGES} fotos. La primera será la principal. Se guardarán en MinIO.</p>
                 </div>
 
                 <div className="space-y-4">
@@ -1348,7 +1404,7 @@ export default function SellerDashboard() {
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
+                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
                   className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
                 >
                   Cancelar
@@ -1358,7 +1414,7 @@ export default function SellerDashboard() {
                   disabled={!form.name || !form.price || !form.stock || !form.description || !form.category || uploadingImage}
                   className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
                 >
-                  {uploadingImage ? "Subiendo imagen..." : "Publicar producto"}
+                  {uploadingImage ? "Subiendo imágenes..." : "Publicar producto"}
                 </button>
               </div>
             </div>
