@@ -2,6 +2,7 @@
 
 > Plantilla: `bc-implantacion`
 > Criterio de "hecho": existen todas las secciones (aunque estén vacías).
+> Documentos relacionados: [`Ficha_Tecnica.md`](./Ficha_Tecnica.md) · [`Plan_Migracion_v0.md`](./Plan_Migracion_v0.md) · [`Respaldo_v0.md`](./Respaldo_v0.md) · [`Instalacion_v0.md`](./Instalacion_v0.md)
 
 ## Metadatos del documento
 
@@ -56,7 +57,10 @@
 
 > Estrategia y pasos para migrar datos/versiones desde el entorno origen al entorno destino.
 
-<!-- TODO -->
+> La versión inicial del plan se documenta en un archivo independiente:
+> [`Docs/Plan_Migracion_v0.md`](./Plan_Migracion_v0.md).
+
+<!-- Ver Docs/Plan_Migracion_v0.md -->
 
 ### 2.1 Alcance de la migración
 <!-- TODO -->
@@ -79,7 +83,10 @@
 
 > Políticas, herramientas y procedimientos de backup y restauración.
 
-<!-- TODO -->
+> La versión inicial del plan de respaldo se documenta en un archivo independiente:
+> [`Docs/Respaldo_v0.md`](./Respaldo_v0.md).
+
+<!-- Ver Docs/Respaldo_v0.md -->
 
 ### 3.1 Alcance de los respaldos (base de datos, archivos, configuración)
 <!-- TODO -->
@@ -102,7 +109,10 @@
 
 > Guía paso a paso para desplegar e instalar el sistema en cada entorno.
 
-<!-- TODO -->
+> La versión inicial de la guía se documenta en un archivo independiente:
+> [`Docs/Instalacion_v0.md`](./Instalacion_v0.md).
+
+<!-- Ver Docs/Instalacion_v0.md -->
 
 ### 4.1 Entornos (desarrollo, staging, producción)
 <!-- TODO -->
