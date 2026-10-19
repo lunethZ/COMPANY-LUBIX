@@ -56,3 +56,12 @@ Remove placeholder form.tsx component
 Remove debug console.log in new-password.tsx
 Fix orphaned /> in register.tsx
 Add click-outside to close navbar dropdowns
+
+---
+
+## Estado del checklist (2026-10-18)
+
+- [x] form.tsx placeholder → ya no existe en el repo
+- [x] console.log en new-password.tsx → eliminado (también el de `src/api/axios.ts`)
+- [x] `/>` huérfano en register.tsx → corregido en commits previos
+- [x] click-outside en dropdowns → hook `src/hooks/useClickOutside.ts` aplicado en navbaruser, navbar-empresa y navbar-admin
