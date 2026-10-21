@@ -10,7 +10,7 @@ client = Minio(
     "minio:9000",
     access_key=config.MINIO_ROOT_USER,
     secret_key=config.MINIO_ROOT_PASSWORD,
-    secure=False
+    secure=False,
 )
 
 bucket = "uploads"
@@ -88,23 +88,29 @@ class NasService:
             return {"success": False, "message": str(e)}
 
     def download_stream(self, object_name: str):
-
+        response = None
         try:
             response = self.client.get_object(
                 self.bucket,
                 object_name
             )
-
+            data = response.read()
             return StreamingResponse(
-                io.BytesIO(response.read()),
+                io.BytesIO(data),
                 media_type="application/octet-stream",
                 headers={
                     "Content-Disposition": f"attachment; filename={object_name.split('/')[-1]}"
                 }
             )
-
         except S3Error as e:
-            return {"success": False, "message": str(e)}
+            raise
+        finally:
+            if response:
+                try:
+                    response.close()
+                    response.release_conn()
+                except Exception:
+                    pass
 
     def get_presigned_url(self, object_name: str, expires: int = 3600):
 

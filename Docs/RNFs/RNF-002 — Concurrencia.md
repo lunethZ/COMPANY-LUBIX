@@ -1,25 +1,42 @@
-# RF-002 — Inicio de sesión
+# RNF-002 — Concurrencia
 
 ## Identificación
 
 | Campo | Valor |
-|------|------|
-| ID | RF-002 |
-| Nombre | Inicio de sesión |
-| Módulo | Autenticación |
-| Prioridad | Crítica |
-| Estado | Implementado |
+|-------|-------|
+| ID | RNF-002 |
+| Nombre | Concurrencia |
+| Categoría | Scalability |
+| Prioridad | Alta |
+| Estado | Definido |
 
 ---
 
-## Requisitos
+## Descripción
 
-## RF-002.1 — Autenticación de usuario
-El sistema debe permitir iniciar sesión con correo electrónico y contraseña.
+El sistema debe soportar múltiples usuarios simultáneos sin degradación del rendimiento ni bloqueos en la base de datos.
 
-## RF-002.2 — Validación de credenciales
-El sistema debe validar que el usuario exista y la contraseña sea correcta.
+---
 
-## RF-002.3 — Generación de token
-El sistema debe generar un token JWT válido al iniciar sesión exitosamente.
+## Especificación
+
+### Meta principal
+El sistema debe manejar al menos 100 usuarios concurrentes manteniendo los tiempos de respuesta definidos en RNF-001.
+
+### Criterios verificables
+
+| Criterio | Valor objetivo |
+|----------|---------------|
+| Usuarios concurrentes soportados | >= 100 |
+| Pool de conexiones PostgreSQL (SQLAlchemy) | >= 20 conexiones |
+| Tiempo de respuesta bajo carga concurrente | Dentro de umbrales RNF-001 |
+| Errores por concurrencia (5xx) | < 1% bajo carga normal |
+
+### Estrategia de validación
+Pruebas de estrés con Locust simulando incremento progresivo de usuarios. Verificación de comportamiento del connection pool con SQLAlchemy.
+
+### Dependencias
+- SQLAlchemy configurado con pool de conexiones
+- PostgreSQL con configuración de max_connections adecuada
+- FastAPI con workers asíncronos (uvicorn)
 

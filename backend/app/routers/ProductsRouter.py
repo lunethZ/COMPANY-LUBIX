@@ -9,6 +9,8 @@ from app.models.ModelReview import Review
 from app.models.ModelFavorite import Favorite
 from app.models.ModelOrder import Order, OrderItem
 
+import uuid
+
 router = APIRouter(
     prefix="/products",
     tags=["products"]
@@ -51,6 +53,7 @@ def search_products(
     orden: str = Query("relevance", description="Orden de resultados"),
     min: float = Query(0, alias="min", description="Precio minimo"),
     max: float = Query(0, alias="max", description="Precio maximo"),
+    company_id: str = Query("", description="Filtrar por empresa"),
     database: Session = Depends(get_db),
 ):
     query = (
@@ -84,6 +87,13 @@ def search_products(
     if max > 0:
         query = query.filter(Product.price <= max)
 
+    if company_id:
+        try:
+            cid = uuid.UUID(company_id)
+            query = query.filter(Product.company_id == cid)
+        except ValueError:
+            pass
+
     if orden == "price_asc":
         query = query.order_by(Product.price.asc())
     elif orden == "price_desc":
@@ -115,7 +125,7 @@ def search_products(
             "discount_enable": product.discount_enable,
             "discount_value": float(product.discount_value),
             "company_id": str(company.id),
-            "company_name": user.fullName,
+            "company_name": company.nameCompany,
             "technical_spec": product.technical_spec,
             "catalog_name": catalog_name,
             "avg_rating": round(avg_rating, 1),
@@ -156,7 +166,7 @@ def get_product(product_id: str, database: Session = Depends(get_db)):
         "discount_enable": product.discount_enable,
         "discount_value": float(product.discount_value),
         "company_id": str(company.id),
-        "company_name": user.fullName,
+        "company_name": company.nameCompany,
         "technical_spec": product.technical_spec,
         "catalog_id": str(product.catalog_id) if product.catalog_id else None,
         "catalog_name": catalog_name,
@@ -288,10 +298,62 @@ def get_related_products(product_id: str, database: Session = Depends(get_db)):
             "stock": p.stock,
             "discount_enable": p.discount_enable,
             "discount_value": float(p.discount_value),
-            "company_name": user.fullName,
+            "company_name": company.nameCompany,
             "catalog_name": catalog_name,
             "avg_rating": round(avg_rating, 1),
             "review_count": review_count,
         })
 
     return {"products": products}
+
+
+@router.get("/company/{company_id}/profile")
+def get_company_profile(company_id: str, database: Session = Depends(get_db)):
+    try:
+        cid = uuid.UUID(company_id)
+    except ValueError:
+        raise HTTPException(status_code=400, detail="ID de empresa inválido")
+
+    company = database.query(Company).filter(Company.id == cid).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+
+    user = database.query(Users).filter(Users.id == company.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+
+    total_sales = database.query(func.count(Order.id)).join(
+        OrderItem, OrderItem.order_id == Order.id
+    ).join(
+        Product, OrderItem.product_id == Product.id
+    ).filter(
+        Product.company_id == cid,
+        Order.status.in_(["delivered", "completed"])
+    ).scalar() or 0
+
+    avg_rating_result = database.query(func.avg(Review.rating)).join(
+        Product, Review.product_id == Product.id
+    ).filter(Product.company_id == cid).scalar()
+    avg_rating = round(float(avg_rating_result), 1) if avg_rating_result else 0
+
+    total_reviews = database.query(func.count(Review.id)).join(
+        Product, Review.product_id == Product.id
+    ).filter(Product.company_id == cid).scalar() or 0
+
+    total_products = database.query(func.count(Product.id)).filter(
+        Product.company_id == cid,
+        Product.status == "active"
+    ).scalar() or 0
+
+    return {
+        "id": str(company.id),
+        "name": company.nameCompany,
+        "address": company.addressCompany,
+        "logo": company.CompanyLogo,
+        "banner": company.CompanyBanner,
+        "member_at": user.created_at,
+        "total_sales": total_sales,
+        "avg_rating": avg_rating,
+        "total_reviews": total_reviews,
+        "total_products": total_products,
+    }

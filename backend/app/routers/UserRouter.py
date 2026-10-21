@@ -11,7 +11,8 @@ from app.schemas.SchemaUser import (
     ChangePasswordRequest,
     CreateAddressRequest,
     UpdateAddressRequest,
-    CreateOrderRequest
+    CreateOrderRequest,
+    OrderItemRequest
 )
 from app.utils.Security import hash_password, verify_password
 
@@ -310,66 +311,93 @@ def _order_to_dict(order: Order):
         ]
     }
 
-@router.post("/orders")
-def create_order(request: Request, data: CreateOrderRequest, database: Session = Depends(get_db)):
-    user = database.query(Users).filter(Users.id == request.state.user_id).first()
-
-    if not user:
+def _obtener_comprador_autenticado(database: Session, comprador_id: str) -> Users:
+    comprador = database.query(Users).filter(Users.id == comprador_id).first()
+    if not comprador:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    return comprador
 
-    if not data.items:
+
+def _validar_items_del_pedido(items_solicitados: list[OrderItemRequest]) -> None:
+    if not items_solicitados:
         raise HTTPException(status_code=400, detail="El pedido debe tener al menos un producto")
 
-    for item in data.items:
-        if item.product_id:
-            product = database.query(Product).filter(Product.id == item.product_id).first()
-            if not product:
-                raise HTTPException(status_code=404, detail=f"Producto {item.product_id} no encontrado")
-            if product.stock < item.quantity:
-                raise HTTPException(status_code=400, detail=f"Stock insuficiente para '{product.name}'. Disponible: {product.stock}")
 
+def _verificar_disponibilidad_de_stock(database: Session, items_solicitados: list[OrderItemRequest]) -> dict:
+    productos_por_id = {}
+    for item_pedido in items_solicitados:
+        if not item_pedido.product_id:
+            continue
+        producto = database.query(Product).filter(Product.id == item_pedido.product_id).first()
+        if not producto:
+            raise HTTPException(status_code=404, detail=f"Producto {item_pedido.product_id} no encontrado")
+        if producto.stock < item_pedido.quantity:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Stock insuficiente para '{producto.name}'. Disponible: {producto.stock}",
+            )
+        productos_por_id[item_pedido.product_id] = producto
+    return productos_por_id
+
+
+def _construir_pedido(comprador_id: str, datos_pedido: CreateOrderRequest) -> Order:
+    pedido = Order(
+        user_id=comprador_id,
+        status="pending",
+        subtotal=datos_pedido.subtotal,
+        discount=datos_pedido.discount,
+        shipping=datos_pedido.shipping,
+        total=datos_pedido.total,
+        payment_method=datos_pedido.payment_method,
+        recipient=datos_pedido.recipient,
+        address=datos_pedido.address,
+        city=datos_pedido.city,
+        department=datos_pedido.department,
+        postal_code=datos_pedido.postal_code,
+    )
+    for item_pedido in datos_pedido.items:
+        pedido.items.append(OrderItem(
+            name=item_pedido.name,
+            price=item_pedido.price,
+            quantity=item_pedido.quantity,
+            product_id=item_pedido.product_id,
+        ))
+    return pedido
+
+
+def _descontar_stock_de_productos(productos_por_id: dict, items_solicitados: list[OrderItemRequest]) -> None:
+    for item_pedido in items_solicitados:
+        producto = productos_por_id.get(item_pedido.product_id)
+        if producto:
+            producto.stock -= item_pedido.quantity
+
+
+def _guardar_pedido(database: Session, pedido: Order) -> None:
     try:
-        new_order = Order(
-            user_id=user.id,
-            status="pending",
-            subtotal=data.subtotal,
-            discount=data.discount,
-            shipping=data.shipping,
-            total=data.total,
-            payment_method=data.payment_method,
-            recipient=data.recipient,
-            address=data.address,
-            city=data.city,
-            department=data.department,
-            postal_code=data.postal_code
-        )
-
-        for item in data.items:
-            new_order.items.append(OrderItem(
-                name=item.name,
-                price=item.price,
-                quantity=item.quantity,
-                product_id=item.product_id
-            ))
-
-        for item in data.items:
-            if item.product_id:
-                product = database.query(Product).filter(Product.id == item.product_id).first()
-                if product:
-                    product.stock -= item.quantity
-
-        database.add(new_order)
+        database.add(pedido)
         database.commit()
-        database.refresh(new_order)
+        database.refresh(pedido)
     except Exception as e:
         database.rollback()
         print("ERROR:", e)
         raise HTTPException(status_code=500, detail="Error al crear el pedido")
 
+
+@router.post("/orders")
+def create_order(request: Request, datos_pedido: CreateOrderRequest, database: Session = Depends(get_db)):
+    comprador = _obtener_comprador_autenticado(database, request.state.user_id)
+
+    _validar_items_del_pedido(datos_pedido.items)
+    productos_por_id = _verificar_disponibilidad_de_stock(database, datos_pedido.items)
+
+    pedido = _construir_pedido(comprador.id, datos_pedido)
+    _descontar_stock_de_productos(productos_por_id, datos_pedido.items)
+    _guardar_pedido(database, pedido)
+
     return {
         "message": "Pedido creado correctamente",
-        "id": str(new_order.id),
-        "status": new_order.status
+        "id": str(pedido.id),
+        "status": pedido.status,
     }
 
 @router.get("/orders")

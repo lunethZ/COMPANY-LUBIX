@@ -1,24 +1,42 @@
-# RF-004 — Restablecimiento de contraseña
+# RNF-004 — Encriptación de contraseñas
 
 ## Identificación
 
 | Campo | Valor |
-|------|------|
-| ID | RF-004 |
-| Nombre | Restablecimiento de contraseña |
-| Módulo | Autenticación |
+|-------|-------|
+| ID | RNF-004 |
+| Nombre | Encriptación de contraseñas |
+| Categoría | Security |
 | Prioridad | Alta |
-| Estado | Implementado |
+| Estado | Definido |
 
 ---
 
-## Requisitos
+## Descripción
 
-## RF-004.1 — Nueva contraseña
-El sistema debe permitir establecer una nueva contraseña mediante enlace válido.
+Todas las contraseñas de usuarios deben ser encriptadas usando algoritmos de hashing robustos antes de almacenarse en la base de datos.
 
-## RF-004.2 — Validación de seguridad
-La nueva contraseña debe cumplir reglas de seguridad definidas.
+---
 
-## RF-004.3 — Invalidación de token
-El token de recuperación debe ser invalidado después de su uso.
+## Especificación
+
+### Meta principal
+Garantizar que ninguna contraseña sea almacenada en texto plano y que el proceso de hashing sea resistente a ataques de fuerza bruta.
+
+### Criterios verificables
+
+| Criterio | Valor objetivo |
+|----------|---------------|
+| Algoritmo de hashing | bcrypt |
+| Salt rounds | >= 12 |
+| Contraseñas en texto plano en BD | 0 (prohibido) |
+| Tokens de reset de contraseña | Hash con expiración |
+| Validación de complejidad de contraseña | Minimo 8 caracteres, mayúscula, minúscula, número |
+
+### Estrategia de validación
+Auditoría directa de la tabla de usuarios verificando que todos los hashes correspondan a bcrypt. Pruebas unitarias del módulo de hashing.
+
+### Dependencias
+- Biblioteca bcrypt (passlib o equivalente)
+- Política de contraseñas definida en el backend
+- Tokens de recuperación con hash almacenado

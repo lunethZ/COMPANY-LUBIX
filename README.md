@@ -1,4 +1,4 @@
-# 🏢 LUBIX - Plataforma de Gestión Empresarial
+﻿# 🏢 LUBIX - Plataforma de Gestión Empresarial
 
 **Solución integral de gestión de usuarios, empresas y productos**
 
@@ -261,20 +261,24 @@ LUBIX-COMPANY/
 │
 └── 📁 Docs/                              # Documentación del proyecto
     ├── 📁 HUs/                           # Historias de Usuario
+    │   ├── 📁 Administración/
     │   ├── 📁 Autenticación/
     │   ├── 📁 Carrito De Compras/
     │   ├── 📁 Catalogo/
     │   ├── 📁 Pedidos/
     │   ├── 📁 Perfil de Usuario/
-    │   └── 📁 Productos/
+    │   ├── 📁 Productos/
+    │   └── 📁 Soporte/
     │
     ├── 📁 RFs/                           # Requisitos Funcionales
+    │   ├── 📁 Administración/
     │   ├── 📁 Autenticación/
     │   ├── 📁 Carrito de Compras/
     │   ├── 📁 Catalogo/
     │   ├── 📁 Pedidos/
     │   ├── 📁 Perfil de Usuario/
-    │   └── 📁 Productos/
+    │   ├── 📁 Productos/
+    │   └── 📁 Soporte/
     │
     └── 📁 RNFs/                          # Requisitos No Funcionales
         ├── RNF-001 — Tiempo de respuesta.md
@@ -707,43 +711,3 @@ Para reportar bugs o solicitar features, abra un issue en el repositorio.
 ## 📄 Licencia
 
 Este proyecto es propiedad de LUBIX-COMPANY. Todos los derechos reservados.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

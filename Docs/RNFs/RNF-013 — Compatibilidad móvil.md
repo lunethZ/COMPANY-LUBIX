@@ -1,18 +1,43 @@
-# RF-013 — Cambiar foto de perfil
+# RNF-013 — Compatibilidad móvil
 
 ## Identificación
 
 | Campo | Valor |
-|------|------|
-| ID | RF-013 |
-| Nombre | Foto de perfil |
-| Módulo | Perfil |
-| Prioridad | Baja |
-| Estado | Implementado |
+|-------|-------|
+| ID | RNF-013 |
+| Nombre | Compatibilidad móvil |
+| Categoría | Portabilidad |
+| Prioridad | Alta |
+| Estado | Definido |
 
 ---
 
-## Requisitos
+## Descripción
 
-## RF-013.1 — Subida de imagen
-El sistema debe permitir subir y actualizar la foto de perfil.
+La plataforma debe estar disponible como aplicación nativa para iOS y Android utilizando React Native/Expo, manteniendo compatibilidad API con el cliente web y ofreciendo la web como alternativa responsive.
+
+---
+
+## Especificación
+
+### Meta principal
+Los usuarios deben poder acceder a todas las funcionalidades principales desde dispositivos móviles nativos y desde el navegador del dispositivo.
+
+### Criterios verificables
+
+| Criterio | Valor objetivo |
+|----------|---------------|
+| Plataforma móvil | React Native con Expo |
+| iOS | Compatible con iOS 13 o superior |
+| Android | Compatible con Android 8 (API 26) o superior |
+| API compartida | Mismos endpoints para web y móvil |
+| Web responsive | Funcionalidad completa como fallback |
+| UI táctil | Componentes optimizados para interacción táctil |
+
+### Estrategia de validación
+Compilar y ejecutar la app en dispositivos iOS y Android reales o emuladores. Ejecutar pruebas de API desde ambos clientes. Verificar que la web responsive cubre todas las funcionalidades en pantallas pequeñas.
+
+### Dependencias
+- Entorno de desarrollo React Native/Expo configurado
+- API REST compatible con múltiples clientes
+- Dispositivos o emuladores para pruebas
