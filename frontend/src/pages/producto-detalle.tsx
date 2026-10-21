@@ -207,13 +207,16 @@ const ProductoDetalle: React.FC = () => {
       openLogin();
       return;
     }
-    void addToCart({
-      id: producto.id,
-      name: producto.name,
-      price: producto.price,
-      image: producto.images?.[0] || "/placeholder.png",
-      stock: producto.stock,
-    });
+    void addToCart(
+      {
+        id: producto.id,
+        name: producto.name,
+        price: producto.price,
+        image: producto.images?.[0] || "/placeholder.png",
+        stock: producto.stock,
+      },
+      quantity
+    );
     setCartMsg(true);
     setTimeout(() => setCartMsg(false), 1500);
   };

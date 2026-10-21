@@ -54,4 +54,14 @@ dependencies = [
 [dependency-groups]
 dev = [
     "pip-audit>=2.10.0",
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
 ]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--cov=app --cov-report=term-missing"
+
+[tool.coverage.report]
+include_namespace_packages = true

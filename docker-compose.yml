@@ -1,6 +1,6 @@
 services:
   minio:
-    image: minio/minio:latest
+    image: bitnamilegacy/minio:latest
     restart: always
     env_file:
       - .env
