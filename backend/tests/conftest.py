@@ -1,10 +1,11 @@
-# Configura el entorno ANTES de importar cualquier módulo de app:
-# app.Config hace int(os.getenv(...)) en import y app.database.Connection
-# crea el engine de SQLAlchemy. Los tests nunca tocan una BD real.
 import os
+import sys
 import uuid
 from types import SimpleNamespace
+from unittest.mock import MagicMock, patch
+import pytest
 
+# 1. Configura el entorno ANTES de importar cualquier módulo de app
 os.environ["URL_DATABASE"] = "sqlite:///:memory:"
 os.environ.setdefault("SECRET_KEY", "lubix-test-secret")
 os.environ.setdefault("ALGORITHM", "HS256")
@@ -14,8 +15,7 @@ os.environ.setdefault("GMAIL_USERNAME", "tests@lubix.test")
 os.environ.setdefault("GMAIL_APP_PASSWORD", "dummy")
 os.environ.setdefault("URL_FRONTEND", "http://localhost:5173")
 
-import pytest
-
+# 2. Imports de la app (después de configurar las variables de entorno)
 from app.models.ModelCompany import Company
 from app.models.ModelRefreshToken import RefreshToken
 from app.models.ModelRole import Role
@@ -24,7 +24,33 @@ from app.services.authentication import AuthService
 
 MODEL_KEYS = {"Users": Users, "Role": Role, "Company": Company, "RefreshToken": RefreshToken}
 
+# 3. Configuración de Minio (de tu feature branch)
+_minio_patcher = None
 
+def pytest_configure(config):
+    global _minio_patcher
+    
+    mock_minio = MagicMock()
+    mock_minio.Minio = MagicMock()
+    mock_minio.Minio.bucket_exists = MagicMock(return_value=True)
+    mock_minio.Minio.make_bucket = MagicMock()
+    mock_minio.Minio.put_object = MagicMock(return_value=None)
+    mock_minio.Minio.get_object = MagicMock(return_value=MagicMock(read=MagicMock(return_value=b"data")))
+    mock_minio.Minio.presigned_get_object = MagicMock(return_value="https://presigned.url")
+    mock_minio.Minio.remove_object = MagicMock(return_value=None)
+    
+    mock_minio.error = MagicMock()
+    mock_minio.error.S3Error = type("S3Error", (Exception,), {})
+    
+    if "minio" in sys.modules:
+        del sys.modules["minio"]
+    if "minio.error" in sys.modules:
+        del sys.modules["minio.error"]
+    
+    sys.modules["minio"] = mock_minio
+    sys.modules["minio.error"] = mock_minio.error
+
+# 4. Clases y Fixtures de Develop
 class FakeQuery:
     """Doble encadenable de Query: filter() es no-op y first() lee de las filas del FakeDB."""
 

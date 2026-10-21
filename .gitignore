@@ -17,6 +17,9 @@ htmlcov/
 coverage.xml
 .mypy_cache/
 .ruff_cache/
+.coverage
+backend/.coverage
+opencode.jsonc
 
 # Node, Vite, Expo and package-manager output
 node_modules/
