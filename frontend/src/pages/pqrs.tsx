@@ -69,6 +69,8 @@ export default function PQRSPage() {
     description: '',
   });
 
+  const [errors, setErrors] = useState<{ subject?: string; description?: string }>({});
+
   const isDeleteRequest = searchParams.get('type') === 'eliminacion';
 
   useEffect(() => {
@@ -88,7 +90,15 @@ export default function PQRSPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.subject.trim() || !form.description.trim()) return;
+
+    const nextErrors: { subject?: string; description?: string } = {};
+    if (!form.subject.trim()) nextErrors.subject = 'El asunto es obligatorio';
+    if (!form.description.trim()) nextErrors.description = 'La descripción es obligatoria';
+    if (Object.values(nextErrors).some(Boolean)) {
+      setErrors(nextErrors);
+      return;
+    }
+    setErrors({});
 
     setSending(true);
     try {
@@ -100,6 +110,7 @@ export default function PQRSPage() {
       setMessage('Tu solicitud ha sido enviada correctamente. El administrador la revisará pronto.');
       setMessageType('success');
       setForm({ type: 'queja', subject: '', description: '' });
+      setErrors({});
       setShowForm(false);
       loadPQRS();
       setTimeout(() => { setMessage(''); setMessageType(''); }, 4000);
@@ -231,11 +242,18 @@ export default function PQRSPage() {
                 <input
                   type="text"
                   value={form.subject}
-                  onChange={(e) => setForm(prev => ({ ...prev, subject: e.target.value }))}
+                  onChange={(e) => {
+                    setForm(prev => ({ ...prev, subject: e.target.value }));
+                    if (e.target.value.trim()) setErrors(prev => ({ ...prev, subject: undefined }));
+                  }}
                   placeholder="Breve descripción del motivo"
                   disabled={isDeleteRequest}
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500 placeholder-gray-500 disabled:opacity-50"
+                  aria-invalid={!!errors.subject}
+                  className={`w-full px-4 py-2.5 bg-slate-800 border rounded-lg text-white text-sm focus:outline-none placeholder-gray-500 disabled:opacity-50 ${errors.subject ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
                 />
+                {errors.subject && (
+                  <span className="block text-red-500 text-sm mt-1">{errors.subject}</span>
+                )}
               </div>
 
               <div>
@@ -245,13 +263,20 @@ export default function PQRSPage() {
                 <textarea
                   rows={5}
                   value={form.description}
-                  onChange={(e) => setForm(prev => ({ ...prev, description: e.target.value }))}
+                  onChange={(e) => {
+                    setForm(prev => ({ ...prev, description: e.target.value }));
+                    if (e.target.value.trim()) setErrors(prev => ({ ...prev, description: undefined }));
+                  }}
                   placeholder={isDeleteRequest
                     ? 'Explica el motivo por el cual deseas eliminar tu cuenta...'
                     : 'Describe tu petición, queja, reclamo o sugerencia en detalle...'
                   }
-                  className="w-full px-4 py-2.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-sm focus:outline-none focus:border-green-500 placeholder-gray-500 resize-none"
+                  aria-invalid={!!errors.description}
+                  className={`w-full px-4 py-2.5 bg-slate-800 border rounded-lg text-white text-sm focus:outline-none placeholder-gray-500 resize-none ${errors.description ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
                 />
+                {errors.description && (
+                  <span className="block text-red-500 text-sm mt-1">{errors.description}</span>
+                )}
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -264,7 +289,7 @@ export default function PQRSPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={sending || !form.subject.trim() || !form.description.trim()}
+                  disabled={sending}
                   className="flex-1 py-2.5 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                 >
                   {sending ? (
