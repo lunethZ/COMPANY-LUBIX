@@ -5,6 +5,7 @@ import axios from "axios";
 import type { LoginRequest, LoginResponse } from "../types/auts";
 import { useAuth } from "../context/AuthContext";
 import { errorDetailMessage } from "../utils/errors";
+import { rules, validateField } from "../utils/validators";
 import { ArrowLeftIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Login: React.FC = () => {
@@ -19,7 +20,7 @@ const Login: React.FC = () => {
   const navigate = useNavigate();
   const { login, isAuthenticated, user } = useAuth();
 
-  // Si ya está autenticado, redirigir y evitar que el botón volver deje ver el login
+  // Si ya estÃ¡ autenticado, redirigir y evitar que el botÃ³n volver deje ver el login
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.role_id === "empresa") navigate("/dashboard-empresa", { replace: true });
@@ -40,8 +41,21 @@ const Login: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!email.trim() || !password) {
-      showMessage("Completa todos los campos", "error");
+    const emailValidation = validateField(email, [
+      rules.required("El correo es obligatorio"),
+      rules.email(),
+    ]);
+    if (!emailValidation.valid) {
+      showMessage(emailValidation.message, "error");
+      return;
+    }
+
+    const passwordValidation = validateField(
+      password,
+      rules.required("La contraseÃ±a es obligatoria"),
+    );
+    if (!passwordValidation.valid) {
+      showMessage(passwordValidation.message, "error");
       return;
     }
 
@@ -50,13 +64,13 @@ const Login: React.FC = () => {
     try {
       const payload: LoginRequest = { email: email.trim(), password };
       
-      // Seleccionar el endpoint según el tipo de usuario
+      // Seleccionar el endpoint segÃºn el tipo de usuario
       const endpoint = userType === "company" ? "/auth/login-company" : "/auth/login-user";
       const response = await api.post<LoginResponse>(endpoint, payload);
 
       const data = response.data;
 
-      // Si el usuario no está verificado, el backend retorna 200 con solo message (sin token)
+      // Si el usuario no estÃ¡ verificado, el backend retorna 200 con solo message (sin token)
       if (!data.access_token) {
         showMessage(data.message || "Tu correo no ha sido verificado. Revisa tu bandeja de entrada.", "error");
         setTimeout(() => navigate("/register/VerifyEmailPage", { state: { email: email.trim() } }), 2000);
@@ -70,14 +84,14 @@ const Login: React.FC = () => {
       // Interfaz de Usuario
       const mappedRole = data.role === "company" ? "empresa" : data.role === "admin" ? "admin" : "user";
 
-      // Validar que el rol coincida con la selección del usuario
+      // Validar que el rol coincida con la selecciÃ³n del usuario
       if (userType === "user" && mappedRole === "empresa") {
-        showMessage("Esta cuenta es de tipo empresa. Selecciona 'Empresa' para iniciar sesión.", "error");
+        showMessage("Esta cuenta es de tipo empresa. Selecciona 'Empresa' para iniciar sesiÃ³n.", "error");
         setLoading(false);
         return;
       }
       if (userType === "company" && mappedRole === "user") {
-        showMessage("Esta cuenta es de tipo usuario. Selecciona 'Usuario' para iniciar sesión.", "error");
+        showMessage("Esta cuenta es de tipo usuario. Selecciona 'Usuario' para iniciar sesiÃ³n.", "error");
         setLoading(false);
         return;
       }
@@ -91,9 +105,9 @@ const Login: React.FC = () => {
 
       api.defaults.headers.common["Authorization"] = `Bearer ${data.access_token}`;
 
-      showMessage(`¡Bienvenido ${data.Nombre}!`, "success");
+      showMessage(`Â¡Bienvenido ${data.Nombre}!`, "success");
 
-      // Redirigir según el tipo de usuario (replace evita que volver regrese al login con sesión abierta)
+      // Redirigir segÃºn el tipo de usuario (replace evita que volver regrese al login con sesiÃ³n abierta)
       if (mappedRole === "empresa") {
         setTimeout(() => navigate("/dashboard-empresa", { replace: true }), 1000);
       } else if (mappedRole === "admin") {
@@ -115,26 +129,26 @@ const Login: React.FC = () => {
           }
         }
 
-        // Mostrar mensajes más específicos según el tipo de error
+        // Mostrar mensajes mÃ¡s especÃ­ficos segÃºn el tipo de error
         if (error.response?.status === 400) {
-          if (errorMsg.includes("Correo o contraseña")) {
-            errorMsg = "El correo o la contraseña son incorrectos. Verifica tus datos.";
-          } else if (errorMsg.includes("Contraseña incorrecta")) {
-            errorMsg = "La contraseña es incorrecta. Intenta de nuevo.";
+          if (errorMsg.includes("Correo o contraseÃ±a")) {
+            errorMsg = "El correo o la contraseÃ±a son incorrectos. Verifica tus datos.";
+          } else if (errorMsg.includes("ContraseÃ±a incorrecta")) {
+            errorMsg = "La contraseÃ±a es incorrecta. Intenta de nuevo.";
           }
         } else if (error.response?.status === 403) {
           if (errorMsg.includes("empresa")) {
-            errorMsg = "Esta cuenta es de tipo empresa. Cambia a la pestaña de Empresa para iniciar sesión.";
+            errorMsg = "Esta cuenta es de tipo empresa. Cambia a la pestaÃ±a de Empresa para iniciar sesiÃ³n.";
           } else {
-            errorMsg = "Esta cuenta es de tipo usuario. Cambia a la pestaña de Usuario para iniciar sesión.";
+            errorMsg = "Esta cuenta es de tipo usuario. Cambia a la pestaÃ±a de Usuario para iniciar sesiÃ³n.";
           }
         } else if (error.response?.status === 500) {
-          errorMsg = "Error del servidor. Intenta de nuevo más tarde.";
+          errorMsg = "Error del servidor. Intenta de nuevo mÃ¡s tarde.";
         }
 
         showMessage(errorMsg, "error");
       } else {
-        showMessage("Error de conexión. Verifica tu internet e intenta de nuevo.", "error");
+        showMessage("Error de conexiÃ³n. Verifica tu internet e intenta de nuevo.", "error");
       }
     } finally {
       setLoading(false);
@@ -170,7 +184,7 @@ const Login: React.FC = () => {
               Lubix
             </h1>
             <p className="text-muted text-xs sm:text-sm font-light tracking-wide">
-              Inicia sesión
+              Inicia sesiÃ³n
             </p>
           </div>
 
@@ -214,14 +228,14 @@ const Login: React.FC = () => {
             </div>
 
             <div className="mb-4 sm:mb-5">
-              <label className="label-base">Contraseña</label>
+              <label className="label-base">ContraseÃ±a</label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="input-base pr-10"
-                  placeholder="••••••••"
+                  placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
                   disabled={loading}
                 />
                 <button
@@ -246,24 +260,24 @@ const Login: React.FC = () => {
                   Iniciando...
                 </>
               ) : (
-                "Iniciar Sesión"
+                "Iniciar SesiÃ³n"
               )}
             </button>
 
             <div className="pt-4 divider text-center">
               <p className="text-muted text-xs sm:text-sm">
-                ¿No tienes cuenta?{" "}
+                Â¿No tienes cuenta?{" "}
                 <Link
                   to="/register"
                   className="text-accent hover:underline font-semibold text-xs sm:text-sm transition-colors"
                 >
-                  Regístrate
+                  RegÃ­strate
                 </Link>
               </p>
             </div>
             <div className="pt-4 divider text-center">
               <p className="text-muted text-xs sm:text-sm">
-                ¿Olvidaste tu contraseña?{" "}
+                Â¿Olvidaste tu contraseÃ±a?{" "}
                 <Link
                   to="/recover"
                   className="text-accent hover:underline font-semibold text-xs sm:text-sm transition-colors"
