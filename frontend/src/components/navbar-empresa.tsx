@@ -2,13 +2,17 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
 import { UserCircleIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 export default function NavbarEmpresa() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  useClickOutside(menuRef, closeMenu, menuOpen);
 
   const handleLogout = () => {
     logout();
@@ -58,7 +62,7 @@ export default function NavbarEmpresa() {
         </Link>
 
         {user && (
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 border-l border-gray-600 pl-4"

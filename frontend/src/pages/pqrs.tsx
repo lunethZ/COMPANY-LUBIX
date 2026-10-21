@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import NavbarAuto from '../components/navbar-auto';
 import Footer from '../components/footer';
 import api from '../api/axios';
@@ -66,7 +65,6 @@ const pqrsRules = {
 };
 
 export default function PQRSPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -76,7 +74,6 @@ export default function PQRSPage() {
   const [sending, setSending] = useState(false);
   const [message, setMessage] = useState('');
   const [messageType, setMessageType] = useState<'success' | 'error' | ''>('');
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   const [form, setForm] = useState({
     type: searchParams.get('type') || 'queja',
@@ -84,28 +81,30 @@ export default function PQRSPage() {
     description: '',
   });
 
+  const [errors, setErrors] = useState<{ subject?: string; description?: string }>({});
+
   const isDeleteRequest = searchParams.get('type') === 'eliminacion';
+
+  const loadPQRS = useCallback(
+    () => api.get('/pqrs')
+      .then((res) => setPqrsList(res.data || []))
+      .catch((err: unknown) => console.error('Error loading PQRS:', err))
+      .finally(() => setLoading(false)),
+    [],
+  );
 
   useEffect(() => {
     loadPQRS();
-  }, []);
-
-  const loadPQRS = async () => {
-    try {
-      const res = await api.get('/pqrs');
-      setPqrsList(res.data || []);
-    } catch (err) {
-      console.error('Error loading PQRS:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [loadPQRS]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const validation = validateForm(form, pqrsRules);
-    setFieldErrors(validation.errors as Record<string, string>);
+    setErrors({
+      subject: validation.errors.subject,
+      description: validation.errors.description,
+    });
 
     if (!validation.valid) {
       setMessage(validation.firstError?.message ?? 'Revisa los campos del formulario');
@@ -123,12 +122,12 @@ export default function PQRSPage() {
       });
       setMessage('Tu solicitud ha sido enviada correctamente. El administrador la revisarÃ¡ pronto.');
       setMessageType('success');
-      setFieldErrors({});
       setForm({ type: 'queja', subject: '', description: '' });
+      setErrors({});
       setShowForm(false);
       loadPQRS();
       setTimeout(() => { setMessage(''); setMessageType(''); }, 4000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setMessage(errorDetailMessage(err, 'Error al enviar la solicitud'));
       setMessageType('error');
       setTimeout(() => { setMessage(''); setMessageType(''); }, 3000);
@@ -260,13 +259,16 @@ export default function PQRSPage() {
                   value={form.subject}
                   onChange={(e) => {
                     setForm(prev => ({ ...prev, subject: e.target.value }));
-                    if (fieldErrors.subject) setFieldErrors({});
+                    if (e.target.value.trim()) setErrors(prev => ({ ...prev, subject: undefined }));
                   }}
-                  placeholder="Breve descripciÃ³n del motivo"
+                  placeholder="Breve descripción del motivo"
                   disabled={isDeleteRequest}
-                  className="input-base disabled:opacity-50"
+                  aria-invalid={!!errors.subject}
+                  className={`input-base disabled:opacity-50 ${errors.subject ? 'border-red-500 focus:border-red-500' : ''}`}
                 />
-                {fieldErrors.subject && <p className="text-xs text-red-400 mt-1">{fieldErrors.subject}</p>}
+                {errors.subject && (
+                  <span className="block text-red-500 text-sm mt-1">{errors.subject}</span>
+                )}
               </div>
 
               <div>
@@ -278,15 +280,18 @@ export default function PQRSPage() {
                   value={form.description}
                   onChange={(e) => {
                     setForm(prev => ({ ...prev, description: e.target.value }));
-                    if (fieldErrors.description) setFieldErrors({});
+                    if (e.target.value.trim()) setErrors(prev => ({ ...prev, description: undefined }));
                   }}
                   placeholder={isDeleteRequest
                     ? 'Explica el motivo por el cual deseas eliminar tu cuenta...'
                     : 'Describe tu peticiÃ³n, queja, reclamo o sugerencia en detalle...'
                   }
-                  className="input-base resize-none"
+                  aria-invalid={!!errors.description}
+                  className={`input-base resize-none ${errors.description ? 'border-red-500 focus:border-red-500' : ''}`}
                 />
-                {fieldErrors.description && <p className="text-xs text-red-400 mt-1">{fieldErrors.description}</p>}
+                {errors.description && (
+                  <span className="block text-red-500 text-sm mt-1">{errors.description}</span>
+                )}
               </div>
 
               <div className="flex gap-3 pt-2">
@@ -300,7 +305,7 @@ export default function PQRSPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={sending || !validateForm(form, pqrsRules).valid}
+                  disabled={sending}
                   className="flex-1 py-2.5 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                 >
                   {sending ? (

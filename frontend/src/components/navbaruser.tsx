@@ -4,7 +4,8 @@ import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import { UserCircleIcon, ShoppingCartIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 export default function NavbarUsuario() {
   const { user, logout } = useAuth();
@@ -14,6 +15,9 @@ export default function NavbarUsuario() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  useClickOutside(menuRef, closeMenu, menuOpen);
 
   const resolveFileUrl = (path?: string | null) => {
     if (!path) return "";
@@ -106,7 +110,7 @@ export default function NavbarUsuario() {
         </Link>
 
         {user && (
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 border-l border-gray-600 pl-4"
