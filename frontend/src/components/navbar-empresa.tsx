@@ -1,22 +1,18 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { UserCircleIcon, ChartBarIcon, ShoppingBagIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
-import { useState } from "react";
+import { UserCircleIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
+import { useState, useRef, useCallback } from "react";
+import { useClickOutside } from "../hooks/useClickOutside";
 
 export default function NavbarEmpresa() {
   const { user, logout } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState("");
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchValue.trim()) {
-      navigate(`/buscar?q=${encodeURIComponent(searchValue.trim())}`);
-    }
-  };
+  const menuRef = useRef<HTMLDivElement>(null);
+  const closeMenu = useCallback(() => setMenuOpen(false), []);
+  useClickOutside(menuRef, closeMenu, menuOpen);
 
   const handleLogout = () => {
     logout();
@@ -25,22 +21,9 @@ export default function NavbarEmpresa() {
 
   return (
     <div className="flex items-center justify-between px-6 py-4 bg-[#162238] w-full">
-      <Link to="/home-empresa" className="text-green-500 text-2xl font-bold hover:text-green-400 transition">
+      <Link to="/dashboard-empresa" className="text-green-500 text-2xl font-bold hover:text-green-400 transition">
         Lubix
       </Link>
-
-      <form onSubmit={handleSearch} className="flex w-[500px] bg-[#1c2a4a] rounded-full overflow-hidden">
-        <input
-          type="text"
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)}
-          placeholder="Buscar en tu tienda..."
-          className="flex-1 px-4 py-2 bg-transparent text-white placeholder-gray-400 focus:outline-none"
-        />
-        <button type="submit" className="bg-green-500 px-5 text-white hover:bg-green-600 transition flex items-center justify-center">
-          <MagnifyingGlassIcon className="w-5 h-5" />
-        </button>
-      </form>
 
       <div className="flex items-center gap-6 text-white">
         <button
@@ -73,23 +56,13 @@ export default function NavbarEmpresa() {
           </svg>
         </button>
 
-        <Link to="/dashboard-empresa" className="flex items-center gap-1 hover:text-green-400 transition">
-          <ChartBarIcon className="w-5 h-5" />
-          <span>Dashboard</span>
-        </Link>
-
-        <Link to="/productos" className="flex items-center gap-1 hover:text-green-400 transition">
-          <ShoppingBagIcon className="w-5 h-5" />
-          <span>Productos</span>
-        </Link>
-
         <Link to="/pqrs" className="flex items-center gap-1 hover:text-green-400 transition">
           <ChatBubbleLeftEllipsisIcon className="w-5 h-5" />
           <span>PQRS</span>
         </Link>
 
         {user && (
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <button
               onClick={() => setMenuOpen(!menuOpen)}
               className="flex items-center gap-2 border-l border-gray-600 pl-4"

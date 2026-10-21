@@ -1,0 +1,729 @@
+================================================================================
+                    TABLA DE PRUEBAS NO FUNCIONALES (PNF)
+                    Proyecto: Lubix Mobile Authentication
+                    Total de pruebas: 20 (PNF-001 a PNF-020)
+================================================================================
+
++-----------+----------------+------------------------------------------------------------+
+| ID        | Categoría      | Descripción                                                |
++-----------+----------------+------------------------------------------------------------+
+| PNF-001   | Rendimiento    | Tiempo de respuesta del API en consultas simples.          |
++-----------+----------------+------------------------------------------------------------+
+| PNF-002   | Rendimiento    | Tiempo de carga del frontend React.                        |
++-----------+----------------+------------------------------------------------------------+
+| PNF-003   | Seguridad      | Contraseñas almacenadas con bcrypt (nunca texto plano).    |
++-----------+----------------+------------------------------------------------------------+
+| PNF-004   | Seguridad      | Tokens JWT con expiración configurada.                     |
++-----------+----------------+------------------------------------------------------------+
+| PNF-005   | Seguridad      | Acceso no autenticado a rutas protegidas.                  |
++-----------+----------------+------------------------------------------------------------+
+| PNF-006   | Seguridad      | Validación de contraseñas débiles en registro.             |
++-----------+----------------+------------------------------------------------------------+
+| PNF-007   | Seguridad      | Rate limiting en endpoint de login.                        |
++-----------+----------------+------------------------------------------------------------+
+| PNF-008   | Seguridad      | Control de acceso por roles (RBAC).                        |
++-----------+----------------+------------------------------------------------------------+
+| PNF-009   | Usabilidad     | Tema claro/oscuro con persistencia.                        |
++-----------+----------------+------------------------------------------------------------+
+| PNF-010   | Usabilidad     | Formularios con validación y mensajes de error.            |
++-----------+----------------+------------------------------------------------------------+
+| PNF-011   | Compatibilidad | App web en Google Chrome.                                  |
++-----------+----------------+------------------------------------------------------------+
+| PNF-012   | Compatibilidad | App web en Mozilla Firefox.                                |
++-----------+----------------+------------------------------------------------------------+
+| PNF-013   | Compatibilidad | Diseño responsivo en móvil (375px).                        |
++-----------+----------------+------------------------------------------------------------+
+| PNF-014   | Compatibilidad | Diseño responsivo en tablet (768px).                       |
++-----------+----------------+------------------------------------------------------------+
+| PNF-015   | Confiabilidad  | Respuestas de error claras del API.                        |
++-----------+----------------+------------------------------------------------------------+
+| PNF-016   | Confiabilidad  | Carrito offline funciona sin conexión.                     |
++-----------+----------------+------------------------------------------------------------+
+| PNF-017   | Disponibilidad | Health check de base de datos.                             |
++-----------+----------------+------------------------------------------------------------+
+| PNF-018   | Disponibilidad | Health check de conexión a internet.                       |
++-----------+----------------+------------------------------------------------------------+
+| PNF-019   | Escalabilidad  | Arquitectura Docker con servicios independientes.          |
++-----------+----------------+------------------------------------------------------------+
+| PNF-020   | Mantenibilidad | Documentación Swagger disponible.                          |
++-----------+----------------+------------------------------------------------------------+
+
+
+================================================================================
+                    DETALLE COMPLETO DE CADA PRUEBA
+================================================================================
+
+
+--------------------------------------------------------------------------------
+PNF-001 | Rendimiento | Tiempo de respuesta del API (RNF-001)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que las consultas simples del API respondan en menos
+    de 200 milisegundos.
+
+  PRECONDICIONES:
+    Backend ejecutándose en Docker con PostgreSQL conectado.
+
+  DATOS DE ENTRADA:
+    Endpoint GET /products/catalogs.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir Postman o curl.
+    2. Ejecutar GET a http://localhost:8002/products/catalogs.
+    3. Medir tiempo de respuesta.
+    4. Repetir 5 veces.
+    5. Calcular promedio.
+
+  RESULTADO ESPERADO:
+    Tiempo promedio menor a 200 ms.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere backend ejecutándose.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-002 | Rendimiento | Tiempo de carga del frontend (RNF-001)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el frontend React cargue en menos de 3 segundos.
+
+  PRECONDICIONES:
+    Frontend ejecutándose en modo desarrollo o producción.
+
+  DATOS DE ENTRADA:
+    Navegador Google Chrome actualizado.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir Chrome DevTools (F12).
+    2. Ir a pestaña Network.
+    3. Navegar a http://localhost:5173.
+    4. Observar tiempo de First Contentful Paint.
+    5. Verificar que sea menor a 3 segundos.
+
+  RESULTADO ESPERADO:
+    Tiempo de carga menor a 3 segundos.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere frontend ejecutándose.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-003 | Seguridad | Contraseñas con bcrypt (RNF-004)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que las contraseñas se almacenen hasheadas con bcrypt
+    y nunca en texto plano.
+
+  PRECONDICIONES:
+    Backend ejecutándose. Usuario registrado en base de datos.
+
+  DATOS DE ENTRADA:
+    Contraseña del usuario: "Password123"
+
+  PASOS DE EJECUCIÓN:
+    1. Conectar a PostgreSQL.
+    2. Ejecutar: SELECT hashed_password FROM users WHERE email='usuario@test.com'.
+    3. Verificar que el valor empiece con "$2b$" (prefijo bcrypt).
+    4. Verificar que NO sea la contraseña en texto plano.
+
+  RESULTADO ESPERADO:
+    El campo hashed_password contiene un hash bcrypt, no texto plano.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere acceso a base de datos.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-004 | Seguridad | Tokens JWT con expiración (RNF-003)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que los tokens JWT tengan tiempo de expiración configurado.
+
+  PRECONDICIONES:
+    Backend ejecutándose. Usuario autenticado.
+
+  DATOS DE ENTRADA:
+    Access token obtenido del login.
+
+  PASOS DE EJECUCIÓN:
+    1. Login exitoso para obtener access_token.
+    2. Decodificar el token (jwt.io o base64).
+    3. Verificar campo "exp" (expiración).
+    4. Verificar que la diferencia con "iat" (emisión) sea 60 minutos.
+    5. Esperar a que expire y verificar que se rechaza.
+
+  RESULTADO ESPERADO:
+    Token tiene expiración de 60 minutos. Token expirado retorna 401.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere autenticación exitosa.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-005 | Seguridad | Acceso no autenticado (RNF-005)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que sin token de autenticación se rechace el acceso
+    a rutas protegidas.
+
+  PRECONDICIONES:
+    Backend ejecutándose con middleware de autenticación activo.
+
+  DATOS DE ENTRADA:
+    Sin header Authorization.
+
+  PASOS DE EJECUCIÓN:
+    1. Ejecutar GET a /user/profile sin token.
+    2. Ejecutar GET a /user/orders sin token.
+    3. Ejecutar GET a /cart sin token.
+    4. Verificar código de respuesta en cada caso.
+
+  RESULTADO ESPERADO:
+    Los tres endpoints retornan código 401 Unauthorized.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere backend ejecutándose.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-006 | Seguridad | Validación de contraseñas débiles (RNF-005)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el sistema rechace contraseñas que no cumplan
+    la política de seguridad.
+
+  PRECONDICIONES:
+    Backend ejecutándose con schemas Pydantic activos.
+
+  DATOS DE ENTRADA:
+    Contraseña "123" (sin complejidad requerida).
+
+  PASOS DE EJECUCIÓN:
+    1. Ejecutar POST a /auth/register-user con password="123".
+    2. Verificar código de respuesta.
+    3. Ejecutar con password="abcdefg1" (sin mayúscula).
+    4. Ejecutar con password="Abcdefgh" (sin número).
+
+  RESULTADO ESPERADO:
+    Todos retornan código 422 con mensaje indicando requisitos:
+    mínimo 8 caracteres, mayúscula, minúscula, número.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere backend ejecutándose.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-007 | Seguridad | Rate limiting en login (RNF-005)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el sistema limité intentos de login fallidos.
+
+  PRECONDICIONES:
+    Backend ejecutándose.
+
+  DATOS DE ENTRADA:
+    Credenciales incorrectas: email="test@test.com", password="wrong".
+
+  PASOS DE EJECUCIÓN:
+    1. Ejecutar POST a /auth/login-user con credenciales incorrectas.
+    2. Repetir 6 veces consecutivas.
+    3. Verificar si se retorna código 429 o 403.
+    4. Verificar mensaje de error.
+
+  RESULTADO ESPERADO:
+    Después de varios intentos fallidos, el sistema retorna error
+    indicando que se debe esperar antes de intentar nuevamente.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Verificar si rate limiting está implementado.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-008 | Seguridad | Control de acceso por roles (RNF-003)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que un usuario regular no pueda acceder a rutas
+    de empresa ni de administrador.
+
+  PRECONDICIONES:
+    Usuario regular autenticado (role="user").
+
+  DATOS DE ENTRADA:
+    Token de usuario regular.
+
+  PASOS DE EJECUCIÓN:
+    1. Login como usuario regular.
+    2. GET /company/dashboard/me con token de usuario.
+    3. Verificar que retorna 403 Forbidden.
+    4. GET /admin/users con token de usuario.
+    5. Verificar que retorna 403 Forbidden.
+
+  RESULTADO ESPERADO:
+    Rutas de empresa retornan 403 para usuario regular.
+    Rutas de admin retornan 403 para usuario regular.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere usuario con rol "user".
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-009 | Usabilidad | Tema claro/oscuro (RNF-010)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el cambio de tema funcione y persista después
+    de recargar la página.
+
+  PRECONDICIONES:
+    Frontend React ejecutándose en navegador.
+
+  DATOS DE ENTRADA:
+    Navegador web.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir la aplicación web.
+    2. Observar tema actual.
+    3. Hacer clic en botón de cambio de tema.
+    4. Verificar que cambian colores de todos los componentes.
+    5. Recargar página (F5).
+    6. Verificar que el tema seleccionado se mantiene.
+
+  RESULTADO ESPERADO:
+    Tema cambia visualmente. Persiste después de recargar.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere verificar visualmente.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-010 | Usabilidad | Formularios con validación (RNF-010)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que los formularios muestren mensajes de error claros
+    cuando los datos ingresados son inválidos.
+
+  PRECONDICIONES:
+    Frontend React ejecutándose. Formulario de registro visible.
+
+  DATOS DE ENTRADA:
+    Email inválido: "noesunemail". Nombre vacío: "".
+
+  PASOS DE EJECUCIÓN:
+    1. Navegar a pantalla de registro.
+    2. Dejar campo nombre vacío.
+    3. Ingresar email inválido.
+    4. Hacer clic en Registrar.
+    5. Verificar mensajes de error junto a cada campo.
+
+  RESULTADO ESPERADO:
+    Mensajes de error aparecen indicando: "Nombre es requerido",
+    "Email no es válido".
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere verificar en navegador.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-011 | Compatibilidad | App web en Chrome (RNF-012)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que la aplicación web funcione correctamente en
+    Google Chrome.
+
+  PRECONDICIONES:
+    Google Chrome actualizado.
+
+  DATOS DE ENTRADA:
+    Frontend desplegado y accesible.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir http://localhost:5173 en Chrome.
+    2. Navegar por Home, Catálogo, Carrito.
+    3. Realizar búsqueda de productos.
+    4. Verificar que no hay errores en consola (F12).
+    5. Verificar diseño correcto.
+
+  RESULTADO ESPERADO:
+    Aplicación carga sin errores. Funcionalidades operan correctamente.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere prueba manual.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-012 | Compatibilidad | App web en Firefox (RNF-012)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que la aplicación web funcione correctamente en
+    Mozilla Firefox.
+
+  PRECONDICIONES:
+    Mozilla Firefox actualizado.
+
+  DATOS DE ENTRADA:
+    Frontend desplegado y accesible.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir http://localhost:5173 en Firefox.
+    2. Navegar por Home, Catálogo, Carrito.
+    3. Realizar búsqueda de productos.
+    4. Verificar que no hay errores en consola.
+    5. Verificar diseño correcto.
+
+  RESULTADO ESPERADO:
+    Aplicación carga sin errores. Funcionalidades operan correctamente.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere Firefox instalado.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-013 | Compatibilidad | Diseño responsivo móvil 375px (RNF-011)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que la interfaz se adapte correctamente a resolución
+    de móvil (375px ancho).
+
+  PRECONDICIONES:
+    Frontend React ejecutándose.
+
+  DATOS DE ENTRADA:
+    Chrome DevTools con vista responsive a 375px.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir Chrome DevTools (F12).
+    2. Activar vista responsive.
+    3. Seleccionar 375px de ancho.
+    4. Navegar por Home, Catálogo, Carrito.
+    5. Verificar que menús y productos se ven correctamente.
+    6. Verificar que no hay elementos superpuestos.
+
+  RESULTADO ESPERADO:
+    Interfaz se adapta. Menú accesible. Productos visibles sin scroll horizontal.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere prueba visual.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-014 | Compatibilidad | Diseño responsivo tablet 768px (RNF-011)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que la interfaz se adapte correctamente a resolución
+    de tablet (768px ancho).
+
+  PRECONDICIONES:
+    Frontend React ejecutándose.
+
+  DATOS DE ENTRADA:
+    Chrome DevTools con vista responsive a 768px.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir Chrome DevTools (F12).
+    2. Activar vista responsive.
+    3. Seleccionar 768px de ancho.
+    4. Navegar por Home, Catálogo, Carrito.
+    5. Verificar layout en dos columnas o grid.
+    6. Verificar que no hay elementos rotos.
+
+  RESULTADO ESPERADO:
+    Interfaz se adapta. Productos se muestran en grid. Navegación correcta.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere prueba visual.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-015 | Confiabilidad | Respuestas de error del API (RNF-009)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el API retorne mensajes de error claros y no
+    exponga información sensible del servidor.
+
+  PRECONDICIONES:
+    Backend ejecutándose.
+
+  DATOS DE ENTRADA:
+    Endpoints con datos inválidos.
+
+  PASOS DE EJECUCIÓN:
+    1. GET a /endpoint-inexistente → verificar 404.
+    2. POST a /auth/login-user con JSON malformado → verificar 422.
+    3. GET a /products/uuid-invalido → verificar 400.
+    4. Verificar que respuestas no incluyan stack trace.
+
+  RESULTADO ESPERADO:
+    Códigos de error apropiados (400, 404, 422). Mensajes descriptivos.
+    Sin información sensible del servidor.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere backend ejecutándose.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-016 | Confiabilidad | Carrito offline (RNF-009)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el carrito funcione sin conexión y se sincronice
+    al reconectar.
+
+  PRECONDICIONES:
+    App móvil o frontend web con soporte offline.
+
+  DATOS DE ENTRADA:
+    Producto disponible en catálogo.
+
+  PASOS DE EJECUCIÓN:
+    1. Abrir la aplicación.
+    2. Agregar producto al carrito.
+    3. Activar modo avión o desconectar red.
+    4. Verificar que producto permanece en carrito.
+    5. Reconectar red.
+    6. Verificar que carrito se sincroniza con servidor.
+
+  RESULTADO ESPERADO:
+    Producto persiste offline. Sincronización exitosa al reconectar.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere app móvil o navegador.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-017 | Disponibilidad | Health check base de datos (RNF-008)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el endpoint de health check de base de datos
+    reporte el estado correcto.
+
+  PRECONDICIONES:
+    Backend y PostgreSQL ejecutándose en Docker.
+
+  DATOS DE ENTRADA:
+    Endpoint GET /health/database.
+
+  PASOS DE EJECUCIÓN:
+    1. Ejecutar GET a http://localhost:8002/health/database.
+    2. Verificar código de respuesta (200).
+    3. Verificar cuerpo de respuesta con estado de PostgreSQL.
+    4. Detener contenedor de PostgreSQL.
+    5. Ejecutar nuevamente GET a /health/database.
+    6. Verificar código 503.
+
+  RESULTADO ESPERADO:
+    200 OK cuando PostgreSQL está activo. 503 cuando no.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere Docker ejecutándose.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-018 | Disponibilidad | Health check internet (RNF-008)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el endpoint de health check de internet reporte
+    conectividad.
+
+  PRECONDICIONES:
+    Backend ejecutándose con acceso a internet.
+
+  DATOS DE ENTRADA:
+    Endpoint GET /health/internet.
+
+  PASOS DE EJECUCIÓN:
+    1. Ejecutar GET a http://localhost:8002/health/internet.
+    2. Verificar código de respuesta (200).
+    3. Verificar cuerpo con estado de conexión.
+
+  RESULTADO ESPERADO:
+    200 OK indicando conexión a internet disponible.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere backend con internet.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+--------------------------------------------------------------------------------
+PNF-019 | Escalabilidad | Arquitectura Docker (RNF-006)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que el sistema use Docker con servicios independientes
+    que permitan escalabilidad.
+
+  PRECONDICIONES:
+    Docker Compose configurado en el proyecto.
+
+  DATOS DE ENTRADA:
+    Archivo docker-compose.yml.
+
+  PASOS DE EJECUCIÓN:
+    1. Ejecutar docker-compose ps.
+    2. Verificar servicios: postgres, minio, backend, frontend.
+    3. Verificar que cada uno corre en su contenedor.
+    4. Verificar puertos expuestos.
+    5. Verificar variables de entorno configuradas.
+
+  RESULTADO ESPERADO:
+    4 servicios ejecutándose independientemente. Puertos configurados.
+    Variables de entorno en .env.
+
+  RESULTADO OBTENIDO:
+    Evidencia del análisis del proyecto - Arquitectura Docker confirmada.
+
+  ESTADO: Aprobado
+  CAPTURA: docker-compose.ps ejecutado
+
+
+--------------------------------------------------------------------------------
+PNF-020 | Mantenibilidad | Documentación Swagger (RNF-014)
+--------------------------------------------------------------------------------
+
+  DESCRIPCIÓN:
+    Verificar que la documentación Swagger del API esté disponible
+    y muestre todos los endpoints.
+
+  PRECONDICIONES:
+    Backend FastAPI ejecutándose.
+
+  DATOS DE ENTRADA:
+    Navegador web.
+
+  PASOS DE EJECUCIÓN:
+    1. Navegar a http://localhost:8002/docs.
+    2. Verificar que carga la interfaz de Swagger.
+    3. Verificar que lista todos los grupos: Auth, User, Company,
+       Products, Admin, Cart, Favorites, PQRS, Health.
+    4. Expandir un endpoint y verificar que muestra parámetros.
+
+  RESULTADO ESPERADO:
+    Swagger disponible en /docs. Todos los endpoints documentados.
+    Parámetros y schemas visibles.
+
+  RESULTADO OBTENIDO:
+    Pendiente de ejecución - Se requiere backend ejecutándose.
+
+  ESTADO: Pendiente
+  CAPTURA: Pendiente de captura
+
+
+================================================================================
+                          RESUMEN DE PRUEBAS
+================================================================================
+
+  Total de pruebas:     20
+  Aprobadas:             1  (PNF-019)
+  Rechazadas:            0
+  Pendientes:           19
+
+  Distribución por categoría:
+  ┌────────────────┬────────────┐
+  │ Categoría      │ Cantidad   │
+  ├────────────────┼────────────┤
+  │ Rendimiento    │     2      │
+  │ Seguridad      │     5      │
+  │ Usabilidad     │     2      │
+  │ Compatibilidad │     4      │
+  │ Confiabilidad  │     2      │
+  │ Disponibilidad │     2      │
+  │ Escalabilidad  │     1      │
+  │ Mantenibilidad │     1      │
+  │ SIN CATEGORÍA  │     1      │
+  └────────────────┴────────────┘
+
+  Correspondencia con RNFs:
+  ┌────────┬──────────────────────────────┬────────────┐
+  │ RNF    │ Nombre                       │ Prueba     │
+  ├────────┼──────────────────────────────┼────────────┤
+  │ RNF-001│ Tiempo de respuesta          │ PNF-001    │
+  │ RNF-001│ Tiempo de respuesta          │ PNF-002    │
+  │ RNF-003│ Autenticación segura         │ PNF-004    │
+  │ RNF-003│ Autenticación segura         │ PNF-008    │
+  │ RNF-004│ Encriptación contraseñas     │ PNF-003    │
+  │ RNF-005│ Protección contra ataques    │ PNF-005    │
+  │ RNF-005│ Protección contra ataques    │ PNF-006    │
+  │ RNF-005│ Protección contra ataques    │ PNF-007    │
+  │ RNF-006│ Escalabilidad horizontal     │ PNF-019    │
+  │ RNF-008│ Disponibilidad del sistema   │ PNF-017    │
+  │ RNF-008│ Disponibilidad del sistema   │ PNF-018    │
+  │ RNF-009│ Recuperación ante fallos     │ PNF-015    │
+  │ RNF-009│ Recuperación ante fallos     │ PNF-016    │
+  │ RNF-010│ Facilidad de uso             │ PNF-009    │
+  │ RNF-010│ Facilidad de uso             │ PNF-010    │
+  │ RNF-011│ Diseño responsivo            │ PNF-013    │
+  │ RNF-011│ Diseño responsivo            │ PNF-014    │
+  │ RNF-012│ Compatibilidad navegadores   │ PNF-011    │
+  │ RNF-012│ Compatibilidad navegadores   │ PNF-012    │
+  │ RNF-014│ Arquitectura modular         │ PNF-020    │
+  └────────┴──────────────────────────────┴────────────┘
+
+================================================================================

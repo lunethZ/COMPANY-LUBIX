@@ -36,13 +36,18 @@ def create_code_and_send_code(database: Session, user_id: uuid.UUID, email: str,
 
     print(f"[LUBIX-DEBUG] Código de verificación generado para {email} ({code_type}): {code}")
     
+    email_sent = False
     if code_type == typeCode.resetPassword:
-        EmailForgotPassword(email, code, code_type)
+        email_sent = EmailForgotPassword(email, code, code_type)
     elif code_type == typeCode.verifyEmail:
-        EmailVerify(email, code, code_type)
+        email_sent = EmailVerify(email, code, code_type)
+    
+    if not email_sent:
+        print(f"[LUBIX-ERROR] No se pudo enviar el correo de verificación a {email}")
         
     return {
-        "message":"Código enviado correctamente"
+        "message": "Código enviado correctamente" if email_sent else "Código generado pero no se pudo enviar el correo. Intenta de nuevo.",
+        "email_sent": email_sent
     }
 
 # Verificar el código ingresado por el usuario

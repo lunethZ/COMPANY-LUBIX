@@ -72,6 +72,7 @@ interface ProductForm {
   name: string;
   price: string;
   stock: string;
+  discount: string;
   category: string;
   description: string;
   brand: string;
@@ -82,6 +83,15 @@ interface ProductForm {
   imageUrl: string;
 }
 
+interface ProductImage {
+  id: string;
+  preview: string;
+  file?: File;
+  url?: string;
+}
+
+const MAX_PRODUCT_IMAGES = 5;
+
 interface SellerInfo {
   name: string;
   email: string;
@@ -89,18 +99,61 @@ interface SellerInfo {
   memberSince: string;
   rating: number;
   totalSales: number;
+  totalRevenue: number;
   totalReviews: number;
   avatar: string;
+  logo: string | null;
+  banner: string | null;
   sellerLevel: string;
   levelProgress: number;
 }
 
 const INITIAL_PRODUCTS: Product[] = [];
 
+type ProductFormErrors = Partial<Record<'price' | 'stock' | 'discount', string>>;
+
+const MAX_DISCOUNT_PERCENT = 100;
+
+const validateNumericField = (field: 'price' | 'stock' | 'discount', value: string): string | undefined => {
+  const raw = value.trim();
+
+  if (raw === '') {
+    if (field === 'price') return 'Ingresa el precio del producto';
+    if (field === 'stock') return 'Ingresa el stock disponible';
+    return undefined;
+  }
+
+  const parsed = Number(raw);
+
+  if (Number.isNaN(parsed)) {
+    if (field === 'discount') return 'Ingresa un descuento válido';
+    return field === 'price' ? 'Ingresa un precio válido' : 'Ingresa un stock válido';
+  }
+
+  if (field === 'price') return parsed <= 0 ? 'El precio debe ser mayor a 0.' : undefined;
+  if (field === 'stock') return parsed <= 0 ? 'El stock debe ser mayor a 0' : undefined;
+  if (parsed < 0) return 'El descuento no puede ser negativo';
+  if (parsed > MAX_DISCOUNT_PERCENT) return `El descuento no puede superar el ${MAX_DISCOUNT_PERCENT}%`;
+  return undefined;
+};
+
+const collectNumericErrors = (form: ProductForm): ProductFormErrors => {
+  const errors: ProductFormErrors = {};
+  (['price', 'stock', 'discount'] as const).forEach((field) => {
+    const message = validateNumericField(field, form[field]);
+    if (message) errors[field] = message;
+  });
+  return errors;
+};
+
+const hasNumericErrors = (errors: ProductFormErrors): boolean =>
+  Object.values(errors).some(Boolean);
+
 const EMPTY_FORM: ProductForm = {
   name: '',
   price: '',
   stock: '',
+  discount: '',
   category: '',
   description: '',
   brand: '',
@@ -120,8 +173,11 @@ const INITIAL_SELLER_INFO: SellerInfo = {
   memberSince: '',
   rating: 0,
   totalSales: 0,
+  totalRevenue: 0,
   totalReviews: 0,
   avatar: '',
+  logo: null,
+  banner: null,
   sellerLevel: 'Bronze',
   levelProgress: 0,
 };
@@ -148,12 +204,14 @@ export default function SellerDashboard() {
   const [bannerSuccess, setBannerSuccess] = useState<boolean | null>(null);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
-  const [imagePreview, setImagePreview] = useState('');
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [formErrors, setFormErrors] = useState<ProductFormErrors>({});
+  const [images, setImages] = useState<ProductImage[]>([]);
+  const [imageUrlInput, setImageUrlInput] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<ProductForm>(EMPTY_FORM);
+  const [editFormErrors, setEditFormErrors] = useState<ProductFormErrors>({});
   const [editImagePreview, setEditImagePreview] = useState('');
   const [editSelectedFile, setEditSelectedFile] = useState<File | null>(null);
   const [editUploading, setEditUploading] = useState(false);
@@ -213,8 +271,11 @@ export default function SellerDashboard() {
         memberSince: me.memberAT ? new Date(me.memberAT).toLocaleDateString() : "",
         rating: avgRating,
         totalSales: totalSales,
+        totalRevenue: me.totalRevenue || profile.totalRevenue || 0,
         totalReviews: me.reviews || profile.totalReviews || 0,
         avatar: (me.nameCompany || "V").charAt(0).toUpperCase(),
+        logo: profile.logo || null,
+        banner: profile.banner || null,
         sellerLevel,
         levelProgress,
       });
@@ -230,8 +291,8 @@ export default function SellerDashboard() {
         name: p.name,
         price: p.price,
         image: p.images?.[0] || REFERENCE_IMAGE,
-        sold: 0,
-        views: 0,
+        sold: p.sold || 0,
+        views: p.views || 0,
         rating: 0,
         stock: p.stock,
         active: p.status !== "inactive",
@@ -281,7 +342,7 @@ export default function SellerDashboard() {
     }
   };
 
-  const totalRevenue = products.reduce((acc, p) => acc + p.price * p.sold, 0);
+  const totalRevenue = sellerInfo.totalRevenue || products.reduce((acc, p) => acc + p.price * p.sold, 0);
   const activeProducts = products.filter((p) => p.active);
 
   const toggleActive = async (id: string) => {
@@ -312,11 +373,12 @@ export default function SellerDashboard() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      await api.patch("/company/dashboard/upload-logo", formData, {
+      const res = await api.patch("/company/dashboard/upload-logo", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setLogoSuccess(true);
-      await fetchDashboardData();
+      setSellerInfo((prev) => ({ ...prev, logo: res.data.logo || null }));
+      setTimeout(() => setLogoSuccess(null), 2000);
     } catch (err: any) {
       setLogoError(err?.response?.data?.detail || "Error al subir la foto de perfil");
       console.error("Error uploading logo:", err);
@@ -334,11 +396,12 @@ export default function SellerDashboard() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      await api.patch("/company/dashboard/upload-banner", formData, {
+      const res = await api.patch("/company/dashboard/upload-banner", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       setBannerSuccess(true);
-      await fetchDashboardData();
+      setSellerInfo((prev) => ({ ...prev, banner: res.data.banner || null }));
+      setTimeout(() => setBannerSuccess(null), 2000);
     } catch (err: any) {
       setBannerError(err?.response?.data?.detail || "Error al subir el banner");
       console.error("Error uploading banner:", err);
@@ -386,16 +449,41 @@ export default function SellerDashboard() {
     return `${base}${path.replace("/files/files", "/files")}`;
   };
 
-  const handleImageFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0] || null;
-    setSelectedFile(file);
-    if (file) {
-      const localUrl = URL.createObjectURL(file);
-      setImagePreview(localUrl);
-      setForm((prev) => ({ ...prev, imageUrl: "" }));
-    } else {
-      setImagePreview(form.imageUrl || "");
-    }
+  const handleAddImages = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
+    setImages((prev) => {
+      const next = [...prev];
+      for (const file of files) {
+        if (next.length >= MAX_PRODUCT_IMAGES) break;
+        next.push({
+          id: `${Date.now()}-${Math.random().toString(36).slice(2)}`,
+          preview: URL.createObjectURL(file),
+          file,
+        });
+      }
+      return next;
+    });
+    e.target.value = "";
+  };
+
+  const handleAddImageUrl = () => {
+    const url = imageUrlInput.trim();
+    if (!url) return;
+    if (images.length >= MAX_PRODUCT_IMAGES) return;
+    setImages((prev) => [
+      ...prev,
+      { id: `${Date.now()}-${Math.random().toString(36).slice(2)}`, preview: url, url },
+    ]);
+    setImageUrlInput("");
+  };
+
+  const handleRemoveImage = (id: string) => {
+    setImages((prev) => {
+      const target = prev.find((img) => img.id === id);
+      if (target?.file) URL.revokeObjectURL(target.preview);
+      return prev.filter((img) => img.id !== id);
+    });
   };
 
   const uploadProductImage = async (file: File): Promise<string> => {
@@ -420,24 +508,35 @@ export default function SellerDashboard() {
       setForm((prev) => ({ ...prev, [field]: clean }));
       return;
     }
-    setForm((prev) => ({ ...prev, [field]: value }));
-    if (field === 'imageUrl') {
-      setImagePreview(value);
-      if (value) setSelectedFile(null);
+    if (field === 'price' || field === 'stock' || field === 'discount') {
+      const message = validateNumericField(field, value);
+      setFormErrors((prev) => ({ ...prev, [field]: message }));
     }
+    setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleAddProduct = async () => {
-    if (!form.name || !form.price || !form.stock) return;
+    const errors = collectNumericErrors(form);
+    setFormErrors(errors);
+    if (!form.name || !form.description || !form.category || hasNumericErrors(errors)) return;
 
-    const priceNum = parseInt(form.price.replace(/\D/g, '')) || 0;
+    const priceNum = Number(form.price) || 0;
     const stockNum = parseInt(form.stock) || 0;
+    const discountNum = Number(form.discount) || 0;
+
+    if (stockNum < 1) return;
+    if (priceNum <= 0) return;
 
     try {
       setUploadingImage(true);
-      let finalImage = form.imageUrl.trim();
-      if (selectedFile) {
-        finalImage = await uploadProductImage(selectedFile);
+      const uploadedImages: string[] = [];
+      for (const img of images) {
+        if (img.file) {
+          const url = await uploadProductImage(img.file);
+          if (url) uploadedImages.push(url);
+        } else if (img.url) {
+          uploadedImages.push(img.url);
+        }
       }
       // Peso con unidad kg predeterminada
       const weightWithUnit = form.weight ? `${form.weight} kg` : "";
@@ -453,17 +552,19 @@ export default function SellerDashboard() {
       await api.post("/company/products", {
         name: form.name,
         price: priceNum,
-        images: finalImage ? [finalImage] : [],
-        discount_enable: false,
-        discount_value: 0,
+        images: uploadedImages,
+        discount_enable: discountNum > 0,
+        discount_value: discountNum,
         stock: stockNum,
         descripcion: [form.description, form.brand, form.model, warrantyWithUnit, weightWithUnit, form.dimensions].filter(Boolean).join(" · ") || form.name,
         technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
         catalog_name: form.category || undefined,
       });
+      images.forEach((img) => img.file && URL.revokeObjectURL(img.preview));
       setForm(EMPTY_FORM);
-      setImagePreview('');
-      setSelectedFile(null);
+      setFormErrors({});
+      setImages([]);
+      setImageUrlInput('');
       setShowAddModal(false);
       await fetchDashboardData();
     } catch (err) {
@@ -481,10 +582,12 @@ export default function SellerDashboard() {
       const warrantyNum = (spec.warranty || "").replace(/\D/g, "");
       const weightNum = (spec.weight || "").replace(/[^0-9.]/g, "");
       setEditingId(productId);
+      setEditFormErrors({});
       setEditForm({
         name: p.name || "",
         price: String(p.price || ""),
         stock: String(p.stock || ""),
+        discount: p.discount_value != null ? String(p.discount_value) : "",
         category: p.catalog_name || "",
         description: p.descripcion || "",
         brand: spec.brand || "",
@@ -513,6 +616,10 @@ export default function SellerDashboard() {
       setEditForm((prev) => ({ ...prev, [field]: clean }));
       return;
     }
+    if (field === 'price' || field === 'stock' || field === 'discount') {
+      const message = validateNumericField(field, value);
+      setEditFormErrors((prev) => ({ ...prev, [field]: message }));
+    }
     setEditForm((prev) => ({ ...prev, [field]: value }));
     if (field === 'imageUrl') {
       setEditImagePreview(value);
@@ -531,9 +638,16 @@ export default function SellerDashboard() {
   };
 
   const handleUpdateProduct = async () => {
-    if (!editingId || !editForm.name || !editForm.price || !editForm.stock) return;
-    const priceNum = parseInt(editForm.price.replace(/\D/g, '')) || 0;
+    if (!editingId || !editForm.name || !editForm.description || !editForm.category) return;
+    const errors = collectNumericErrors(editForm);
+    setEditFormErrors(errors);
+    if (hasNumericErrors(errors)) return;
+    const priceNum = Number(editForm.price) || 0;
     const stockNum = parseInt(editForm.stock) || 0;
+    const discountNum = Number(editForm.discount) || 0;
+
+    if (stockNum < 1) return;
+    if (priceNum <= 0) return;
     try {
       setEditUploading(true);
       let finalImage = editForm.imageUrl.trim();
@@ -553,6 +667,8 @@ export default function SellerDashboard() {
         name: editForm.name,
         price: priceNum,
         images: finalImage ? [finalImage] : [],
+        discount_enable: discountNum > 0,
+        discount_value: discountNum,
         stock: stockNum,
         descripcion: [editForm.description, editForm.brand, editForm.model, warrantyWithUnit, weightWithUnit, editForm.dimensions].filter(Boolean).join(" · ") || editForm.name,
         technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
@@ -560,6 +676,7 @@ export default function SellerDashboard() {
       setShowEditModal(false);
       setEditingId(null);
       setEditForm(EMPTY_FORM);
+      setEditFormErrors({});
       setEditImagePreview('');
       setEditSelectedFile(null);
       await fetchDashboardData();
@@ -643,11 +760,24 @@ export default function SellerDashboard() {
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
-        <div className="bg-gradient-to-r from-green-600 to-blue-600 rounded-2xl p-8 mb-8 shadow-xl shadow-green-500/20">
-          <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
+        <div
+          className="relative rounded-2xl p-8 mb-8 shadow-xl shadow-green-500/20 overflow-hidden"
+          style={sellerInfo.banner ? { backgroundImage: `url(${resolveImageUrl(sellerInfo.banner)})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: 'linear-gradient(to right, #16a34a, #2563eb)' }}
+        >
+          {sellerInfo.banner && <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>}
+          <label className="absolute bottom-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10">
+            <CameraIcon className="w-4 h-4" />
+            Cambiar banner
+            <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
+          </label>
+          <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
-              <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-green-500 shadow-lg border-4 border-white/20">
-                {sellerInfo.avatar}
+              <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-green-500 shadow-lg border-4 border-white/20 overflow-hidden">
+                {sellerInfo.logo ? (
+                  <img src={resolveImageUrl(sellerInfo.logo)} alt="Logo" className="w-full h-full object-cover" />
+                ) : (
+                  sellerInfo.avatar
+                )}
               </div>
               <label className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center shadow-lg hover:bg-blue-400 transition-colors cursor-pointer">
                 <CameraIcon className="w-4 h-4 text-white" />
@@ -719,7 +849,7 @@ export default function SellerDashboard() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Mis Productos <span className="text-gray-500 font-normal text-base">({products.length})</span></h2>
               <button
-                onClick={() => setShowAddModal(true)}
+                onClick={() => { setFormErrors({}); setShowAddModal(true); }}
                 className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30 hover:shadow-green-500/50"
               >
                 <PlusIcon className="w-5 h-5" />
@@ -733,7 +863,7 @@ export default function SellerDashboard() {
                 <p className="text-lg font-medium">No tienes productos aún</p>
                 <p className="text-sm mt-1">Agrega tu primer producto para empezar a vender</p>
                 <button
-                  onClick={() => setShowAddModal(true)}
+                  onClick={() => { setFormErrors({}); setShowAddModal(true); }}
                   className="mt-4 inline-flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white px-5 py-2.5 rounded-xl font-semibold transition-all"
                 >
                   <PlusIcon className="w-5 h-5" />
@@ -782,10 +912,6 @@ export default function SellerDashboard() {
                         <div className="flex items-center gap-1">
                           <ArrowTrendingUpIcon className="w-3.5 h-3.5" />
                           <span>{product.sold} vendidos</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <EyeIcon className="w-3.5 h-3.5" />
-                          <span>{product.views}</span>
                         </div>
                         {product.rating > 0 && (
                           <div className="flex items-center gap-1">
@@ -1098,7 +1224,7 @@ export default function SellerDashboard() {
                     {Array.from({ length: 5 }).map((_, i) => (
                       <StarIcon
                         key={i}
-                        className={`w-4 h-4 fill-yellow-400 text-yellow-400 ${i < review.rating ? "fill-yellow-400" : "text-gray-300"}`}
+                        className={`w-4 h-4 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-600"}`}
                       />
                     ))}
                     <span className="text-xs text-gray-400">{review.rating}/5</span>
@@ -1122,7 +1248,7 @@ export default function SellerDashboard() {
                 Agregar nuevo producto
               </h2>
               <button
-                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
+                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
                 className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -1133,39 +1259,59 @@ export default function SellerDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
+                    Imágenes del producto <span className="text-gray-500 font-normal">({images.length}/{MAX_PRODUCT_IMAGES})</span>
                   </label>
-                  <div className="space-y-3 mb-3">
-                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-green-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
-                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
-                      <span className="truncate">{selectedFile ? selectedFile.name : "Click para seleccionar archivo (JPG, PNG, WEBP)"}</span>
-                      <input type="file" accept="image/*" className="hidden" onChange={handleImageFileChange} />
-                    </label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        placeholder="o pega URL https://..."
-                        value={form.imageUrl}
-                        onChange={(e) => handleFormChange('imageUrl', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
-                      />
-                    </div>
-                    {uploadingImage && <p className="text-xs text-green-400 animate-pulse">Subiendo imagen...</p>}
-                  </div>
-                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
-                    {imagePreview ? (
-                      <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" onError={() => setImagePreview(REFERENCE_IMAGE)} />
-                    ) : (
-                      <div className="text-center">
-                        <img src={REFERENCE_IMAGE} alt="Referencia" className="w-full h-full object-cover opacity-30" />
-                        <div className="absolute inset-0 flex items-center justify-center flex-col gap-2">
-                          <ArrowUpTrayIcon className="w-8 h-8 text-gray-400" />
-                          <p className="text-gray-400 text-xs">Vista previa</p>
-                        </div>
+                  <div className="grid grid-cols-3 gap-3 mb-3">
+                    {images.map((img, i) => (
+                      <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-slate-700">
+                        <img
+                          src={img.preview}
+                          alt={`Imagen ${i + 1}`}
+                          className="w-full h-full object-contain"
+                          onError={(e) => { (e.target as HTMLImageElement).src = REFERENCE_IMAGE; }}
+                        />
+                        {i === 0 && (
+                          <span className="absolute top-1 left-1 bg-green-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded">Principal</span>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(img.id)}
+                          className="absolute top-1 right-1 w-6 h-6 flex items-center justify-center bg-red-500 hover:bg-red-400 text-white rounded-full transition"
+                          title="Quitar imagen"
+                        >
+                          <XMarkIcon className="w-3.5 h-3.5" />
+                        </button>
                       </div>
+                    ))}
+                    {images.length < MAX_PRODUCT_IMAGES && (
+                      <label className="aspect-square rounded-xl border-2 border-dashed border-slate-600 hover:border-green-500 hover:bg-slate-700/50 flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-white cursor-pointer transition text-center px-1">
+                        <PlusIcon className="w-6 h-6" />
+                        <span className="text-[10px] leading-tight">Agregar foto</span>
+                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} />
+                      </label>
                     )}
                   </div>
-                  <p className="text-xs text-gray-500 mt-2">Se guardará en MinIO y se mostrará en la tienda.</p>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      placeholder="o pega URL https://..."
+                      value={imageUrlInput}
+                      onChange={(e) => setImageUrlInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddImageUrl(); } }}
+                      disabled={images.length >= MAX_PRODUCT_IMAGES}
+                      className="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddImageUrl}
+                      disabled={!imageUrlInput.trim() || images.length >= MAX_PRODUCT_IMAGES}
+                      className="px-3 rounded-lg bg-slate-800 border border-slate-700 text-gray-300 hover:text-white hover:border-green-500 disabled:opacity-40 disabled:cursor-not-allowed transition text-sm"
+                    >
+                      Agregar
+                    </button>
+                  </div>
+                  {uploadingImage && <p className="text-xs text-green-400 animate-pulse">Subiendo imágenes...</p>}
+                  <p className="text-xs text-gray-500">Puedes subir hasta {MAX_PRODUCT_IMAGES} fotos. La primera será la principal. Se guardarán en MinIO.</p>
                 </div>
 
                 <div className="space-y-4">
@@ -1175,7 +1321,7 @@ export default function SellerDashboard() {
                     </label>
                     <input
                       type="text"
-                      placeholder="Ej: Smartphone Samsung Galaxy S24"
+                      placeholder="Ej: Celular Samsung Galaxy S24"
                       value={form.name}
                       onChange={(e) => handleFormChange('name', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
@@ -1187,12 +1333,18 @@ export default function SellerDashboard() {
                       Precio (COP) <span className="text-red-400">*</span>
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
                       placeholder="Ej: 3500000"
                       value={form.price}
                       onChange={(e) => handleFormChange('price', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      aria-invalid={!!formErrors.price}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
                     />
+                    {formErrors.price && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.price}</span>
+                    )}
                   </div>
 
                   <div>
@@ -1201,23 +1353,52 @@ export default function SellerDashboard() {
                     </label>
                     <input
                       type="number"
+                      min="1"
+                      step="1"
                       placeholder="Ej: 20"
                       value={form.stock}
                       onChange={(e) => handleFormChange('stock', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      aria-invalid={!!formErrors.stock}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
                     />
+                    {formErrors.stock && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.stock}</span>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={MAX_DISCOUNT_PERCENT}
+                      step="1"
+                      placeholder="Ej: 15"
+                      value={form.discount}
+                      onChange={(e) => handleFormChange('discount', e.target.value)}
+                      aria-invalid={!!formErrors.discount}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.discount ? (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.discount}</span>
+                    ) : (
+                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría <span className="text-red-400">*</span></label>
                     <select
                       value={form.category}
                       onChange={(e) => handleFormChange('category', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     >
                       <option value="">Selecciona una categoría</option>
+                      <option value="Celulares">Celulares</option>
                       <option value="Computadores">Computadores</option>
-                      <option value="Smartphones">Smartphones</option>
+                      <option value="Televisores">Televisores</option>
                       <option value="Audio">Audio</option>
                       <option value="Fotografía">Fotografía</option>
                       <option value="Gaming">Gaming</option>
@@ -1229,7 +1410,7 @@ export default function SellerDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción <span className="text-red-400">*</span></label>
                 <textarea
                   rows={3}
                   placeholder="Describe las características principales del producto..."
@@ -1266,18 +1447,25 @@ export default function SellerDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía (meses) <span className="text-gray-500 font-normal">solo números</span></label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="Ej: 12"
-                        value={form.warranty}
-                        onChange={(e) => handleFormChange('warranty', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-16 text-sm focus:outline-none focus:border-green-500 transition-colors"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 bg-slate-700 px-2 py-1 rounded">meses</span>
-                    </div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía</label>
+                    <select
+                      value={form.warranty}
+                      onChange={(e) => handleFormChange('warranty', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    >
+                      <option value="">Sin garantía</option>
+                      <option value="1">1 mes</option>
+                      <option value="2">2 meses</option>
+                      <option value="3">3 meses</option>
+                      <option value="6">6 meses</option>
+                      <option value="9">9 meses</option>
+                      <option value="12">12 meses</option>
+                      <option value="18">18 meses</option>
+                      <option value="24">24 meses</option>
+                      <option value="36">36 meses</option>
+                      <option value="48">48 meses</option>
+                      <option value="60">60 meses</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
@@ -1308,17 +1496,17 @@ export default function SellerDashboard() {
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setImagePreview(''); setSelectedFile(null); }}
+                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
                   className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleAddProduct}
-                  disabled={!form.name || !form.price || !form.stock || uploadingImage}
+                  disabled={!form.name || !form.price || !form.stock || !form.description || !form.category || hasNumericErrors(formErrors) || uploadingImage}
                   className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
                 >
-                  {uploadingImage ? "Subiendo imagen..." : "Publicar producto"}
+                  {uploadingImage ? "Subiendo imágenes..." : "Publicar producto"}
                 </button>
               </div>
             </div>
@@ -1335,7 +1523,7 @@ export default function SellerDashboard() {
                 Editar producto
               </h2>
               <button
-                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
                 className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -1387,7 +1575,7 @@ export default function SellerDashboard() {
                     </label>
                     <input
                       type="text"
-                      placeholder="Ej: Smartphone Samsung Galaxy S24"
+                      placeholder="Ej: Celular Samsung Galaxy S24"
                       value={editForm.name}
                       onChange={(e) => handleEditFormChange('name', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
@@ -1399,12 +1587,18 @@ export default function SellerDashboard() {
                       Precio (COP) <span className="text-red-400">*</span>
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
                       placeholder="Ej: 3500000"
                       value={editForm.price}
                       onChange={(e) => handleEditFormChange('price', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      aria-invalid={!!editFormErrors.price}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
                     />
+                    {editFormErrors.price && (
+                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.price}</span>
+                    )}
                   </div>
 
                   <div>
@@ -1413,23 +1607,52 @@ export default function SellerDashboard() {
                     </label>
                     <input
                       type="number"
+                      min="1"
+                      step="1"
                       placeholder="Ej: 20"
                       value={editForm.stock}
                       onChange={(e) => handleEditFormChange('stock', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      aria-invalid={!!editFormErrors.stock}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
                     />
+                    {editFormErrors.stock && (
+                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.stock}</span>
+                    )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría</label>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={MAX_DISCOUNT_PERCENT}
+                      step="1"
+                      placeholder="Ej: 15"
+                      value={editForm.discount}
+                      onChange={(e) => handleEditFormChange('discount', e.target.value)}
+                      aria-invalid={!!editFormErrors.discount}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
+                    />
+                    {editFormErrors.discount ? (
+                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.discount}</span>
+                    ) : (
+                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría <span className="text-red-400">*</span></label>
                     <select
                       value={editForm.category}
                       onChange={(e) => handleEditFormChange('category', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     >
                       <option value="">Selecciona una categoría</option>
+                      <option value="Celulares">Celulares</option>
                       <option value="Computadores">Computadores</option>
-                      <option value="Smartphones">Smartphones</option>
+                      <option value="Televisores">Televisores</option>
                       <option value="Audio">Audio</option>
                       <option value="Fotografía">Fotografía</option>
                       <option value="Gaming">Gaming</option>
@@ -1441,7 +1664,7 @@ export default function SellerDashboard() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción</label>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción <span className="text-red-400">*</span></label>
                 <textarea
                   rows={3}
                   placeholder="Describe las características principales del producto..."
@@ -1478,18 +1701,25 @@ export default function SellerDashboard() {
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía (meses) <span className="text-gray-500 font-normal">solo números</span></label>
-                    <div className="relative">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        placeholder="Ej: 12"
-                        value={editForm.warranty}
-                        onChange={(e) => handleEditFormChange('warranty', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-16 text-sm focus:outline-none focus:border-blue-500 transition-colors"
-                      />
-                      <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-gray-400 bg-slate-700 px-2 py-1 rounded">meses</span>
-                    </div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía</label>
+                    <select
+                      value={editForm.warranty}
+                      onChange={(e) => handleEditFormChange('warranty', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                    >
+                      <option value="">Sin garantía</option>
+                      <option value="1">1 mes</option>
+                      <option value="2">2 meses</option>
+                      <option value="3">3 meses</option>
+                      <option value="6">6 meses</option>
+                      <option value="9">9 meses</option>
+                      <option value="12">12 meses</option>
+                      <option value="18">18 meses</option>
+                      <option value="24">24 meses</option>
+                      <option value="36">36 meses</option>
+                      <option value="48">48 meses</option>
+                      <option value="60">60 meses</option>
+                    </select>
                   </div>
                   <div>
                     <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
@@ -1520,14 +1750,14 @@ export default function SellerDashboard() {
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                  onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
                   className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
                 >
                   Cancelar
                 </button>
                 <button
                   onClick={handleUpdateProduct}
-                  disabled={!editForm.name || !editForm.price || !editForm.stock || editUploading}
+                  disabled={!editForm.name || !editForm.price || !editForm.stock || !editForm.description || !editForm.category || hasNumericErrors(editFormErrors) || editUploading}
                   className="flex-1 py-3 bg-blue-500 hover:bg-blue-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/30"
                 >
                   {editUploading ? "Guardando..." : "Guardar cambios"}
@@ -1562,7 +1792,11 @@ export default function SellerDashboard() {
                 </h3>
                 <div className="flex items-center gap-4">
                   <div className="w-20 h-20 bg-slate-800 rounded-xl flex items-center justify-center text-3xl font-bold text-green-500 border-2 border-dashed border-slate-700 overflow-hidden">
-                    {sellerInfo.avatar}
+                    {sellerInfo.logo ? (
+                      <img src={resolveImageUrl(sellerInfo.logo)} alt="Logo" className="w-full h-full object-cover" />
+                    ) : (
+                      sellerInfo.avatar
+                    )}
                   </div>
                   <label className="flex-1 cursor-pointer">
                     <div className="flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm text-gray-300 transition-colors">
@@ -1579,28 +1813,24 @@ export default function SellerDashboard() {
                   <CameraIcon className="w-4 h-4" /> Banner de la tienda
                 </h3>
                 <label className="cursor-pointer block">
-                  <div className="flex items-center justify-center gap-2 py-6 bg-slate-800 hover:bg-slate-700 border-2 border-dashed border-slate-700 rounded-xl text-sm text-gray-300 transition-colors">
-                    <ArrowUpTrayIcon className="w-5 h-5" />
-                    Subir banner
-                  </div>
+                  {sellerInfo.banner ? (
+                    <div className="relative rounded-xl overflow-hidden border-2 border-slate-700">
+                      <img src={resolveImageUrl(sellerInfo.banner)} alt="Banner" className="w-full h-32 object-cover" />
+                      <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                        <div className="flex items-center gap-2 text-white text-sm">
+                          <ArrowUpTrayIcon className="w-4 h-4" /> Cambiar banner
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center gap-2 py-6 bg-slate-800 hover:bg-slate-700 border-2 border-dashed border-slate-700 rounded-xl text-sm text-gray-300 transition-colors">
+                      <ArrowUpTrayIcon className="w-5 h-5" />
+                      Subir banner
+                    </div>
+                  )}
                   <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
                 </label>
-              {bannerUploading && (
-                <div className="absolute inset-0 bg-black/30 rounded-full flex items-center justify-center z-10">
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
-                </div>
-              )}
-              {bannerError && (
-                <div className="absolute top-0 left-0 w-full h-full bg-black/50 rounded-full flex items-center justify-center text-white text-sm z-10">
-                  {bannerError}
-                </div>
-              )}
-              {bannerSuccess && (
-                <div className="absolute top-0 left-0 w-full h-full bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-sm z-10">
-                  Banner actualizado
-                </div>
-              )}
-            </div>
+              </div>
 
               <div className="border-t border-slate-800 pt-6">
                 <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Información de la tienda</h3>

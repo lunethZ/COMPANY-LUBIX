@@ -83,25 +83,57 @@ def list_companies(request: Request, database: Session = Depends(get_db)):
         for company, user in companies
     ]
 
-@router.delete("/users/{user_id}")
-def delete_user(user_id: str, request: Request, database: Session = Depends(get_db)):
-    user = database.query(Users).filter(Users.id == user_id).first()
+@router.patch("/users/{user_id}/toggle-status")
+def toggle_user_status(user_id: str, request: Request, database: Session = Depends(get_db)):
+    current_user = database.query(Users).filter(Users.id == request.state.user_id).first()
+    if not current_user:
+        raise HTTPException(status_code=404, detail="Usuario administrador no encontrado")
 
+    role_admin = _get_role_id(database, "admin")
+    if current_user.role_id == role_admin and str(current_user.id) == str(user_id):
+        raise HTTPException(status_code=400, detail="No puedes inhabilitar tu propia cuenta de administrador")
+
+    user = database.query(Users).filter(Users.id == user_id).first()
     if not user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
 
-    role_admin = _get_role_id(database, "admin")
     if user.role_id == role_admin:
-        raise HTTPException(status_code=400, detail="No se puede eliminar un administrador")
+        raise HTTPException(status_code=400, detail="No se puede inhabilitar un administrador")
 
-    company = database.query(Company).filter(Company.user_id == user.id).first()
-    if company:
-        database.delete(company)
-
-    database.delete(user)
+    user.isActive = not user.isActive
     database.commit()
 
-    return {"message": "Usuario eliminado correctamente", "id": user_id}
+    status_text = "inhabilitado" if not user.isActive else "habilitado"
+    return {
+        "message": f"Usuario {status_text} correctamente",
+        "id": str(user.id),
+        "isActive": user.isActive
+    }
+
+
+@router.patch("/companies/{company_id}/toggle-status")
+def toggle_company_status(company_id: str, request: Request, database: Session = Depends(get_db)):
+    company = database.query(Company).filter(Company.id == company_id).first()
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
+
+    user = database.query(Users).filter(Users.id == company.user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Usuario de la empresa no encontrado")
+
+    role_admin = _get_role_id(database, "admin")
+    if user.role_id == role_admin:
+        raise HTTPException(status_code=400, detail="No se puede inhabilitar un administrador")
+
+    user.isActive = not user.isActive
+    database.commit()
+
+    status_text = "inhabilitada" if not user.isActive else "habilitada"
+    return {
+        "message": f"Empresa {status_text} correctamente",
+        "id": str(company.id),
+        "isActive": user.isActive
+    }
 
 
 @router.patch("/companies/{company_id}/validate")
