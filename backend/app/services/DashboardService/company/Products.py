@@ -1,7 +1,9 @@
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 from app.models.ModelUser import Users
 from app.models.ModelProduct import Product, Catalog
+from app.models.ModelOrder import Order, OrderItem
 from app.schemas.SchemaProduct import CreateProductRequest, UpdateProductRequest
 import uuid
 
@@ -15,6 +17,24 @@ def _get_company_by_user(user_id, database: Session):
         raise HTTPException(status_code=403, detail="No tienes una empresa registrada")
 
     return user, user.company
+
+
+def _get_sold_by_product(product_ids, database: Session):
+    sold_map = {}
+    if not product_ids:
+        return sold_map
+
+    rows = database.query(
+        OrderItem.product_id, func.coalesce(func.sum(OrderItem.quantity), 0)
+    ).join(Order).filter(
+        OrderItem.product_id.in_(product_ids),
+        Order.status != "pending",
+    ).group_by(OrderItem.product_id).all()
+
+    for product_id, quantity in rows:
+        sold_map[str(product_id)] = int(quantity or 0)
+
+    return sold_map
 
 def create_product_service(user_id: str, data: CreateProductRequest, database: Session):
     user, company = _get_company_by_user(user_id, database)
@@ -68,6 +88,8 @@ def list_products_service(user_id: str, database: Session):
 
     products = database.query(Product).filter(Product.company_id == company.id).all()
 
+    sold_map = _get_sold_by_product([p.id for p in products], database)
+
     return [
         {
             "id": str(p.id),
@@ -82,7 +104,8 @@ def list_products_service(user_id: str, database: Session):
             "catalog_id": str(p.catalog_id) if p.catalog_id else None,
             "catalog_name": p.catalog.name if p.catalog else None,
             "company_id": str(p.company_id),
-            "status": p.status
+            "status": p.status,
+            "sold": sold_map.get(str(p.id), 0)
         }
         for p in products
     ]

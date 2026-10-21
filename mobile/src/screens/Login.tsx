@@ -66,7 +66,7 @@ export default function LoginScreen() {
 
       showMessage(`¡Bienvenido ${data.Nombre}!`, "success");
       setTimeout(() => {
-        if (mappedRole === "empresa") navigation.replace("HomeEmpresa");
+        if (mappedRole === "empresa") navigation.replace("DashboardEmpresa");
         else if (mappedRole === "admin") navigation.replace("DashboardAdmin");
         else navigation.replace("Main");
       }, 1000);

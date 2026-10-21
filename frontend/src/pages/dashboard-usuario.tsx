@@ -132,8 +132,8 @@ export default function BuyerDashboard() {
         precio: f.product.price,
         antes: null,
         descuento: f.product.discount_enable && f.product.discount_value > 0 ? `-${f.product.discount_value}%` : null,
-        imagen: f.product.images?.[0] || "/placeholder.png",
-        imagenes: f.product.images?.length ? f.product.images : ["/placeholder.png"],
+        imagen: resolveFileUrl(f.product.images?.[0]),
+        imagenes: f.product.images?.length ? f.product.images.map(resolveFileUrl) : [],
         categoria: "General",
         stock: f.product.stock,
         tienda: { nombre: f.product.company_name || "Tienda", logo: (f.product.company_name || "T").charAt(0), direccion: "", ciudad: "", calificacion: 0, numResenas: 0, ventas: 0, miembrosDesde: "" },
@@ -199,12 +199,26 @@ export default function BuyerDashboard() {
   const estadoLabel = (estado: string) => {
     const map: Record<string, string> = {
       pending: "Pendiente",
+      confirmed: "Confirmado",
       paid: "Pagado",
       shipped: "Enviado",
       delivered: "Entregado",
       cancelled: "Cancelado",
     };
     return map[estado] || estado;
+  };
+
+  const cancelOrder = async (orderId: string) => {
+    if (!window.confirm("¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.")) return;
+    try {
+      await api.patch(`/user/orders/${orderId}/cancel`);
+      setOrders((prev) =>
+        prev.map((o) => (o.id === orderId ? { ...o, estado: "cancelled", delivery_progress: 0 } : o))
+      );
+    } catch (err: any) {
+      const msg = err?.response?.data?.detail || "No se pudo cancelar el pedido";
+      window.alert(msg);
+    }
   };
 
   const loadAddresses = async () => {
@@ -346,15 +360,15 @@ export default function BuyerDashboard() {
   </div>
   <div class="card">
     <h2>📍 Direcciones (${addresses.length})</h2>
-    ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map(a=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
+    ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map((a: any)=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
   </div>
   <div class="card">
     <h2>🛒 Pedidos (${orders.length})</h2>
-    ${orders.length ? orders.map(o=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map(i=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
+    ${orders.length ? orders.map((o: any)=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map((i: any)=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
   </div>
   <div class="card">
     <h2>❤️ Favoritos (${favorites.length})</h2>
-    ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map(f=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
+    ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map((f: any)=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
   </div>
   <p class="muted" style="text-align:center;margin-top:24px">Documento generado por Lubix - Tus datos están protegidos</p>
 </body></html>`;
@@ -370,26 +384,21 @@ export default function BuyerDashboard() {
     }
   };
 
-  const deleteAccount = async () => {
-    const confirmed = window.confirm("¿Estás seguro de que quieres eliminar tu cuenta? Esta acción es irreversible y borrará todos tus datos, pedidos y direcciones.\n\nSi prefieres, puedes solicitar la eliminación vía PQRS.");
+  const requestAccountDisable = async () => {
+    const confirmed = window.confirm("¿Estás seguro de que deseas solicitar la inhabilitación de tu cuenta?\n\nTu solicitud será enviada al administrador para su revisión. No se eliminarán tus datos, solo se desactivará tu cuenta.");
     if (!confirmed) return;
-    const doubleConfirm = window.prompt("Escribe ELIMINAR para confirmar:");
-    if (doubleConfirm !== "ELIMINAR") return;
+    const doubleConfirm = window.prompt("Escribe INHABILITAR para confirmar:");
+    if (doubleConfirm !== "INHABILITAR") return;
     try {
-      await api.delete("/user/account");
-      localStorage.removeItem("access_token");
-      localStorage.removeItem("refresh_token");
-      localStorage.removeItem("user");
-      logout();
-      navigate("/login", { replace: true });
+      await api.post("/pqrs", {
+        type: "inhabilitar_cuenta",
+        subject: "Solicitud de inhabilitación de cuenta",
+        description: "El usuario ha solicitado la inhabilitación de su cuenta.",
+      });
+      alert("Tu solicitud ha sido enviada correctamente. El administrador la revisará pronto.");
     } catch (err: any) {
-      const msg = err?.response?.data?.detail || "Error al eliminar la cuenta";
-      // Fallback a PQRS si el backend no permite borrado directo
-      if (msg.includes("permiso") || err?.response?.status === 401) {
-        navigate('/pqrs?type=eliminacion&subject=Solicitud de eliminación de cuenta');
-      } else {
-        alert(msg);
-      }
+      const msg = err?.response?.data?.detail || "Error al enviar la solicitud";
+      alert(msg);
     }
   };
 
@@ -483,7 +492,7 @@ export default function BuyerDashboard() {
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: 'overview', label: 'Resumen', icon: <UserIcon className="w-4 h-4" /> },
     { id: 'orders', label: 'Mis Pedidos', icon: <CubeIcon className="w-4 h-4" /> },
-    { id: 'integrated', label: 'Producto Integrado', icon: <CheckCircleIcon className="w-4 h-4" /> },
+    { id: 'integrated', label: 'Producto Entregado', icon: <CheckCircleIcon className="w-4 h-4" /> },
     { id: 'delete-product', label: 'Eliminar Producto', icon: <TrashIcon className="w-4 h-4" /> },
     { id: 'saved', label: 'Guardados', icon: <HeartIcon className="w-4 h-4" /> },
   ];
@@ -597,7 +606,7 @@ export default function BuyerDashboard() {
                   {favoriteProducts.slice(0, 3).map((p) => (
                     <div key={p.id} className="rounded-xl overflow-hidden bg-slate-800 hover:bg-slate-700 transition-all group cursor-pointer">
                       <div className="relative">
-                        <img src={p.imagen} alt={p.nombre} className="w-full h-28 object-cover group-hover:scale-105 transition-transform duration-300" />
+                        <img src={p.imagen} alt={p.nombre} className="w-full h-28 object-contain bg-slate-800 p-2 group-hover:scale-105 transition-transform duration-300" />
                         <button
                           onClick={() => removeFavorite(String(p.id))}
                           className="absolute top-2 right-2 w-7 h-7 bg-slate-900/80 rounded-full flex items-center justify-center"
@@ -718,6 +727,18 @@ export default function BuyerDashboard() {
                           </div>
                         </div>
 
+                        {(order.estado === "pending" || order.estado === "confirmed") && (
+                          <div>
+                            <button
+                              onClick={() => cancelOrder(order.id)}
+                              className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-xl text-sm font-semibold transition-all"
+                            >
+                              <XMarkIcon className="w-4 h-4" />
+                              Cancelar pedido
+                            </button>
+                          </div>
+                        )}
+
                         <div>
                           <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">Productos</h3>
                           <div className="space-y-3">
@@ -803,17 +824,23 @@ export default function BuyerDashboard() {
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
                 {favoriteProducts.map((p) => (
                     <div key={p.id} className="rounded-xl overflow-hidden bg-slate-800 hover:shadow-lg hover:shadow-blue-500/10 transition-all group">
-                    <div className="relative">
-                      <img src={p.imagen} alt={p.nombre} className="w-full h-44 object-cover group-hover:scale-105 transition-transform duration-300" />
+                    <div className="relative cursor-pointer" onClick={() => navigate(`/producto/${p.id}`)}>
+                      {p.imagen ? (
+                        <img src={p.imagen} alt={p.nombre} className="w-full h-44 object-contain bg-slate-800 p-2 group-hover:scale-105 transition-transform duration-300" />
+                      ) : (
+                        <div className="w-full h-44 bg-slate-700 flex items-center justify-center">
+                          <CubeIcon className="w-10 h-10 text-gray-500" />
+                        </div>
+                      )}
                       <button
-                        onClick={() => removeFavorite(String(p.id))}
+                        onClick={(e) => { e.stopPropagation(); removeFavorite(String(p.id)); }}
                         className="absolute top-3 right-3 w-8 h-8 bg-slate-900/80 rounded-full flex items-center justify-center hover:bg-red-500/20 transition-colors"
                       >
                         <HeartSolid className="w-4 h-4 text-pink-400" />
                       </button>
                     </div>
                     <div className="p-4">
-                      <p className="text-white font-semibold mb-2">{p.nombre}</p>
+                      <p className="text-white font-semibold mb-2 cursor-pointer hover:text-green-400 transition-colors" onClick={() => navigate(`/producto/${p.id}`)}>{p.nombre}</p>
                       <div className="flex items-center justify-between">
                         <span className="text-green-400 font-bold text-lg">${p.precio.toLocaleString('es-CO')}</span>
                       </div>
@@ -841,11 +868,11 @@ export default function BuyerDashboard() {
 
         {activeTab === 'integrated' && (
           <div className={`${themeClasses.card} rounded-xl p-6`}>
-            <h2 className="text-xl font-bold text-white mb-6">Productos Integrados</h2>
+            <h2 className="text-xl font-bold text-white mb-6">Productos Entregados</h2>
             {orders.filter(o => o.estado === 'delivered').length === 0 ? (
               <div className="text-center py-16 text-gray-400">
                 <CheckCircleIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-                <p className="text-lg font-medium">No tienes productos integrados aún</p>
+                <p className="text-lg font-medium">No tienes productos Entregados aún</p>
                 <p className="text-sm mt-1">Los productos de pedidos entregados aparecerán aquí</p>
               </div>
             ) : (
@@ -1061,8 +1088,8 @@ export default function BuyerDashboard() {
                     <span className="text-white text-sm">Descargar mis datos</span>
                     <ChevronRightIcon className="w-4 h-4 text-gray-400" />
                   </button>
-                  <button onClick={deleteAccount} className="w-full flex items-center justify-between p-3 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors">
-                    <span className="text-red-400 text-sm">Eliminar mi cuenta</span>
+                  <button onClick={requestAccountDisable} className="w-full flex items-center justify-between p-3 bg-red-500/10 hover:bg-red-500/20 rounded-lg transition-colors">
+                    <span className="text-red-400 text-sm">Solicitar inhabilitación de cuenta</span>
                     <ChevronRightIcon className="w-4 h-4 text-red-400" />
                   </button>
                 </div>

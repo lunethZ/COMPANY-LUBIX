@@ -26,7 +26,6 @@ RUN pip install --no-cache-dir \
     passlib==1.7.4 \
     psycopg2-binary==2.9.11 \
     pydantic==2.12.5 \
-    pydantic-settings==2.13.1 \
     python-dotenv==1.2.2 \
     python-jose==3.5.0 \
     python-multipart>=0.0.27 \

@@ -156,7 +156,7 @@ def login_user_service(user: userLogin, database: Session):
         raise HTTPException(status_code=400, detail="Correo o contraseña incorrectos")
     
     if not verify_password(user.password, search_user.hashed_password):
-        raise HTTPException(status_code=400, detail="contraseña incorrectos")
+        raise HTTPException(status_code=400, detail="Contraseña incorrecta")
 
     # Validación de rol: este endpoint es para usuario y admin
     # Solo bloquea empresa (evita que empresa entre como usuario)
@@ -164,10 +164,12 @@ def login_user_service(user: userLogin, database: Session):
         raise HTTPException(status_code=403, detail="Esta cuenta es de empresa. Usa el acceso de Empresa.")
     
     if not search_user.verified:
-        create_code_and_send_code(database, search_user.id, search_user.email, code_type="verifyEmail")
-        return {
-            "message": "Tu correo electrónico no ha sido verificado. Se ha enviado un nuevo código de verificación a tu correo electrónico."
-        }
+        result = create_code_and_send_code(database, search_user.id, search_user.email, code_type="verifyEmail")
+        if result.get("email_sent"):
+            message = "Tu correo electrónico no ha sido verificado. Se ha enviado un nuevo código de verificación a tu correo electrónico."
+        else:
+            message = "Tu correo electrónico no ha sido verificado. No se pudo enviar el código. Intenta de nuevo más tarde."
+        return {"message": message}
         
     access_token = create_access_token(
         user_id=str(search_user.id),
