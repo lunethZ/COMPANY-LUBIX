@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  frontend:
+    name: Frontend (Vitest y cobertura)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci --legacy-peer-deps
+      - name: Pruebas con cobertura (umbral 40 % en los formularios con pruebas)
+        run: npm run test:coverage
+
+  backend:
+    name: Backend (pytest y cobertura)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Instalar dependencias
+        run: >
+          pip install
+          fastapi==0.135.1 sqlalchemy==2.0.48 pydantic==2.12.5 python-jose==3.5.0
+          passlib==1.7.4 bcrypt==3.2.2 minio==7.2.20 python-dotenv==1.2.2
+          psycopg2-binary==2.9.11 email-validator==2.3.0 python-multipart
+          httpx==0.28.1 requests pytest pytest-cov
+      - name: Pruebas con cobertura (umbral 40 %)
+        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=40
