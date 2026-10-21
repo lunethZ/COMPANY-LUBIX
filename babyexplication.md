@@ -5,7 +5,7 @@
 
 ## 2. Abrir el proyecto
 ```
-cd "C:\Users\Mundo\OneDrive\Escritorio\Mono Principal\LUBIX-COMPANY"
+cd mobil_lubix_autentication
 ```
 
 ## 3. Configurar variables de entorno
@@ -90,11 +90,6 @@ Docker Hub quitó acceso a `minio/minio:latest`. El `docker-compose.yml` ahora u
 ---
 
 > ⚠️ **Si te registras y NO llega el código de verificación**: revisa los logs con `docker compose logs backend`. Si dice `Daily user sending limit exceeded`, esa cuenta de Gmail agotó su límite diario de envíos (o usa otro provedor SMTP). El código se guarda en la BD en la tabla `event_codes`, puedes consultarlo ahí mientras tanto.
-
-Remove placeholder form.tsx component
-Remove debug console.log in new-password.tsx
-Fix orphaned /> in register.tsx
-Add click-outside to close navbar dropdowns
 
 ---
 

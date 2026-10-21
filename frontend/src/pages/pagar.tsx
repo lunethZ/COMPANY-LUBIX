@@ -196,9 +196,11 @@ const PagarPage = () => {
     else if (!isValidEmail(envio.email)) e.email = "Correo no válido";
     if (!envio.telefono.trim()) e.telefono = "El teléfono es obligatorio";
     else if (envio.telefono.replace(/\D/g, "").length < 7) e.telefono = "Teléfono inválido";
+    if (!envio.documento.trim()) e.documento = "El documento es obligatorio";
     if (!envio.direccion.trim()) e.direccion = "La dirección es obligatoria";
     if (!envio.ciudad.trim()) e.ciudad = "La ciudad es obligatoria";
     if (!envio.departamento.trim()) e.departamento = "El departamento es obligatorio";
+    if (!envio.codigoPostal.trim()) e.codigoPostal = "El código postal es obligatorio";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -442,8 +444,9 @@ const PagarPage = () => {
                     {errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre}</p>}
                   </div>
                   <div>
-                    <label className="label-base">Documento de identidad</label>
+                    <label className="label-base">Documento de identidad *</label>
                     <input name="documento" value={envio.documento} onChange={handleEnvioChange} className="input-base" placeholder="CC / NIT" />
+                    {errors.documento && <p className="text-xs text-red-500 mt-1">{errors.documento}</p>}
                   </div>
                   <div>
                     <label className="label-base">Email *</label>
@@ -471,8 +474,9 @@ const PagarPage = () => {
                     {errors.departamento && <p className="text-xs text-red-500 mt-1">{errors.departamento}</p>}
                   </div>
                   <div>
-                    <label className="label-base">Código postal</label>
+                    <label className="label-base">Código postal *</label>
                     <input name="codigoPostal" value={envio.codigoPostal} onChange={handleEnvioChange} className="input-base" placeholder="110111" />
+                    {errors.codigoPostal && <p className="text-xs text-red-500 mt-1">{errors.codigoPostal}</p>}
                   </div>
                   <div>
                     <label className="label-base">Notas de entrega</label>
@@ -632,7 +636,7 @@ const PagarPage = () => {
                     <div className="space-y-2">
                       {cart.map((item) => (
                         <div key={item.id} className="flex items-center gap-3">
-                          <img src={resolveImage(item.image)} alt={item.name} className="w-12 h-12 rounded-lg object-cover" />
+                          <img src={resolveImage(item.image)} alt={item.name} className="w-12 h-12 rounded-lg object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium truncate">{item.name}</p>
                             <p className="text-xs text-muted">Cantidad: {item.quantity}</p>
@@ -667,7 +671,7 @@ const PagarPage = () => {
               <div className="space-y-3 max-h-72 overflow-y-auto pr-1">
                 {cart.map((item) => (
                   <div key={item.id} className="flex items-center gap-3">
-                    <img src={resolveImage(item.image)} alt={item.name} className="w-14 h-14 rounded-lg object-cover" />
+                    <img src={resolveImage(item.image)} alt={item.name} className="w-14 h-14 rounded-lg object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium truncate">{item.name}</p>
                       <p className="text-xs text-muted">Cantidad: {item.quantity}</p>

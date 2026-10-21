@@ -30,6 +30,7 @@ export const Register = () => {
     const [loading, setLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
     const password = form.password;
 
@@ -66,6 +67,7 @@ export const Register = () => {
 
     const handleRegister = async (e: React.FormEvent) => {
         e.preventDefault();
+        setFieldErrors({});
 
         if (form.password !== form.confirmPassword) {
             showPopup("Las contraseñas no coinciden", "error");
@@ -73,20 +75,54 @@ export const Register = () => {
         }
 
         if (!isPasswordValid) {
-            showPopup("La contraseña no es segura", "error");
+            showPopup("La contraseña no es segura. Debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.", "error");
             return;
         }
 
         if (mode === "empresa") {
-            if (!form.companyName.trim() || !form.nit.trim() || !form.address.trim()) {
-                showPopup("Completa los datos de la empresa", "error");
+            if (!form.companyName.trim()) {
+                setFieldErrors({ companyName: "El nombre de la empresa es obligatorio" });
+                showPopup("Completa el nombre de la empresa", "error");
+                return;
+            }
+            if (!form.nit.trim()) {
+                setFieldErrors({ nit: "El NIT es obligatorio" });
+                showPopup("Completa el NIT de la empresa", "error");
+                return;
+            }
+            if (!form.nitDV.trim()) {
+                setFieldErrors({ nitDV: "El dígito de verificación es obligatorio" });
+                showPopup("Completa el dígito de verificación del NIT", "error");
+                return;
+            }
+            if (!form.address.trim()) {
+                setFieldErrors({ address: "La dirección es obligatoria" });
+                showPopup("Completa la dirección de la empresa", "error");
                 return;
             }
         } else {
+            if (!form.name.trim()) {
+                setFieldErrors({ name: "El nombre es obligatorio" });
+                showPopup("Completa tu nombre", "error");
+                return;
+            }
             if (!form.surname.trim()) {
+                setFieldErrors({ surname: "El apellido es obligatorio" });
                 showPopup("Completa tu apellido", "error");
                 return;
             }
+        }
+
+        if (!form.email.trim()) {
+            setFieldErrors({ email: "El correo es obligatorio" });
+            showPopup("Completa tu correo electrónico", "error");
+            return;
+        }
+
+        if (!form.tell.trim()) {
+            setFieldErrors({ tell: "El teléfono es obligatorio" });
+            showPopup("Completa tu número de teléfono", "error");
+            return;
         }
 
         setLoading(true);
@@ -147,15 +183,39 @@ export const Register = () => {
             }
         } catch (error) {
             if (axios.isAxiosError(error)) {
-                showPopup(
-                    errorDetailMessage(
-                        error,
-                        mode === "empresa" ? "No se pudo registrar la empresa" : "Error al registrar"
-                    ),
-                    "error"
-                );
+                const errorData = error.response?.data;
+                let errorMsg = "";
+                const newFieldErrors: Record<string, string> = {};
+
+                if (errorData?.detail) {
+                    if (Array.isArray(errorData.detail)) {
+                        // Pydantic validation errors
+                        const errors = errorData.detail;
+                        errors.forEach((err: any) => {
+                            const field = err.loc?.[err.loc.length - 1] || "";
+                            const msg = err.msg || "Error de validación";
+                            newFieldErrors[field] = msg;
+                        });
+                        errorMsg = errors.map((e: any) => e.msg).join(". ");
+                    } else if (typeof errorData.detail === "string") {
+                        errorMsg = errorData.detail;
+                        // Map common backend errors to fields
+                        if (errorMsg.includes("correo") || errorMsg.includes("email")) {
+                            newFieldErrors.email = errorMsg;
+                        } else if (errorMsg.includes("NIT")) {
+                            newFieldErrors.nit = errorMsg;
+                        } else if (errorMsg.includes("nombre")) {
+                            newFieldErrors.companyName = errorMsg;
+                        }
+                    }
+                } else {
+                    errorMsg = mode === "empresa" ? "No se pudo registrar la empresa" : "Error al registrar";
+                }
+
+                setFieldErrors(newFieldErrors);
+                showPopup(errorMsg, "error");
             } else {
-                showPopup("Error desconocido", "error");
+                showPopup("Error desconocido. Intenta de nuevo.", "error");
             }
         } finally {
             setLoading(false);
@@ -214,10 +274,11 @@ export const Register = () => {
                                     name="name"
                                     value={form.name}
                                     onChange={handleChange}
-                                    className="input-base"
+                                    className={`input-base ${fieldErrors.name ? 'border-red-500' : ''}`}
                                     placeholder={mode === "empresa" ? "Nombre de contacto" : "Su Nombre"}
                                     required
                                 />
+                                {fieldErrors.name && <p className="text-xs text-red-400 mt-1">{fieldErrors.name}</p>}
                             </div>
                             
                             {mode === "usuario" && (
@@ -229,10 +290,11 @@ export const Register = () => {
                                         name="surname"
                                         value={form.surname}
                                         onChange={handleChange}
-                                        className="input-base"
+                                        className={`input-base ${fieldErrors.surname ? 'border-red-500' : ''}`}
                                         placeholder="Su Apellido"
                                         required
                                     />
+                                    {fieldErrors.surname && <p className="text-xs text-red-400 mt-1">{fieldErrors.surname}</p>}
                                 </div>
                             )}
                         </div>
@@ -246,10 +308,11 @@ export const Register = () => {
                                 type="email"
                                 value={form.email}
                                 onChange={handleChange}
-                                className="input-base"
+                                className={`input-base ${fieldErrors.email ? 'border-red-500' : ''}`}
                                 placeholder="tu@email.com"
                                 required
                               />
+                            {fieldErrors.email && <p className="text-xs text-red-400 mt-1">{fieldErrors.email}</p>}
                         </div>
 
                         <div>
@@ -260,10 +323,11 @@ export const Register = () => {
                                 name="tell"
                                 value={form.tell}
                                 onChange={handleChange}
-                                className="input-base"
+                                className={`input-base ${fieldErrors.tell ? 'border-red-500' : ''}`}
                                 placeholder="+57 300 123 4567"
                                 required
                             />
+                            {fieldErrors.tell && <p className="text-xs text-red-400 mt-1">{fieldErrors.tell}</p>}
                         </div>
 
                         <div>
@@ -351,10 +415,11 @@ export const Register = () => {
                                         name="companyName"
                                         value={form.companyName}
                                         onChange={handleChange}
-                                        className="input-base"
+                                        className={`input-base ${fieldErrors.companyName ? 'border-red-500' : ''}`}
                                         placeholder="Lubix S.A.S"
                                         required
                                     />
+                                    {fieldErrors.companyName && <p className="text-xs text-red-400 mt-1">{fieldErrors.companyName}</p>}
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
@@ -366,10 +431,11 @@ export const Register = () => {
                                             name="nit"
                                             value={form.nit}
                                             onChange={handleChange}
-                                            className="input-base"
+                                            className={`input-base ${fieldErrors.nit ? 'border-red-500' : ''}`}
                                             placeholder="900123456"
                                             required
                                         />
+                                        {fieldErrors.nit && <p className="text-xs text-red-400 mt-1">{fieldErrors.nit}</p>}
                                     </div>
                                     <div>
                                         <label className="label-base">
@@ -379,11 +445,12 @@ export const Register = () => {
                                             name="nitDV"
                                             value={form.nitDV}
                                             onChange={handleChange}
-                                            className="input-base"
+                                            className={`input-base ${fieldErrors.nitDV ? 'border-red-500' : ''}`}
                                             placeholder="7"
                                             maxLength={1}
                                             required
                                         />
+                                        {fieldErrors.nitDV && <p className="text-xs text-red-400 mt-1">{fieldErrors.nitDV}</p>}
                                     </div>
                                 </div>
 
@@ -395,10 +462,11 @@ export const Register = () => {
                                         name="address"
                                         value={form.address}
                                         onChange={handleChange}
-                                        className="input-base"
+                                        className={`input-base ${fieldErrors.address ? 'border-red-500' : ''}`}
                                         placeholder="Calle 123 #45-67"
                                         required
                                     />
+                                    {fieldErrors.address && <p className="text-xs text-red-400 mt-1">{fieldErrors.address}</p>}
                                 </div>
                             </>
                         )}

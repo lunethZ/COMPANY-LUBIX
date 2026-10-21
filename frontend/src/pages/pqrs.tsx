@@ -129,7 +129,7 @@ export default function PQRSPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col">
+      <div className="page-container min-h-screen flex flex-col">
         <NavbarAuto />
         <div className="flex-1 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
@@ -140,7 +140,7 @@ export default function PQRSPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
+    <div className="page-container min-h-screen flex flex-col">
       <NavbarAuto />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 flex-1 w-full">
 
@@ -156,13 +156,14 @@ export default function PQRSPage() {
 
         <div className="flex items-center justify-between mb-8">
           <div>
-            <h1 className="text-2xl font-bold text-white">PQRS</h1>
-            <p className="text-gray-400 text-sm mt-1">Peticiones, Quejas, Reclamos y Sugerencias</p>
+            <h1 className="text-2xl font-bold" style={{ color: "var(--color-text)" }}>PQRS</h1>
+            <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>Peticiones, Quejas, Reclamos y Sugerencias</p>
           </div>
           <div className="flex gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+              className="px-4 py-2 rounded-xl font-medium transition-colors border"
+              style={{ backgroundColor: "var(--color-btn-secondary)", color: "var(--color-text)", borderColor: "var(--color-border)" }}
             >
               Volver
             </button>
@@ -199,19 +200,19 @@ export default function PQRSPage() {
         )}
 
         {showForm && (
-          <div className="bg-slate-900 border border-slate-800 rounded-xl p-6 mb-8">
+          <div className="rounded-xl p-6 mb-8 border" style={{ backgroundColor: "var(--color-bg-card)", borderColor: "var(--color-border)" }}>
             <div className="flex items-center justify-between mb-5">
-              <h2 className="text-lg font-bold text-white">
+              <h2 className="text-lg font-bold" style={{ color: "var(--color-text)" }}>
                 {isDeleteRequest ? 'Solicitar eliminación de cuenta' : 'Nueva solicitud PQRS'}
               </h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-white">
+              <button onClick={() => setShowForm(false)} className="hover:opacity-70" style={{ color: "var(--color-text-muted)" }}>
                 <XMarkIcon className="w-5 h-5" />
               </button>
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-400 mb-2">Tipo de solicitud</label>
+                <label className="block text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>Tipo de solicitud</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
                     { value: 'peticion', label: 'Petición', icon: <QuestionMarkCircleIcon className="w-4 h-4" /> },
@@ -224,11 +225,12 @@ export default function PQRSPage() {
                       type="button"
                       onClick={() => setForm(prev => ({ ...prev, type: opt.value }))}
                       disabled={isDeleteRequest}
-                      className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-medium text-sm transition-all ${
+                      className={`flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg font-medium text-sm transition-all border ${
                         form.type === opt.value
                           ? 'bg-green-500 text-white'
-                          : 'bg-slate-800 text-gray-400 hover:bg-slate-700 border border-slate-700'
+                          : ''
                       } ${isDeleteRequest ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      style={form.type === opt.value ? { borderColor: "transparent" } : { backgroundColor: "var(--color-bg-input)", color: "var(--color-text-muted)", borderColor: "var(--color-border)" }}
                     >
                       {opt.icon}
                       {opt.label}
@@ -238,7 +240,7 @@ export default function PQRSPage() {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-1">Asunto</label>
+                <label className="block text-sm mb-1" style={{ color: "var(--color-text-muted)" }}>Asunto</label>
                 <input
                   type="text"
                   value={form.subject}
@@ -249,7 +251,7 @@ export default function PQRSPage() {
                   placeholder="Breve descripción del motivo"
                   disabled={isDeleteRequest}
                   aria-invalid={!!errors.subject}
-                  className={`w-full px-4 py-2.5 bg-slate-800 border rounded-lg text-white text-sm focus:outline-none placeholder-gray-500 disabled:opacity-50 ${errors.subject ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                  className={`input-base disabled:opacity-50 ${errors.subject ? 'border-red-500 focus:border-red-500' : ''}`}
                 />
                 {errors.subject && (
                   <span className="block text-red-500 text-sm mt-1">{errors.subject}</span>
@@ -257,7 +259,7 @@ export default function PQRSPage() {
               </div>
 
               <div>
-                <label className="block text-sm text-gray-400 mb-1">
+                <label className="block text-sm mb-1" style={{ color: "var(--color-text-muted)" }}>
                   {isDeleteRequest ? '¿Por qué deseas eliminar tu cuenta?' : 'Descripción detallada'}
                 </label>
                 <textarea
@@ -272,7 +274,7 @@ export default function PQRSPage() {
                     : 'Describe tu petición, queja, reclamo o sugerencia en detalle...'
                   }
                   aria-invalid={!!errors.description}
-                  className={`w-full px-4 py-2.5 bg-slate-800 border rounded-lg text-white text-sm focus:outline-none placeholder-gray-500 resize-none ${errors.description ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                  className={`input-base resize-none ${errors.description ? 'border-red-500 focus:border-red-500' : ''}`}
                 />
                 {errors.description && (
                   <span className="block text-red-500 text-sm mt-1">{errors.description}</span>
@@ -283,7 +285,8 @@ export default function PQRSPage() {
                 <button
                   type="button"
                   onClick={() => setShowForm(false)}
-                  className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                  className="flex-1 py-2.5 rounded-xl font-medium transition-colors border"
+                  style={{ backgroundColor: "var(--color-btn-secondary)", color: "var(--color-text)", borderColor: "var(--color-border)" }}
                 >
                   Cancelar
                 </button>
@@ -309,11 +312,11 @@ export default function PQRSPage() {
           </div>
         )}
 
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-6">
-          <h2 className="text-lg font-bold text-white mb-5">Mis solicitudes ({pqrsList.length})</h2>
+        <div className="rounded-xl p-6 border" style={{ backgroundColor: "var(--color-bg-card)", borderColor: "var(--color-border)" }}>
+          <h2 className="text-lg font-bold mb-5" style={{ color: "var(--color-text)" }}>Mis solicitudes ({pqrsList.length})</h2>
 
           {pqrsList.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
+            <div className="text-center py-16" style={{ color: "var(--color-text-muted)" }}>
               <ChatBubbleLeftEllipsisIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
               <p className="text-lg font-medium">No tienes solicitudes aún</p>
               <p className="text-sm mt-1">Envía una petición, queja, reclamo o sugerencia</p>
@@ -323,16 +326,17 @@ export default function PQRSPage() {
               {pqrsList.map((item) => (
                 <div
                   key={item.id}
-                  className="border border-slate-800 rounded-xl p-4 hover:border-slate-700 transition-colors"
+                  className="rounded-xl p-4 border transition-colors"
+                  style={{ borderColor: "var(--color-border)" }}
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 border ${typeColors[item.type] || 'bg-slate-800 border-slate-700'}`}>
+                      <div className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 border ${typeColors[item.type] || ''}`}>
                         {typeIcons[item.type] || <ChatBubbleLeftEllipsisIcon className="w-5 h-5 text-gray-400" />}
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${typeColors[item.type] || 'bg-slate-800 border-slate-700 text-gray-400'}`}>
+                          <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${typeColors[item.type] || 'bg-gray-500/10 border-gray-500/30 text-gray-400'}`}>
                             {typeLabels[item.type] || item.type}
                           </span>
                           <span className={`text-xs px-2 py-0.5 rounded-full flex items-center gap-1 ${
@@ -344,9 +348,9 @@ export default function PQRSPage() {
                             {statusLabel(item.status)}
                           </span>
                         </div>
-                        <p className="text-white font-semibold text-sm mb-1">{item.subject}</p>
-                        <p className="text-gray-400 text-xs line-clamp-2">{item.description}</p>
-                        <p className="text-gray-500 text-xs mt-2">
+                        <p className="font-semibold text-sm mb-1" style={{ color: "var(--color-text)" }}>{item.subject}</p>
+                        <p className="text-xs line-clamp-2" style={{ color: "var(--color-text-muted)" }}>{item.description}</p>
+                        <p className="text-xs mt-2" style={{ color: "var(--color-text-muted)" }}>
                           {new Date(item.created_at).toLocaleDateString('es-CO', { day: 'numeric', month: 'long', year: 'numeric' })}
                         </p>
                       </div>
@@ -361,8 +365,8 @@ export default function PQRSPage() {
         <div className="mt-10">
           <div className="bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-2xl p-8 text-center">
             <ChatBubbleLeftEllipsisIcon className="w-12 h-12 mx-auto mb-4 text-green-400" />
-            <h3 className="text-xl font-bold text-white mb-2">¿Tienes algo que decirnos?</h3>
-            <p className="text-gray-400 text-sm mb-5 max-w-md mx-auto">
+            <h3 className="text-xl font-bold mb-2" style={{ color: "var(--color-text)" }}>¿Tienes algo que decirnos?</h3>
+            <p className="text-sm mb-5 max-w-md mx-auto" style={{ color: "var(--color-text-muted)" }}>
               Tu opinión nos ayuda a mejorar. No dudes en enviar cualquier petición, queja, reclamo o sugerencia.
             </p>
             <button

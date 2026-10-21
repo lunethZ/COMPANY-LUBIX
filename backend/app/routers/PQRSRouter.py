@@ -21,7 +21,7 @@ def create_pqrs(data: CreatePQRSRequest, request: Request, database: Session = D
     user_id = request.state.user_id
     user_role = request.state.role
 
-    if data.type not in ("peticion", "queja", "reclamo", "sugerencia"):
+    if data.type not in ("peticion", "queja", "reclamo", "sugerencia", "inhabilitar_cuenta"):
         raise HTTPException(status_code=400, detail="Tipo de PQRS no válido")
 
     new_pqrs = PQRS(

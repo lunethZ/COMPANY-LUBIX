@@ -208,7 +208,7 @@ class TestLoginUser:
             userLogin(email="ana.tester@lubix.com", password="OtraClave9"),
             db,
             status_code=400,
-            detail_contains="contraseña incorrectos",
+            detail_contains="Contraseña incorrecta",
         )
 
     def test_cuenta_de_empresa_devuelve_403(self, fake_db, make_user, password_doubles):

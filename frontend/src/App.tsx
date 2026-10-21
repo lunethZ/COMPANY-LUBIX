@@ -7,7 +7,6 @@ import VerificationCode from "./pages/verific-code";
 import NewPassword from "./pages/new-password";
 import Home from "./pages/Home"; 
 import HomeUsuario from "./pages/home-usuario";
-import HomeEmpresa from "./pages/home-empresa";
 import Dashboard from "./pages/dashboard-empresa";
 import DashboardUsuario from "./pages/dashboard-usuario";
 import BuscarProducto from "./pages/buscar-producto";
@@ -17,7 +16,9 @@ import PagarPage from "./pages/pagar";
 import { useAuth } from "./context/AuthContext";
 import DashboardAdmin from "./pages/dashboardadmin";
 import ProductoDetalle from "./pages/producto-detalle";
+import PerfilEmpresa from "./pages/perfil-empresa";
 import PQRSPage from "./pages/pqrs";
+import AuthModal from "./components/AuthModal";
 
 function ProtectedRoute({ allowedRoles, children }: { allowedRoles?: Array<"user" | "empresa" | "admin">, children: React.ReactNode }) {
   const { user, isAuthenticated } = useAuth();
@@ -29,7 +30,7 @@ function ProtectedRoute({ allowedRoles, children }: { allowedRoles?: Array<"user
 
   if (allowedRoles && !allowedRoles.includes(user.role_id)) {
     // Redirigir al home correcto según rol si intenta entrar a ruta no autorizada
-    if (user.role_id === "empresa") return <Navigate to="/home-empresa" replace />;
+    if (user.role_id === "empresa") return <Navigate to="/dashboard-empresa" replace />;
     if (user.role_id === "admin") return <Navigate to="/dashboard-admin" replace />;
     return <Navigate to="/home-usuario" replace />;
   }
@@ -40,7 +41,7 @@ function ProtectedRoute({ allowedRoles, children }: { allowedRoles?: Array<"user
 function PublicOnlyRoute({ children }: { children: React.ReactNode }) {
   const { user, isAuthenticated } = useAuth();
   if (isAuthenticated && user) {
-    if (user.role_id === "empresa") return <Navigate to="/home-empresa" replace />;
+    if (user.role_id === "empresa") return <Navigate to="/dashboard-empresa" replace />;
     if (user.role_id === "admin") return <Navigate to="/dashboard-admin" replace />;
     return <Navigate to="/home-usuario" replace />;
   }
@@ -77,7 +78,9 @@ function App() {
   }, []);
 
   return (
-    <Routes>
+    <>
+      <AuthModal />
+      <Routes>
       <Route path="/" element={<Home />} />
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
@@ -87,17 +90,19 @@ function App() {
 
       {/* Rutas protegidas: requieren sesión. El back tras logout no podrá verlas gracias a ProtectedRoute + replace */}
       <Route path="/home-usuario" element={<ProtectedRoute allowedRoles={["user"]}><HomeUsuario /></ProtectedRoute>} />
-      <Route path="/home-empresa" element={<ProtectedRoute allowedRoles={["empresa"]}><HomeEmpresa /></ProtectedRoute>} />
+      <Route path="/home-empresa" element={<Navigate to="/dashboard-empresa" replace />} />
       <Route path="/dashboard-empresa" element={<ProtectedRoute allowedRoles={["empresa"]}><Dashboard /></ProtectedRoute>} />
       <Route path="/dashboard-usuario" element={<ProtectedRoute allowedRoles={["user"]}><DashboardUsuario /></ProtectedRoute>} />
       <Route path="/carrito" element={<ProtectedRoute allowedRoles={["user"]}><CartPage /></ProtectedRoute>} />
       <Route path="/pago" element={<ProtectedRoute allowedRoles={["user"]}><PagarPage /></ProtectedRoute>} />
       <Route path="/buscar" element={<BuscarProducto />} />
       <Route path="/producto/:id" element={<ProductoDetalle />} />
+      <Route path="/empresa/:id" element={<PerfilEmpresa />} />
       <Route path="/productos" element={<Productos />} />
       <Route path="/pqrs" element={<PQRSPage />} />
       <Route path="/dashboard-admin" element={<ProtectedAdminRoute />} />
-    </Routes>
+      </Routes>
+    </>
   );
 }
 
