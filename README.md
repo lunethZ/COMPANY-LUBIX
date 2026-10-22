@@ -1,11 +1,12 @@
-﻿# 🏢 LUBIX - Plataforma de Gestión Empresarial
+﻿# LUBIX - Plataforma de Gestión Empresarial
 
 **Solución integral de gestión de usuarios, empresas y productos**
 
 Repositorio principal del código fuente de la compañía Lubix.
+
 ---
 
-## 📋 Tabla de Contenidos
+## Tabla de Contenidos
 
 - [Descripción General](#descripción-general)
 - [Características Principales](#características-principales)
@@ -19,7 +20,7 @@ Repositorio principal del código fuente de la compañía Lubix.
 
 ---
 
-## 📝 Descripción General
+## Descripción General
 
 **LUBIX** es una plataforma completa de gestión empresarial que integra:
 
@@ -34,49 +35,55 @@ Esta arquitectura permite escalabilidad horizontal, mantenibilidad y una experie
 
 ---
 
-## ✨ Características Principales
+## Características Principales
 
-### 🔐 Autenticación y Seguridad
-- ✅ Registro de usuarios
-- ✅ Inicio de sesión con JWT (JSON Web Tokens)
-- ✅ Middleware de autenticación segura
-- ✅ Encriptación de contraseñas con bcrypt
-- ✅ Recuperación de contraseña mediante correo electrónico
-- ✅ Verificación de cuenta por correo electrónico
-- ✅ Tokens de refresco automático
+### Autenticación y Seguridad
 
-### 👥 Gestión de Usuarios
-- ✅ CRUD completo de usuarios
-- ✅ Gestión de roles y permisos
-- ✅ Perfiles de usuario personalizables
-- ✅ Auditoría de actividades
+- Registro de usuarios
+- Inicio de sesión con JWT (JSON Web Tokens)
+- Middleware de autenticación segura
+- Encriptación de contraseñas con bcrypt
+- Recuperación de contraseña mediante correo electrónico
+- Verificación de cuenta por correo electrónico
+- Tokens de refresco automático
 
-### 🏢 Gestión de Empresas
-- ✅ Creación y gestión de empresas
-- ✅ Gestión de catálogos de productos
-- ✅ Dashboard analítico en tiempo real
-- ✅ Gestión de códigos y promociones
+### Gestión de Usuarios
 
-### 📦 Gestión de Productos
-- ✅ CRUD de productos
-- ✅ Gestión de categorías
-- ✅ Almacenamiento de imágenes en MinIO
-- ✅ Información detallada de productos
+- CRUD completo de usuarios
+- Gestión de roles y permisos
+- Perfiles de usuario personalizables
+- Auditoría de actividades
 
-### 🛒 Carrito de Compras
-- ✅ Gestión de carritos
-- ✅ Cálculo dinámico de totales
-- ✅ Gestión de pedidos
+### Gestión de Empresas
 
-### 🎨 Experiencia de Usuario
-- ✅ Tema claro/oscuro automático
-- ✅ Interfaz responsiva
-- ✅ Diseño moderno con Tailwind CSS
-- ✅ Componentes reutilizables
+- Creación y gestión de empresas
+- Gestión de catálogos de productos
+- Dashboard analítico en tiempo real
+- Gestión de códigos y promociones
+
+### Gestión de Productos
+
+- CRUD de productos
+- Gestión de categorías
+- Almacenamiento de imágenes en MinIO
+- Información detallada de productos
+
+### Carrito de Compras
+
+- Gestión de carritos
+- Cálculo dinámico de totales
+- Gestión de pedidos
+
+### Experiencia de Usuario
+
+- Tema claro/oscuro automático
+- Interfaz responsiva
+- Diseño moderno con Tailwind CSS
+- Componentes reutilizables
 
 ---
 
-## 🛠️ Stack Tecnológico
+## Stack Tecnológico
 
 ### Backend
 
@@ -126,161 +133,161 @@ Esta arquitectura permite escalabilidad horizontal, mantenibilidad y una experie
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 LUBIX-COMPANY/
 │
-├── 📄 README.md                          # Este archivo - Documentación principal
-├── 📄 docker-compose.yml                 # Orquestación de contenedores
+├── README.md                              # Este archivo - Documentación principal
+├── docker-compose.yml                     # Orquestación de contenedores
 │
-├── 📁 backend/                           # API Backend
-│   ├── 📄 main.py                        # Punto de entrada
-│   ├── 📄 pyproject.toml                 # Dependencias del proyecto
-│   ├── 📄 Dockerfile                     # Contenedor del backend
-│   ├── 📄 alembic.ini                    # Configuración de migraciones
-│   ├── 📄 README.md                      # Documentación del backend
-│   ├── 📄 CHANGELOG.md                   # Histórico de cambios
+├── backend/                               # API Backend
+│   ├── main.py                            # Punto de entrada
+│   ├── pyproject.toml                     # Dependencias del proyecto
+│   ├── Dockerfile                         # Contenedor del backend
+│   ├── alembic.ini                        # Configuración de migraciones
+│   ├── README.md                          # Documentación del backend
+│   ├── CHANGELOG.md                       # Histórico de cambios
 │   │
-│   ├── 📁 app/
-│   │   ├── 📄 main.py                    # Aplicación FastAPI
-│   │   ├── 📄 Config.py                  # Configuración global
+│   ├── app/
+│   │   ├── main.py                        # Aplicación FastAPI
+│   │   ├── Config.py                      # Configuración global
 │   │   │
-│   │   ├── 📁 database/
-│   │   │   └── 📄 Connection.py          # Conexión a PostgreSQL
+│   │   ├── database/
+│   │   │   └── Connection.py              # Conexión a PostgreSQL
 │   │   │
-│   │   ├── 📁 models/                    # Modelos SQLAlchemy
-│   │   │   ├── 📄 ModelUser.py
-│   │   │   ├── 📄 ModelCompany.py
-│   │   │   ├── 📄 ModelProduct.py
-│   │   │   ├── 📄 ModelRole.py
-│   │   │   ├── 📄 ModelCode.py
-│   │   │   └── 📄 ModelRefreshToken.py
+│   │   ├── models/                        # Modelos SQLAlchemy
+│   │   │   ├── ModelUser.py
+│   │   │   ├── ModelCompany.py
+│   │   │   ├── ModelProduct.py
+│   │   │   ├── ModelRole.py
+│   │   │   ├── ModelCode.py
+│   │   │   └── ModelRefreshToken.py
 │   │   │
-│   │   ├── 📁 schemas/                   # Esquemas Pydantic
-│   │   │   ├── 📄 SchemaAuthUser.py
-│   │   │   ├── 📄 SchemaAuthCompany.py
-│   │   │   ├── 📄 SchemaProduct.py
-│   │   │   └── 📁 dashboard/
-│   │   │       └── 📄 SchemaCompany.py
+│   │   ├── schemas/                       # Esquemas Pydantic
+│   │   │   ├── SchemaAuthUser.py
+│   │   │   ├── SchemaAuthCompany.py
+│   │   │   ├── SchemaProduct.py
+│   │   │   └── dashboard/
+│   │   │       └── SchemaCompany.py
 │   │   │
-│   │   ├── 📁 routers/                   # Rutas API
-│   │   │   ├── 📄 AuthRouters.py         # Autenticación
-│   │   │   ├── 📄 CompanyRouter.py       # Gestión de empresas
-│   │   │   ├── 📄 CardRouters.py         # Carrito de compras
-│   │   │   └── 📄 HealthRouter.py        # Health check
+│   │   ├── routers/                       # Rutas API
+│   │   │   ├── AuthRouters.py             # Autenticación
+│   │   │   ├── CompanyRouter.py           # Gestión de empresas
+│   │   │   ├── CardRouters.py             # Carrito de compras
+│   │   │   └── HealthRouter.py            # Health check
 │   │   │
-│   │   ├── 📁 services/                  # Lógica de negocio
-│   │   │   ├── 📁 authentication/
-│   │   │   │   ├── 📄 AuthService.py
-│   │   │   │   └── 📄 JWTService.py
-│   │   │   ├── 📁 email/
-│   │   │   │   ├── 📄 EmailService.py
-│   │   │   │   ├── 📄 SaveAndGenerateCode.py
-│   │   │   │   └── 📁 template/
-│   │   │   │       ├── 📄 EmailRegisterUser.py
-│   │   │   │       ├── 📄 EmailRegisterCompany.py
-│   │   │   │       ├── 📄 EmailVerify.py
-│   │   │   │       └── 📄 EmailForgotPassword.py
-│   │   │   ├── 📁 CompanyServices/
-│   │   │   │   ├── 📄 Dasboard.py
-│   │   │   │   └── 📄 Products.py
-│   │   │   └── 📄 NasService.py          # Gestión de MinIO
+│   │   ├── services/                      # Lógica de negocio
+│   │   │   ├── authentication/
+│   │   │   │   ├── AuthService.py
+│   │   │   │   └── JWTService.py
+│   │   │   ├── email/
+│   │   │   │   ├── EmailService.py
+│   │   │   │   ├── SaveAndGenerateCode.py
+│   │   │   │   └── template/
+│   │   │   │       ├── EmailRegisterUser.py
+│   │   │   │       ├── EmailRegisterCompany.py
+│   │   │   │       ├── EmailVerify.py
+│   │   │   │       └── EmailForgotPassword.py
+│   │   │   ├── CompanyServices/
+│   │   │   │   ├── Dasboard.py
+│   │   │   │   └── Products.py
+│   │   │   └── NasService.py              # Gestión de MinIO
 │   │   │
-│   │   ├── 📁 middleware/
-│   │   │   ├── 📄 AuthMiddleware.py      # Validación de JWT
-│   │   │   └── 📄 CorsMiddleware.py      # CORS
+│   │   ├── middleware/
+│   │   │   ├── AuthMiddleware.py          # Validación de JWT
+│   │   │   └── CorsMiddleware.py          # CORS
 │   │   │
-│   │   ├── 📁 utils/
-│   │   │   ├── 📄 Security.py            # Utilidades de seguridad
-│   │   │   ├── 📄 CheckNetwork.py        # Validaciones de red
-│   │   │   ├── 📄 Config.py              # Configuración
-│   │   │   ├── 📄 seed.py                # Datos iniciales
-│   │   │   └── 📄 TestDatabase.py        # Pruebas de BD
+│   │   ├── utils/
+│   │   │   ├── Security.py                # Utilidades de seguridad
+│   │   │   ├── CheckNetwork.py            # Validaciones de red
+│   │   │   ├── Config.py                  # Configuración
+│   │   │   ├── seed.py                    # Datos iniciales
+│   │   │   └── TestDatabase.py            # Pruebas de BD
 │   │   │
-│   │   └── 📁 docs/
-│   │       ├── 📄 ENDPOINTS.md           # Documentación de endpoints
-│   │       └── 📄 AUDITORIA.md           # Auditoría del sistema
+│   │   └── docs/
+│   │       ├── ENDPOINTS.md               # Documentación de endpoints
+│   │       └── AUDITORIA.md               # Auditoría del sistema
 │   │
-│   └── 📁 alembic/                       # Migraciones de BD
-│       ├── 📄 env.py
-│       ├── 📄 script.py.mako
-│       └── 📁 versions/
-│           ├── 📄 8604d5f49af7_initial_migration.py
-│           └── 📄 ebac4a669c65_add_new_table_product_and_catalog.py
+│   └── alembic/                           # Migraciones de BD
+│       ├── env.py
+│       ├── script.py.mako
+│       └── versions/
+│           ├── 8604d5f49af7_initial_migration.py
+│           └── ebac4a669c65_add_new_table_product_and_catalog.py
 │
-├── 📁 frontend/                          # Aplicación React
-│   ├── 📄 package.json                   # Dependencias npm
-│   ├── 📄 pnpm-lock.yaml                 # Lock file
-│   ├── 📄 vite.config.ts                 # Configuración Vite
-│   ├── 📄 tailwind.config.js             # Configuración Tailwind
-│   ├── 📄 tsconfig.json                  # Configuración TypeScript
-│   ├── 📄 index.html                     # HTML principal
-│   ├── 📄 Dockerfile                     # Contenedor del frontend
-│   ├── 📄 README.md                      # Documentación del frontend
-│   ├── 📄 eslint.config.js               # Configuración ESLint
-│   ├── 📄 postcss.config.cjs             # Configuración PostCSS
+├── frontend/                              # Aplicación React
+│   ├── package.json                       # Dependencias npm
+│   ├── pnpm-lock.yaml                     # Lock file
+│   ├── vite.config.ts                     # Configuración Vite
+│   ├── tailwind.config.js                 # Configuración Tailwind
+│   ├── tsconfig.json                      # Configuración TypeScript
+│   ├── index.html                         # HTML principal
+│   ├── Dockerfile                         # Contenedor del frontend
+│   ├── README.md                          # Documentación del frontend
+│   ├── eslint.config.js                   # Configuración ESLint
+│   ├── postcss.config.cjs                 # Configuración PostCSS
 │   │
-│   ├── 📁 public/                        # Recursos estáticos
+│   ├── public/                            # Recursos estáticos
 │   │
-│   └── 📁 src/
-│       ├── 📄 main.tsx                   # Punto de entrada
-│       ├── 📄 App.tsx                    # Componente raíz
-│       ├── 📄 index.css                  # 🎨 Estilos globales + Variables CSS
-│       ├── 📄 App.css
+│   └── src/
+│       ├── main.tsx                       # Punto de entrada
+│       ├── App.tsx                        # Componente raíz
+│       ├── index.css                      # Estilos globales + Variables CSS
+│       ├── App.css
 │       │
-│       ├── 📁 components/                # Componentes reutilizables
-│       │   └── 📄 navbar.tsx
+│       ├── components/                    # Componentes reutilizables
+│       │   └── navbar.tsx
 │       │
-│       ├── 📁 pages/                     # Páginas/Rutas
-│       │   ├── 📄 login.tsx
-│       │   ├── 📄 registrer.tsx
-│       │   ├── 📄 reset-password.tsx
-│       │   └── 📄 Home.tsx
+│       ├── pages/                         # Páginas/Rutas
+│       │   ├── login.tsx
+│       │   ├── registrer.tsx
+│       │   ├── reset-password.tsx
+│       │   └── Home.tsx
 │       │
-│       ├── 📁 context/                   # Context API
-│       │   ├── 📄 ThemeContext.tsx
-│       │   ├── 📄 ThemeProvider.tsx
-│       │   ├── 📄 AuthContext.tsx
-│       │   └── 📄 AuthProvider.tsx
+│       ├── context/                       # Context API
+│       │   ├── ThemeContext.tsx
+│       │   ├── ThemeProvider.tsx
+│       │   ├── AuthContext.tsx
+│       │   └── AuthProvider.tsx
 │       │
-│       ├── 📁 services/                  # Servicios HTTP
+│       ├── services/                      # Servicios HTTP
 │       │   └── Consumo de APIs
 │       │
-│       ├── 📁 types/                     # Tipos TypeScript
+│       ├── types/                         # Tipos TypeScript
 │       │   └── Definiciones de tipos
 │       │
-│       ├── 📁 constants/                 # Constantes
+│       ├── constants/                     # Constantes
 │       │   └── Valores globales
 │       │
-│       ├── 📁 assets/                    # Imágenes, iconos
+│       ├── assets/                        # Imágenes, iconos
 │       │   └── Recursos multimedia
 │       │
-│       └── 📁 api/                       # Configuración de APIs
+│       └── api/                           # Configuración de APIs
 │           └── Cliente HTTP
 │
-└── 📁 Docs/                              # Documentación del proyecto
-    ├── 📁 HUs/                           # Historias de Usuario
-    │   ├── 📁 Administración/
-    │   ├── 📁 Autenticación/
-    │   ├── 📁 Carrito De Compras/
-    │   ├── 📁 Catalogo/
-    │   ├── 📁 Pedidos/
-    │   ├── 📁 Perfil de Usuario/
-    │   ├── 📁 Productos/
-    │   └── 📁 Soporte/
+└── Docs/                                  # Documentación del proyecto
+    ├── HUs/                               # Historias de Usuario
+    │   ├── Administración/
+    │   ├── Autenticación/
+    │   ├── Carrito De Compras/
+    │   ├── Catalogo/
+    │   ├── Pedidos/
+    │   ├── Perfil de Usuario/
+    │   ├── Productos/
+    │   └── Soporte/
     │
-    ├── 📁 RFs/                           # Requisitos Funcionales
-    │   ├── 📁 Administración/
-    │   ├── 📁 Autenticación/
-    │   ├── 📁 Carrito de Compras/
-    │   ├── 📁 Catalogo/
-    │   ├── 📁 Pedidos/
-    │   ├── 📁 Perfil de Usuario/
-    │   ├── 📁 Productos/
-    │   └── 📁 Soporte/
+    ├── RFs/                               # Requisitos Funcionales
+    │   ├── Administración/
+    │   ├── Autenticación/
+    │   ├── Carrito de Compras/
+    │   ├── Catalogo/
+    │   ├── Pedidos/
+    │   ├── Perfil de Usuario/
+    │   ├── Productos/
+    │   └── Soporte/
     │
-    └── 📁 RNFs/                          # Requisitos No Funcionales
+    └── RNFs/                              # Requisitos No Funcionales
         ├── RNF-001 — Tiempo de respuesta.md
         ├── RNF-002 — Concurrencia.md
         ├── RNF-003 — Autenticación segura.md
@@ -300,33 +307,35 @@ LUBIX-COMPANY/
 
 ---
 
-## 📋 Requisitos Previos
+## Requisitos Previos
 
 Antes de instalar y ejecutar el proyecto, asegúrate de tener:
 
 ### Mínimo requerido
+
 - **Docker** (v20.10+) — [Descargar](https://www.docker.com/products/docker-desktop)
 - **Docker Compose** (v2.0+) — Incluido en Docker Desktop
 - **Git** — Control de versiones
 - **Editor de código** — VS Code recomendado
 
 ### Desarrollo local (opcional)
+
 - **Python 3.13** — [Descargar](https://www.python.org/downloads/)
 - **Node.js 18+** y **pnpm** — [Descargar](https://nodejs.org/) y `npm install -g pnpm`
 - **PostgreSQL 16** — [Descargar](https://www.postgresql.org/download/)
 
 ---
 
-## 🚀 Instalación y Configuración
+## Instalación y Configuración
 
-### 1️⃣ Clonar el Repositorio
+### Paso 1: Clonar el Repositorio
 
 ```bash
 git clone https://github.com/RehnieyAl/lubix-company.git
 cd lubix-company
 ```
 
-### 2️⃣ Crear Archivo de Variables de Entorno
+### Paso 2: Crear Archivo de Variables de Entorno
 
 En la raíz del proyecto, crea un archivo `.env`:
 
@@ -338,11 +347,12 @@ cp .env.example .env
 copy .env.example .env
 ```
 
-### 3️⃣ Configurar Variables de Entorno
+### Paso 3: Configurar Variables de Entorno
 
 Edita el archivo `.env` y configura las siguientes variables:
 
-#### 🗄️ PostgreSQL
+#### PostgreSQL
+
 ```env
 POSTGRES_USER=lubix_user
 POSTGRES_PASSWORD=tu_password_seguro
@@ -352,7 +362,8 @@ POSTGRES_PORT=5432
 DATABASE_URL=postgresql://lubix_user:tu_password_seguro@postgres:5432/lubix_db
 ```
 
-#### 🔐 JWT
+#### JWT
+
 ```env
 SECRET_KEY=tu_clave_secreta_muy_larga_y_segura
 ALGORITHM=HS256
@@ -360,7 +371,8 @@ ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_EXPIRE_DAYS=7
 ```
 
-#### 📧 SMTP (Gmail)
+#### SMTP (Gmail)
+
 ```env
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
@@ -369,7 +381,8 @@ SMTP_PASSWORD=tu_contraseña_de_aplicacion
 SENDER_EMAIL=tu_email@gmail.com
 ```
 
-#### 📦 MinIO
+#### MinIO
+
 ```env
 MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=minioadmin123
@@ -377,7 +390,8 @@ MINIO_URL=http://minio:9000
 MINIO_BUCKET=lubix
 ```
 
-#### 🔧 Backend
+#### Backend
+
 ```env
 BACKEND_URL=http://localhost:8001
 ENVIRONMENT=development
@@ -385,22 +399,26 @@ LOG_LEVEL=INFO
 RUN_SEED=False  # Cambiar a True solo en la primera ejecución
 ```
 
-⚠️ **IMPORTANTE SOBRE SEED**: La primera vez que ejecutes el proyecto, activa la seed:
+**IMPORTANTE SOBRE SEED**: La primera vez que ejecutes el proyecto, activa la seed:
+
 ```env
 RUN_SEED=True
 ```
+
 Después de que se complete la inicialización, apágala:
+
 ```env
 RUN_SEED=False
 ```
 
-### 4️⃣ Construir los Contenedores
+### Paso 4: Construir los Contenedores
 
 ```bash
 docker compose build
 ```
 
 Este comando construirá:
+
 - Backend (FastAPI con Python 3.13)
 - Frontend (React con Node.js)
 - PostgreSQL
@@ -408,7 +426,7 @@ Este comando construirá:
 
 ---
 
-## ▶️ Ejecución del Proyecto
+## Ejecución del Proyecto
 
 ### Iniciar con Docker Compose
 
@@ -423,6 +441,7 @@ docker compose ps
 ```
 
 Deberías ver:
+
 ```
 NAME                COMMAND                  SERVICE      STATUS      PORTS
 lubix-postgres      postgres                 postgres     Up          0.0.0.0:5434->5432/tcp
@@ -451,10 +470,10 @@ docker compose logs -f postgres
 
 | Servicio | URL | Descripción |
 |----------|-----|-------------|
-| 🌐 Frontend | [http://localhost:5173](http://localhost:5173) | Aplicación React |
-| 📡 Backend API | [http://localhost:8001](http://localhost:8001) | API FastAPI |
-| 📚 API Docs | [http://localhost:8001/docs](http://localhost:8001/docs) | Swagger UI |
-| 🗄️ MinIO | [http://localhost:9000](http://localhost:9000) | Almacenamiento de archivos |
+| Frontend | [http://localhost:5173](http://localhost:5173) | Aplicación React |
+| Backend API | [http://localhost:8001](http://localhost:8001) | API FastAPI |
+| API Docs | [http://localhost:8001/docs](http://localhost:8001/docs) | Swagger UI |
+| MinIO | [http://localhost:9000](http://localhost:9000) | Almacenamiento de archivos |
 
 ### Ejecutar Migraciones de Base de Datos
 
@@ -485,7 +504,7 @@ docker compose down -v
 
 ---
 
-## 🛑 Desarrollo Local (sin Docker)
+## Desarrollo Local (sin Docker)
 
 Si prefieres desarrollar sin Docker:
 
@@ -527,42 +546,54 @@ pnpm run build
 
 ---
 
-## 📚 Documentación
+## Documentación
 
-### 📖 Documentación del Backend
+### Documentación del Backend
+
 Ver [backend/README.md](backend/README.md) para detalles sobre:
+
 - Estructura de carpetas
 - Modelos de datos
 - Servicios y utilidades
 - Configuración de variables de entorno
 
-### 📖 Documentación del Frontend
+### Documentación del Frontend
+
 Ver [frontend/README.md](frontend/README.md) para detalles sobre:
+
 - Sistema de colores y temas
 - Componentes reutilizables
 - Context API
 - Guía de estilos
 
-### 📖 Endpoints de API
+### Endpoints de API
+
 Ver [backend/app/docs/ENDPOINTS.md](backend/app/docs/ENDPOINTS.md) para:
+
 - Listado completo de endpoints
 - Parámetros de entrada/salida
 - Ejemplos de uso
 
-### 📖 Auditoría del Sistema
+### Auditoría del Sistema
+
 Ver [backend/app/docs/AUDITORIA.md](backend/app/docs/AUDITORIA.md) para:
+
 - Registro de actividades
 - Historial de cambios
 - Logs del sistema
 
-### 📋 Historias de Usuario
+### Historias de Usuario
+
 Ver carpeta [Docs/HUs/](Docs/HUs/) para las historias de usuario de cada módulo
 
-### 📋 Requisitos Funcionales
+### Requisitos Funcionales
+
 Ver carpeta [Docs/RFs/](Docs/RFs/) para los requisitos funcionales detallados
 
-### 📋 Requisitos No Funcionales
+### Requisitos No Funcionales
+
 Ver carpeta [Docs/RNFs/](Docs/RNFs/) para:
+
 - Tiempo de respuesta
 - Concurrencia
 - Seguridad
@@ -572,7 +603,7 @@ Ver carpeta [Docs/RNFs/](Docs/RNFs/) para:
 
 ---
 
-## 🔄 Flujo de Desarrollo
+## Flujo de Desarrollo
 
 ### 1. Crear una rama para tu feature
 
@@ -583,11 +614,13 @@ git checkout -b feature/tu-feature
 ### 2. Hacer cambios
 
 #### Backend
+
 - Editar modelos en `backend/app/models/`
 - Crear endpoints en `backend/app/routers/`
 - Agregar lógica en `backend/app/services/`
 
 #### Frontend
+
 - Crear componentes en `frontend/src/components/`
 - Crear páginas en `frontend/src/pages/`
 - Agregar servicios en `frontend/src/services/`
@@ -617,7 +650,7 @@ Crea un PR con descripción clara de los cambios
 
 ---
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Error: "Puerto ya está en uso"
 
@@ -671,19 +704,20 @@ docker compose up -d
 
 ---
 
-## 🔐 Seguridad
+## Seguridad
 
 Este proyecto implementa varias capas de seguridad:
 
-✅ **JWT** — Tokens de autenticación seguros con expiración  
-✅ **bcrypt** — Hash de contraseñas con salt  
-✅ **CORS** — Control de acceso entre dominios  
-✅ **Rate Limiting** — Protección contra ataques de fuerza bruta  
-✅ **HTTPS** — Recomendado para producción  
-✅ **Validación** — Pydantic valida todos los inputs  
-✅ **SQL Injection** — SQLAlchemy previene inyecciones  
+- **JWT** — Tokens de autenticación seguros con expiración
+- **bcrypt** — Hash de contraseñas con salt
+- **CORS** — Control de acceso entre dominios
+- **Rate Limiting** — Protección contra ataques de fuerza bruta
+- **HTTPS** — Recomendado para producción
+- **Validación** — Pydantic valida todos los inputs
+- **SQL Injection** — SQLAlchemy previene inyecciones
 
-⚠️ **Para producción:**
+**Para producción:**
+
 - Cambiar `ENVIRONMENT=production`
 - Usar HTTPS obligatoriamente
 - Cambiar `SECRET_KEY` a un valor único y fuerte
@@ -693,7 +727,7 @@ Este proyecto implementa varias capas de seguridad:
 
 ---
 
-## 📊 Versionado
+## Versionado
 
 - **Versión Backend:** 1.1.1b
 - **Versión Frontend:** 0.0.0
@@ -701,13 +735,14 @@ Este proyecto implementa varias capas de seguridad:
 
 Ver [backend/CHANGELOG.md](backend/CHANGELOG.md) para historial de cambios
 
+---
 
-## 📞 Soporte
+## Soporte
 
 Para reportar bugs o solicitar features, abra un issue en el repositorio.
 
 ---
 
-## 📄 Licencia
+## Licencia
 
 Este proyecto es propiedad de LUBIX-COMPANY. Todos los derechos reservados.
