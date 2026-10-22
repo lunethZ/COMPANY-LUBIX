@@ -73,6 +73,7 @@ def company_dashboard_me_service(user_id, database: Session):
         "memberAT": user.created_at,
         "role": role.name,
         "sales": metrics["completeSales"],
+        "totalRevenue": metrics["totalRevenue"],
         "stars": metrics["averageRating"],
         "reviews": metrics["totalReviews"],
     }
@@ -96,7 +97,10 @@ def company_dashboard_my_profile_service(user_id: str, database: Session):
         "averageRating": metrics["averageRating"],
         "totalReviews": metrics["totalReviews"],
         "completeSales": metrics["completeSales"],
+        "totalRevenue": metrics["totalRevenue"],
         "sellerLevel": metrics["sellerLevel"],
+        "logo": company.CompanyLogo,
+        "banner": company.CompanyBanner,
     }
 
 
@@ -276,12 +280,12 @@ def company_upload_logo_service(user_id: str, file, database: Session):
 
     from app.services.NasService import subir
 
-    result = subir.upload_stream(file)
+    result = subir.upload_file(file, "company-logos/")
     if not result or not result.get("success"):
         raise HTTPException(status_code=500, detail="Error al subir la imagen")
 
     company = user.company
-    company.CompanyLogo = result["path"]
+    company.CompanyLogo = result["object_name"]
     database.commit()
     database.refresh(company)
 
@@ -298,12 +302,12 @@ def company_upload_banner_service(user_id: str, file, database: Session):
 
     from app.services.NasService import subir
 
-    result = subir.upload_stream(file)
+    result = subir.upload_file(file, "company-banners/")
     if not result or not result.get("success"):
         raise HTTPException(status_code=500, detail="Error al subir la imagen")
 
     company = user.company
-    company.CompanyBanner = result["path"]
+    company.CompanyBanner = result["object_name"]
     database.commit()
     database.refresh(company)
 

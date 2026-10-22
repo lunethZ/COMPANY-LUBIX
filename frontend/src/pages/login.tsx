@@ -5,6 +5,7 @@ import axios from "axios";
 import type { LoginRequest, LoginResponse } from "../types/auts";
 import { useAuth } from "../context/AuthContext";
 import { errorDetailMessage } from "../utils/errors";
+import { rules, validateField } from "../utils/validators";
 import { ArrowLeftIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Login: React.FC = () => {
@@ -22,7 +23,7 @@ const Login: React.FC = () => {
   // Si ya está autenticado, redirigir y evitar que el botón volver deje ver el login
   useEffect(() => {
     if (isAuthenticated && user) {
-      if (user.role_id === "empresa") navigate("/home-empresa", { replace: true });
+      if (user.role_id === "empresa") navigate("/dashboard-empresa", { replace: true });
       else if (user.role_id === "admin") navigate("/dashboard-admin", { replace: true });
       else navigate("/home-usuario", { replace: true });
     }
@@ -45,6 +46,24 @@ const Login: React.FC = () => {
       return;
     }
 
+    const emailValidation = validateField(email, [
+      rules.required("El correo es obligatorio"),
+      rules.email(),
+    ]);
+    if (!emailValidation.valid) {
+      showMessage(emailValidation.message, "error");
+      return;
+    }
+
+    const passwordValidation = validateField(
+      password,
+      rules.required("La contraseña es obligatoria"),
+    );
+    if (!passwordValidation.valid) {
+      showMessage(passwordValidation.message, "error");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -55,6 +74,13 @@ const Login: React.FC = () => {
       const response = await api.post<LoginResponse>(endpoint, payload);
 
       const data = response.data;
+
+      // Si el usuario no está verificado, el backend retorna 200 con solo message (sin token)
+      if (!data.access_token) {
+        showMessage(data.message || "Tu correo no ha sido verificado. Revisa tu bandeja de entrada.", "error");
+        setTimeout(() => navigate("/register/VerifyEmailPage", { state: { email: email.trim() } }), 2000);
+        return;
+      }
 
       // Guardar tokens en localStorage
       localStorage.setItem("access_token", data.access_token);
@@ -88,7 +114,7 @@ const Login: React.FC = () => {
 
       // Redirigir según el tipo de usuario (replace evita que volver regrese al login con sesión abierta)
       if (mappedRole === "empresa") {
-        setTimeout(() => navigate("/home-empresa", { replace: true }), 1000);
+        setTimeout(() => navigate("/dashboard-empresa", { replace: true }), 1000);
       } else if (mappedRole === "admin") {
         setTimeout(() => navigate("/dashboard-admin", { replace: true }), 1000);
       } else {
@@ -97,7 +123,28 @@ const Login: React.FC = () => {
 
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        showMessage(errorDetailMessage(error, "Error de login"), "error");
+        let errorMsg = errorDetailMessage(error, "Error de login");
+
+        // Mostrar mensajes más específicos según el tipo de error
+        if (error.response?.status === 400) {
+          if (errorMsg.includes("Correo o contraseña")) {
+            errorMsg = "El correo o la contraseña son incorrectos. Verifica tus datos.";
+          } else if (errorMsg.includes("Contraseña incorrecta")) {
+            errorMsg = "La contraseña es incorrecta. Intenta de nuevo.";
+          }
+        } else if (error.response?.status === 403) {
+          if (errorMsg.includes("empresa")) {
+            errorMsg = "Esta cuenta es de tipo empresa. Cambia a la pestaña de Empresa para iniciar sesión.";
+          } else {
+            errorMsg = "Esta cuenta es de tipo usuario. Cambia a la pestaña de Usuario para iniciar sesión.";
+          }
+        } else if (error.response?.status === 500) {
+          errorMsg = "Error del servidor. Intenta de nuevo más tarde.";
+        }
+
+        showMessage(errorMsg, "error");
+      } else {
+        showMessage("Error de conexión. Verifica tu internet e intenta de nuevo.", "error");
       }
     } finally {
       setLoading(false);

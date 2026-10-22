@@ -3,7 +3,7 @@ set -e
 
 echo "Running alembic migrations..."
 # Esperar a que postgres esté listo
-until pg_isready -h postgres -p 5432 -U nacoooobit; do
+until pg_isready -h postgres -p 5432 -U "${POSTGRES_USER:-postgres}"; do
   echo "Waiting for postgres..."
   sleep 2
 done

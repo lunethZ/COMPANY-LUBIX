@@ -11,18 +11,26 @@ class createCompany(BaseModel):
     companyBanner: str | None = None
     companyCertificate: str | None = None
 
-    
     @field_validator('companyName')
     def validate_companyName(cls, v: str):
-        if len(v) < 3:
+        if not v or not v.strip():
+            raise ValueError('el nombre de la empresa es obligatorio')
+        if len(v.strip()) < 3:
             raise ValueError('el nombre de la empresa debe tener al menos 3 caracteres')
         if len(v) > 50:
             raise ValueError('el nombre de la empresa no debe exceder los 50 caracteres')
         return v
     
+    @field_validator('companyAddress')
+    def validate_companyAddress(cls, v: str):
+        if not v or not v.strip():
+            raise ValueError('la dirección de la empresa es obligatoria')
+        return v
     
     @field_validator('companyNIT')
     def validate_nit(cls, v: str):
+        if not v or not v.strip():
+            raise ValueError('el NIT es obligatorio')
         if len(v) < 5:
             raise ValueError('el NIT debe tener al menos 5 caracteres')
         if not v.isdigit():
@@ -31,6 +39,8 @@ class createCompany(BaseModel):
     
     @field_validator('companyNITDV')
     def validate_nitdv(cls, v: str):
+        if not v or not v.strip():
+            raise ValueError('el dígito de verificación del NIT es obligatorio')
         if len(v) != 1:
             raise ValueError('el dígito de verificación del NIT debe tener exactamente 1 carácter')
         if not v.isdigit():

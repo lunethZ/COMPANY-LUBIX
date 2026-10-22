@@ -13,6 +13,12 @@ class CreateProductRequest(BaseModel):
     catalog_id: Optional[str] = None
     catalog_name: Optional[str] = None
 
+    @field_validator('name')
+    def validate_name(cls, v):
+        if not v or not v.strip():
+            raise ValueError('el nombre del producto es obligatorio')
+        return v
+
     @field_validator('price')
     def validate_price(cls, v):
         if v <= 0:
@@ -23,6 +29,12 @@ class CreateProductRequest(BaseModel):
     def validate_stock(cls, v):
         if v < 0:
             raise ValueError('el stock no puede ser negativo')
+        return v
+
+    @field_validator('descripcion')
+    def validate_descripcion(cls, v):
+        if not v or not v.strip():
+            raise ValueError('la descripción del producto es obligatoria')
         return v
 
     @field_validator('discount_value')

@@ -1,68 +1,99 @@
+# Endpoints de API
 
-```text
-http://127.0.0.1:8000/
+Base URL: `http://127.0.0.1:8000`
 
-para probar conexion de base de datos desde el backend:
-POSTDATA: debe tener previamente postgre sql con usuario, contraseña y base de datos
-GET /health/test
+---
 
--- Usuario
---  registrar usuario
-POST Auth/register-user
+## Health Check
+
+| Método | Ruta | Descripción |
+|--------|------|-------------|
+| GET | /health/test | Verifica conexión a base de datos |
+
+---
+
+## Autenticación
+
+### Registro de usuario
+
+| Campo | Tipo | Obligatorio |
+|-------|------|-------------|
+| fullName | Texto | Sí |
+| email | Texto | Sí |
+| tell | Texto | No |
+| password | Texto | Sí |
+
+```json
+POST /api/v1/auth/register
 {
-  "fullName": "",
-  "email": "",
-  "tell": "",
-  "password": ""
+  "fullName": "Juan Pérez",
+  "email": "juan@email.com",
+  "tell": "+573001234567",
+  "password": "MiPassword1"
 }
+```
 
--- registro de empresa
-post /Auth/register-company
+### Registro de empresa
+
+```json
+POST /api/v1/auth/register-company
 {
-  "companyName": "",
-  "companyEmail": "",
-  "companyPassword": "",
-  "companyTell": "",
-  "companyAddress": "",
-  "companyNIT": "",
-  "companyNITDV": ""
+  "companyName": "Mi Empresa",
+  "companyEmail": "empresa@email.com",
+  "companyPassword": "Pass1234",
+  "companyTell": "+573001234567",
+  "companyAddress": "Calle 123",
+  "companyNIT": "900123456",
+  "companyNITDV": "7"
 }
+```
 
---- login company
-post /Auth/login-company
+### Inicio de sesión
+
+```json
+POST /api/v1/auth/login
 {
-  "companyNIT": "",
-  "companyPassword": ""
+  "email": "usuario@email.com",
+  "password": "MiPassword1"
 }
+```
 
-verify account
-POST Auth/verify-email
+### Inicio de sesión (empresa)
+
+```json
+POST /api/v1/auth/login-company
 {
-  "email": "",
-  "code": ""
+  "companyNIT": "900123456",
+  "companyPassword": "Pass1234"
 }
+```
 
-export default App
+### Verificación de correo
 
--- login 
-POST Auth/login
+```json
+POST /api/v1/auth/verify-email
 {
-  "email": "",
-  "password": ""
+  "email": "usuario@email.com",
+  "code": "123456"
 }
+```
 
--- forgot password
-POST Auth/forgot-password
+### Recuperación de contraseña
+
+```json
+POST /api/v1/auth/forgot-password
 {
-  "email": ""
+  "email": "usuario@email.com"
 }
+```
 
--- reset password
-POST Auth/reset-password
+### Restablecimiento de contraseña
+
+```json
+POST /api/v1/auth/reset-password
 {
-  "email": "",
-  "code": "",
-  "new_password":""
+  "email": "usuario@email.com",
+  "code": "123456",
+  "new_password": "NuevaPassword1"
 }
-
 ```
