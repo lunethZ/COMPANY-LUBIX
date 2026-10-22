@@ -209,7 +209,7 @@ export default function BuyerDashboard() {
   };
 
   const cancelOrder = async (orderId: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.")) return;
+    if (!window.confirm("¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer bueno.")) return;
     try {
       await api.patch(`/user/orders/${orderId}/cancel`);
       setOrders((prev) =>
