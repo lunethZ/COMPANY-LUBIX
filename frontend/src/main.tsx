@@ -5,13 +5,16 @@ import "./index.css";
 import { AuthProvider } from "./context/AuthProvider";
 import { ThemeProvider } from "./context/ThemeProvider";
 import { CartProvider } from "./context/CartContext";
+import { AuthModalProvider } from "./context/AuthModalContext";
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <ThemeProvider>
     <BrowserRouter>
       <AuthProvider>
         <CartProvider>
-          <App />
+          <AuthModalProvider>
+            <App />
+          </AuthModalProvider>
         </CartProvider>
       </AuthProvider>
     </BrowserRouter>

@@ -23,7 +23,11 @@ def upgrade() -> None:
     # Un único usuario debe poder tener códigos de distintos tipos
     # (p. ej. verificación de correo + recuperación de contraseña),
     # por lo que se elimina la restricción de unicidad sobre user_id.
-    op.drop_constraint('event_codes_user_id_key', 'event_codes', type_='unique')
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    constraints = [c['name'] for c in inspector.get_unique_constraints('event_codes')]
+    if 'event_codes_user_id_key' in constraints:
+        op.drop_constraint('event_codes_user_id_key', 'event_codes', type_='unique')
 
 
 def downgrade() -> None:

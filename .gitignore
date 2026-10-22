@@ -11,8 +11,15 @@ __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
 .mypy_cache/
 .ruff_cache/
+.coverage
+backend/.coverage
+opencode.jsonc
 
 # Node, Vite, Expo and package-manager output
 node_modules/
@@ -22,6 +29,8 @@ build/
 web-build/
 .expo/
 *.local
+test-results/
+playwright-report/
 
 # Local databases and logs
 *.db

@@ -2,6 +2,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
+import { useAuthModal } from "../context/AuthModalContext";
 import { MagnifyingGlassIcon, ShoppingCartIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 
@@ -9,6 +10,7 @@ export default function Navbar() {
   const { user, logout } = useAuth();
   const { totalItems } = useCart();
   const { theme, toggleTheme } = useTheme();
+  const { openLogin, openRegister } = useAuthModal();
   const navigate = useNavigate();
   const [searchValue, setSearchValue] = useState("");
 
@@ -94,15 +96,15 @@ export default function Navbar() {
           </>
         ) : (
           <>
-            <Link to="/login" className="hover:text-green-400 transition">
+            <button onClick={openLogin} className="hover:text-green-400 transition">
               Login
-            </Link>
-            <Link
-              to="/register"
+            </button>
+            <button
+              onClick={openRegister}
               className="bg-green-500 text-black font-bold px-4 py-2 rounded-full hover:bg-green-600 transition"
             >
               Register
-            </Link>
+            </button>
           </>
         )}
 
