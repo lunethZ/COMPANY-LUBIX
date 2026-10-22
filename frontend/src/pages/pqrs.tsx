@@ -28,11 +28,11 @@ interface PQRSItem {
 }
 
 const typeLabels: Record<string, string> = {
-  peticion: 'PeticiÃ³n',
+  peticion: 'Petición',
   queja: 'Queja',
   reclamo: 'Reclamo',
   sugerencia: 'Sugerencia',
-  eliminacion: 'Solicitud de EliminaciÃ³n',
+  eliminacion: 'Solicitud de Eliminación',
 };
 
 const typeIcons: Record<string, React.ReactNode> = {
@@ -54,13 +54,12 @@ const typeColors: Record<string, string> = {
 const pqrsRules = {
   subject: [
     rules.required('El asunto es obligatorio'),
-    rules.minLength(5, 'El asunto debe tener al menos 5 caracteres'),
-    rules.maxLength(120, 'El asunto debe tener como mÃ¡ximo 120 caracteres'),
+    rules.maxLength(150, 'El asunto debe tener como máximo 150 caracteres'),
   ],
   description: [
-    rules.required('La descripciÃ³n es obligatoria'),
-    rules.minLength(10, 'La descripciÃ³n debe tener al menos 10 caracteres'),
-    rules.maxLength(1000, 'La descripciÃ³n debe tener como mÃ¡ximo 1000 caracteres'),
+    rules.required('La descripción es obligatoria'),
+    rules.minLength(10, 'La descripción debe tener al menos 10 caracteres'),
+    rules.maxLength(2000, 'La descripción debe tener como máximo 2000 caracteres'),
   ],
 };
 
@@ -82,6 +81,7 @@ export default function PQRSPage() {
   });
 
   const [errors, setErrors] = useState<{ subject?: string; description?: string }>({});
+  const isFormValid = validateForm(form, pqrsRules).valid;
 
   const isDeleteRequest = searchParams.get('type') === 'eliminacion';
 
@@ -120,7 +120,7 @@ export default function PQRSPage() {
         subject: form.subject,
         description: form.description,
       });
-      setMessage('Tu solicitud ha sido enviada correctamente. El administrador la revisarÃ¡ pronto.');
+      setMessage('Tu solicitud ha sido enviada correctamente. El administrador la revisará pronto.');
       setMessageType('success');
       setForm({ type: 'queja', subject: '', description: '' });
       setErrors({});
@@ -194,20 +194,20 @@ export default function PQRSPage() {
           <div className="bg-red-500/10 border border-red-500/30 rounded-xl p-6 mb-6">
             <div className="flex items-center gap-3 mb-3">
               <ExclamationTriangleIcon className="w-6 h-6 text-red-400" />
-              <h2 className="text-lg font-bold text-red-300">Solicitud de EliminaciÃ³n de Cuenta</h2>
+              <h2 className="text-lg font-bold text-red-300">Solicitud de Eliminación de Cuenta</h2>
             </div>
             <p className="text-red-200/80 text-sm mb-4">
-              Para eliminar tu cuenta, por favor indica el motivo en la secciÃ³n de PQRS. Tu solicitud serÃ¡ revisada por el administrador.
+              Para eliminar tu cuenta, por favor indica el motivo en la sección de PQRS. Tu solicitud será revisada por el administrador.
             </p>
             <button
               onClick={() => {
-                setForm(prev => ({ ...prev, type: 'eliminacion', subject: 'Solicitud de eliminaciÃ³n de cuenta' }));
+                setForm(prev => ({ ...prev, type: 'eliminacion', subject: 'Solicitud de eliminación de cuenta' }));
                 setShowForm(true);
               }}
               className="flex items-center gap-2 px-5 py-2.5 bg-red-600 hover:bg-red-500 text-white rounded-xl font-semibold transition-all"
             >
               <TrashIcon className="w-4 h-4" />
-              Solicitar eliminaciÃ³n de cuenta
+              Solicitar eliminación de cuenta
             </button>
           </div>
         )}
@@ -216,7 +216,7 @@ export default function PQRSPage() {
           <div className="rounded-xl p-6 mb-8 border" style={{ backgroundColor: "var(--color-bg-card)", borderColor: "var(--color-border)" }}>
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold" style={{ color: "var(--color-text)" }}>
-                {isDeleteRequest ? 'Solicitar eliminaciÃ³n de cuenta' : 'Nueva solicitud PQRS'}
+                {isDeleteRequest ? 'Solicitar eliminación de cuenta' : 'Nueva solicitud PQRS'}
               </h2>
               <button onClick={() => setShowForm(false)} className="hover:opacity-70" style={{ color: "var(--color-text-muted)" }}>
                 <XMarkIcon className="w-5 h-5" />
@@ -228,7 +228,7 @@ export default function PQRSPage() {
                 <label className="block text-sm mb-2" style={{ color: "var(--color-text-muted)" }}>Tipo de solicitud</label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {[
-                    { value: 'peticion', label: 'PeticiÃ³n', icon: <QuestionMarkCircleIcon className="w-4 h-4" /> },
+                    { value: 'peticion', label: 'Petición', icon: <QuestionMarkCircleIcon className="w-4 h-4" /> },
                     { value: 'queja', label: 'Queja', icon: <ExclamationTriangleIcon className="w-4 h-4" /> },
                     { value: 'reclamo', label: 'Reclamo', icon: <ChatBubbleLeftEllipsisIcon className="w-4 h-4" /> },
                     { value: 'sugerencia', label: 'Sugerencia', icon: <LightBulbIcon className="w-4 h-4" /> },
@@ -273,7 +273,7 @@ export default function PQRSPage() {
 
               <div>
                 <label className="block text-sm mb-1" style={{ color: "var(--color-text-muted)" }}>
-                  {isDeleteRequest ? 'Â¿Por quÃ© deseas eliminar tu cuenta?' : 'DescripciÃ³n detallada'}
+                  {isDeleteRequest ? '¿Por qué deseas eliminar tu cuenta?' : 'Descripción detallada'}
                 </label>
                 <textarea
                   rows={5}
@@ -284,7 +284,7 @@ export default function PQRSPage() {
                   }}
                   placeholder={isDeleteRequest
                     ? 'Explica el motivo por el cual deseas eliminar tu cuenta...'
-                    : 'Describe tu peticiÃ³n, queja, reclamo o sugerencia en detalle...'
+                    : 'Describe tu petición, queja, reclamo o sugerencia en detalle...'
                   }
                   aria-invalid={!!errors.description}
                   className={`input-base resize-none ${errors.description ? 'border-red-500 focus:border-red-500' : ''}`}
@@ -305,7 +305,7 @@ export default function PQRSPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={sending}
+                  disabled={sending || !isFormValid}
                   className="flex-1 py-2.5 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                 >
                   {sending ? (
@@ -331,8 +331,8 @@ export default function PQRSPage() {
           {pqrsList.length === 0 ? (
             <div className="text-center py-16" style={{ color: "var(--color-text-muted)" }}>
               <ChatBubbleLeftEllipsisIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
-              <p className="text-lg font-medium">No tienes solicitudes aÃºn</p>
-              <p className="text-sm mt-1">EnvÃ­a una peticiÃ³n, queja, reclamo o sugerencia</p>
+              <p className="text-lg font-medium">No tienes solicitudes aún</p>
+              <p className="text-sm mt-1">Envía una petición, queja, reclamo o sugerencia</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -378,9 +378,9 @@ export default function PQRSPage() {
         <div className="mt-10">
           <div className="bg-gradient-to-r from-green-600/20 to-blue-600/20 border border-green-500/30 rounded-2xl p-8 text-center">
             <ChatBubbleLeftEllipsisIcon className="w-12 h-12 mx-auto mb-4 text-green-400" />
-            <h3 className="text-xl font-bold mb-2" style={{ color: "var(--color-text)" }}>Â¿Tienes algo que decirnos?</h3>
+            <h3 className="text-xl font-bold mb-2" style={{ color: "var(--color-text)" }}>¿Tienes algo que decirnos?</h3>
             <p className="text-sm mb-5 max-w-md mx-auto" style={{ color: "var(--color-text-muted)" }}>
-              Tu opiniÃ³n nos ayuda a mejorar. No dudes en enviar cualquier peticiÃ³n, queja, reclamo o sugerencia.
+              Tu opinión nos ayuda a mejorar. No dudes en enviar cualquier petición, queja, reclamo o sugerencia.
             </p>
             <button
               onClick={() => setShowForm(true)}

@@ -2,7 +2,6 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import axios from "axios";
-import { errorDetailMessage } from "../utils/errors";
 import {
     getPasswordChecks,
     getPasswordStrength,
@@ -12,6 +11,15 @@ import {
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 type RegistrationMode = "usuario" | "empresa";
+
+interface RegistrationValidationError {
+    loc?: (string | number)[];
+    msg?: string;
+}
+
+interface RegistrationErrorResponse {
+    detail?: string | RegistrationValidationError[];
+}
 
 export const Register = () => {
     const navigate = useNavigate();
@@ -78,8 +86,8 @@ export const Register = () => {
         setFieldErrors({});
 
         if (form.password !== form.confirmPassword) {
-            setFieldErrors({ confirmPassword: "Las contraseÃ±as no coinciden" });
-            showPopup("Las contraseÃ±as no coinciden", "error");
+            setFieldErrors({ confirmPassword: "Las contraseñas no coinciden" });
+            showPopup("Las contraseñas no coinciden", "error");
             return;
         }
 
@@ -90,15 +98,15 @@ export const Register = () => {
                     : "El nombre es obligatorio",
             ),
             email: [rules.required("El correo es obligatorio"), rules.email()],
-            tell: rules.required("El telÃ©fono es obligatorio"),
+            tell: rules.required("El teléfono es obligatorio"),
             password: rules.password(),
-            confirmPassword: rules.required("Confirma tu contraseÃ±a"),
+            confirmPassword: rules.required("Confirma tu contraseña"),
             ...(mode === "empresa"
                 ? {
                     companyName: rules.required("El nombre de la empresa es obligatorio"),
                     nit: rules.required("El NIT es obligatorio"),
-                    nitDV: rules.required("El dÃ­gito de verificaciÃ³n es obligatorio"),
-                    address: rules.required("La direcciÃ³n es obligatoria"),
+                    nitDV: rules.required("El dígito de verificación es obligatorio"),
+                    address: rules.required("La dirección es obligatoria"),
                 }
                 : {
                     surname: rules.required("El apellido es obligatorio"),
@@ -134,7 +142,7 @@ export const Register = () => {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
 
-                showPopup("Empresa registrada. RecibirÃ¡s un correo de verificaciÃ³n.", "success");
+                showPopup("Empresa registrada. Recibirás un correo de verificación.", "success");
             } else {
                 const payload = {
                     fullName: `${form.name} ${form.surname}`.trim(),
@@ -171,7 +179,7 @@ export const Register = () => {
                 }, 2000);
             }
         } catch (error) {
-            if (axios.isAxiosError(error)) {
+            if (axios.isAxiosError<RegistrationErrorResponse>(error)) {
                 const errorData = error.response?.data;
                 let errorMsg = "";
                 const newFieldErrors: Record<string, string> = {};
@@ -180,12 +188,12 @@ export const Register = () => {
                     if (Array.isArray(errorData.detail)) {
                         // Pydantic validation errors
                         const errors = errorData.detail;
-                        errors.forEach((err: any) => {
+                        errors.forEach((err) => {
                             const field = err.loc?.[err.loc.length - 1] || "";
-                            const msg = err.msg || "Error de validaciÃ³n";
+                            const msg = err.msg || "Error de validación";
                             newFieldErrors[field] = msg;
                         });
-                        errorMsg = errors.map((e: any) => e.msg).join(". ");
+                        errorMsg = errors.map((item) => item.msg || "Error de validación").join(". ");
                     } else if (typeof errorData.detail === "string") {
                         errorMsg = errorData.detail;
                         // Map common backend errors to fields
@@ -202,7 +210,9 @@ export const Register = () => {
                 }
 
                 setFieldErrors(newFieldErrors);
-                showPopup(errorMsg, "error");
+                if (Object.keys(newFieldErrors).length === 0) {
+                    showPopup(errorMsg, "error");
+                }
             } else {
                 showPopup("Error desconocido. Intenta de nuevo.", "error");
             }
@@ -306,7 +316,7 @@ export const Register = () => {
 
                         <div>
                             <label className="label-base">
-                                TelÃ©fono *
+                                Teléfono *
                             </label>
                             <input
                                 name="tell"
@@ -321,7 +331,7 @@ export const Register = () => {
 
                         <div>
                             <label className="label-base">
-                                ContraseÃ±a *
+                                Contraseña *
                             </label>
                             <div className="relative">
                                 <input
@@ -330,7 +340,7 @@ export const Register = () => {
                                     value={form.password}
                                     onChange={handleChange}
                                     className="input-base pr-10"
-                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                                    placeholder="••••••••"
                                     required
                                 />
                                 <button
@@ -357,9 +367,9 @@ export const Register = () => {
                                     </div>
                                     <div className="mt-2 grid grid-cols-2 gap-1 text-xs text-muted">
                                         <span className={hasMinLength ? "text-accent font-medium" : "text-muted"}>8+ chars</span>
-                                        <span className={hasUpper ? "text-accent font-medium" : "text-muted"}>MayÃºs</span>
-                                        <span className={hasLower ? "text-accent font-medium" : "text-muted"}>MinÃºs</span>
-                                        <span className={hasNumber ? "text-accent font-medium" : "text-muted"}>NÃºmero</span>
+                                        <span className={hasUpper ? "text-accent font-medium" : "text-muted"}>Mayús</span>
+                                        <span className={hasLower ? "text-accent font-medium" : "text-muted"}>Minús</span>
+                                        <span className={hasNumber ? "text-accent font-medium" : "text-muted"}>Número</span>
                                     </div>
                                 </div>
                             )}
@@ -367,7 +377,7 @@ export const Register = () => {
 
                         <div>
                             <label className="label-base">
-                                Confirmar contraseÃ±a *
+                                Confirmar contraseña *
                             </label>
                             <div className="relative">
                                 <input
@@ -376,7 +386,7 @@ export const Register = () => {
                                     value={form.confirmPassword}
                                     onChange={handleChange}
                                     className="input-base pr-10"
-                                    placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
+                                    placeholder="••••••••"
                                     required
                                 />
                                 <button
@@ -445,7 +455,7 @@ export const Register = () => {
 
                                 <div>
                                     <label className="label-base">
-                                        DirecciÃ³n *
+                                        Dirección *
                                     </label>
                                     <input
                                         name="address"
@@ -469,9 +479,9 @@ export const Register = () => {
                         </button>
 
                         <p className="text-center text-sm text-muted">
-                            Â¿Ya tienes cuenta?{" "}
+                            ¿Ya tienes cuenta?{" "}
                             <Link to="/login" className="text-accent font-semibold hover:underline">
-                                Inicia sesiÃ³n
+                                Inicia sesión
                             </Link>
                         </p>
                     </form>
