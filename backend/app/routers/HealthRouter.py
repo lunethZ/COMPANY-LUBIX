@@ -1,5 +1,5 @@
-# Este router se encarga de manejar las rutas relacionadas 
-# con la salud del sistema,
+# Este router se encarga de manejar las rutas relacionadas
+# con la salud del sistema.
 from fastapi import APIRouter
 from app.utils.TestDatabase import db_test
 from app.utils.CheckNetwork import check_internet_connection
@@ -8,9 +8,12 @@ router = APIRouter(
     prefix=("/health"),
     tags=["health"]
 )
+
+
 @router.get("/database")
 def healthDatabase():
     return db_test()
+
 
 @router.get("/internet")
 def healthInternet():
