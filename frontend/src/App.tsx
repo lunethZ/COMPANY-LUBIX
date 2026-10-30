@@ -19,6 +19,8 @@ import ProductoDetalle from "./pages/producto-detalle";
 import PerfilEmpresa from "./pages/perfil-empresa";
 import PQRSPage from "./pages/pqrs";
 import AuthModal from "./components/AuthModal";
+import ManualTecnico from "./pages/ManualTecnico";
+import ManualTecnicoSeccion from "./pages/ManualTecnicoSeccion";
 
 function ProtectedRoute({ allowedRoles, children }: { allowedRoles?: Array<"user" | "empresa" | "admin">, children: React.ReactNode }) {
   const { user, isAuthenticated } = useAuth();
@@ -82,6 +84,8 @@ function App() {
       <AuthModal />
       <Routes>
       <Route path="/" element={<Home />} />
+      <Route path="/manual-tecnico" element={<ManualTecnico />} />
+      <Route path="/manual-tecnico/:section" element={<ManualTecnicoSeccion />} />
       <Route path="/login" element={<PublicOnlyRoute><Login /></PublicOnlyRoute>} />
       <Route path="/register" element={<PublicOnlyRoute><Register /></PublicOnlyRoute>} />
       <Route path="/recover" element={<RecoverPassword />} />

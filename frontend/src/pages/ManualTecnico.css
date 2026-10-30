@@ -1,0 +1,132 @@
+.manual-shell {
+  box-sizing: border-box;
+  display: flex;
+  min-height: 100vh;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #1b1b1b;
+  color: #000;
+  font-family: Arial, sans-serif;
+}
+
+.manual-panel {
+  box-sizing: border-box;
+  width: min(510px, 100%);
+  padding: 30px;
+  border-radius: 7px;
+  background: #10434a;
+}
+
+.manual-title {
+  margin: 0 0 24px;
+  color: #fff;
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.manual-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.manual-link {
+  box-sizing: border-box;
+  display: flex;
+  min-width: 0;
+  min-height: 68px;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 12px;
+  border-radius: 7px;
+  background: #fff;
+  color: #000;
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.2;
+  text-align: center;
+  text-decoration: none;
+  transition: background-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+}
+
+.manual-link:hover {
+  transform: translateY(-1px);
+  background: #f0f4f4;
+  box-shadow: 0 4px 10px rgb(0 0 0 / 18%);
+}
+
+.manual-link:focus-visible,
+.manual-back:focus-visible {
+  outline: 3px solid #f2c14e;
+  outline-offset: 3px;
+}
+
+.manual-link--full {
+  grid-column: 1 / -1;
+}
+
+.manual-link--tall {
+  min-height: 88px;
+}
+
+.manual-section {
+  text-align: center;
+}
+
+.manual-section .manual-title {
+  margin-bottom: 20px;
+}
+
+.manual-placeholder {
+  margin: 0 0 24px;
+  color: #fff;
+  font-size: 17px;
+  line-height: 1.5;
+}
+
+.manual-back {
+  display: inline-block;
+  color: #fff;
+  font-size: 16px;
+  text-underline-offset: 4px;
+}
+
+@media (max-width: 520px) {
+  .manual-shell {
+    padding: 16px;
+  }
+
+  .manual-panel {
+    padding: 24px 20px;
+  }
+
+  .manual-title {
+    font-size: 22px;
+  }
+
+  .manual-grid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .manual-link--full {
+    grid-column: auto;
+  }
+
+  .manual-link--tall {
+    min-height: 68px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .manual-link {
+    transition: none;
+  }
+
+  .manual-link:hover {
+    transform: none;
+  }
+}
