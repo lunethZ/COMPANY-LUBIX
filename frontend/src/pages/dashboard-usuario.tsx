@@ -346,15 +346,15 @@ export default function BuyerDashboard() {
     </table>
   </div>
   <div class="card">
-    <h2>📍 Direcciones (${addresses.length})</h2>
+    <h2> Direcciones (${addresses.length})</h2>
     ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map((a: any)=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
   </div>
   <div class="card">
-    <h2>🛒 Pedidos (${orders.length})</h2>
+    <h2> Pedidos (${orders.length})</h2>
     ${orders.length ? orders.map((o: any)=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map((i: any)=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
   </div>
   <div class="card">
-    <h2>❤️ Favoritos (${favorites.length})</h2>
+    <h2> Favoritos (${favorites.length})</h2>
     ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map((f: any)=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
   </div>
   <p class="muted" style="text-align:center;margin-top:24px">Documento generado por Lubix - Tus datos están protegidos</p>
