@@ -59,5 +59,11 @@ dev = [
     "pytest-cov>=7.0.0",
 ]
 
+[tool.coverage.run]
+source = ["app"]
+
 [tool.coverage.report]
 include_namespace_packages = true
+fail_under = 50
+show_missing = true
+precision = 2

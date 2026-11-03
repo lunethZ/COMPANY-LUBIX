@@ -1,6 +1,6 @@
 # Estrategia de hosting y dominio
 
-Tarea S3. Define dónde se aloja Lubix, con qué dominio se publica y cómo se obtiene HTTPS. También deja registrado dónde vive el umbral de cobertura del CI (40 %).
+Tarea S3. Define dónde se aloja Lubix, con qué dominio se publica y cómo se obtiene HTTPS. También deja registrado dónde vive el umbral de cobertura del CI (50 % backend, 40 % frontend).
 
 ## 1. Punto de partida
 
@@ -131,13 +131,13 @@ Comprobación una vez publicado: `curl -I https://lubix.duckdns.org` debe respon
 - **Móvil:** apuntar `EXPO_PUBLIC_API_URL` a `https://lubix.duckdns.org/api`.
 - **Respaldo:** guardar copias de los volúmenes `postgres_data` y `minio_data`.
 
-## 8. Umbral de cobertura en el CI (40 %)
+## 8. Umbral de cobertura en el CI (50 % backend, 40 % frontend)
 
-Antes de esta tarea el repositorio no tenía un flujo de CI. Se agregó `.github/workflows/ci.yml` con dos trabajos y un umbral mínimo de 40 %:
+Antes de esta tarea el repositorio no tenía un flujo de CI. Se agregó `.github/workflows/ci.yml` con dos trabajos. El umbral del backend se elevó al 50 %:
 
-| Parte | Dónde se define el 40 % | Qué mide |
+| Parte | Dónde se define el umbral | Qué mide |
 | --- | --- | --- |
-| Backend | `pytest --cov=app --cov-fail-under=40` en `.github/workflows/ci.yml` | Cobertura del paquete `app` |
+| Backend | `fail_under = 50` en `backend/pyproject.toml` y `--cov-fail-under=50` en `backend/pytest.ini` / `.github/workflows/ci.yml` | Cobertura del paquete `app` |
 | Frontend | `coverage.thresholds` en `frontend/vite.config.ts` | `login.tsx`, `register.tsx` y `pqrs.tsx`, los formularios con pruebas de RTL |
 
 En el frontend la cobertura global inicial (S1) fue de 0,55 %, así que el umbral por ahora solo cubre los formularios que ya tienen pruebas. Cuando se agreguen pruebas a otras páginas se suman a la lista de `thresholds`.
@@ -149,8 +149,10 @@ Para comprobarlo en local:
 cd frontend && npm run test:coverage
 
 # backend (con el entorno virtual activado)
-cd backend && pytest --cov=app --cov-report=term-missing --cov-fail-under=40
+cd backend && pytest --cov=app --cov-report=term-missing --cov-fail-under=50
 ```
+
+La suite actual supera el umbral (51,81 % al momento de este cambio). Si se agrega código sin pruebas, el CI fallará hasta recuperar el 50 %.
 
 ## 9. Pendiente de decidir con el equipo
 

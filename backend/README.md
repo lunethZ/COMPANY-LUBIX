@@ -76,6 +76,20 @@ uv run alembic revision --autogenerate -m "descripcion"
 uv run alembic upgrade head
 ```
 
+En Render las migraciones se ejecutan automáticamente al arrancar (`backend/start.sh` ejecuta `alembic upgrade head` antes de Uvicorn).
+
+## Pruebas y cobertura
+
+```bash
+pytest
+```
+
+El umbral mínimo es **50 %** (`fail_under = 50` en `pyproject.toml` y `--cov-fail-under=50` en `pytest.ini`).
+
+## Despliegue
+
+La guía completa para publicar la API en Render con PostgreSQL en Neon o Supabase está en [`Docs/DEPLOYMENT.md`](../Docs/DEPLOYMENT.md). El archivo [`render.yaml`](../render.yaml) de la raíz contiene el Web Service y `requirements.txt` las dependencias de ejecución.
+
 ## Auditoría de seguridad
 
 Ver [app/docs/AUDITORIA.md](app/docs/AUDITORIA.md) para instrucciones de auditoría de vulnerabilidades con `pip-audit`.
