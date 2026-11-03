@@ -7,16 +7,36 @@ import io
 import uuid
 
 client = Minio(
-    "minio:9000",
+    config.MINIO_ENDPOINT,
     access_key=config.MINIO_ROOT_USER,
     secret_key=config.MINIO_ROOT_PASSWORD,
-    secure=False,
+    secure=config.MINIO_SECURE,
 )
 
-bucket = "uploads"
+bucket = config.MINIO_BUCKET
 
-if not client.bucket_exists(bucket):
-    client.make_bucket(bucket)
+
+def _ensure_bucket():
+    """Crea el bucket si hace falta, sin impedir el arranque de la API.
+
+    En producción el almacenamiento puede ser un MinIO/S3 externo. Si no está
+    disponible, la API debe seguir levantando y solo fallarán los endpoints de
+    archivos; de lo contrario Render no podría iniciar el servicio.
+    """
+    if not config.MINIO_AUTO_CREATE_BUCKET:
+        return
+
+    try:
+        if not client.bucket_exists(bucket):
+            client.make_bucket(bucket)
+    except Exception as exc:
+        print(
+            f"[LUBIX-WARN] No se pudo verificar el bucket '{bucket}' "
+            f"en {config.MINIO_ENDPOINT}: {exc}"
+        )
+
+
+_ensure_bucket()
 
 
 class NasService:
