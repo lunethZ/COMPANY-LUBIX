@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/navbar-empresa';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { rules, validateField, validateForm, type Validator } from '../utils/validators';
 import {
   StarIcon,
   ArrowTrendingUpIcon,
@@ -68,7 +69,7 @@ interface CompanyOrder {
   items: CompanyOrderItem[];
 }
 
-interface ProductForm {
+type ProductForm = {
   name: string;
   price: string;
   stock: string;
@@ -80,7 +81,9 @@ interface ProductForm {
   weight: string;
   dimensions: string;
   imageUrl: string;
-}
+};
+
+type ProductFormErrors = Partial<Record<keyof ProductForm, string>>;
 
 interface ProductImage {
   id: string;
@@ -123,6 +126,27 @@ const EMPTY_FORM: ProductForm = {
   imageUrl: '',
 };
 
+/** Reglas compartidas del formulario de producto (precio y stock no admiten negativos). */
+const productFormSchema: { [K in keyof ProductForm]?: Validator | Validator[] } = {
+  name: [rules.required('Ingresa el nombre del producto')],
+  price: [
+    rules.required('Ingresa el precio'),
+    rules.positiveNumber('El precio debe ser un número mayor que cero'),
+  ],
+  stock: [
+    rules.required('Ingresa el stock disponible'),
+    rules.positiveNumber('El stock debe ser un número mayor que cero'),
+  ],
+  category: [rules.required('Selecciona una categoría')],
+  description: [rules.required('Ingresa una descripción del producto')],
+};
+
+const validateProductField = (field: keyof ProductForm, value: string): string => {
+  const fieldRules = productFormSchema[field];
+  if (!fieldRules) return '';
+  return validateField(value, fieldRules).message;
+};
+
 const REFERENCE_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop';
 
 const INITIAL_SELLER_INFO: SellerInfo = {
@@ -163,12 +187,14 @@ export default function SellerDashboard() {
   const [bannerSuccess, setBannerSuccess] = useState<boolean | null>(null);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
+  const [formErrors, setFormErrors] = useState<ProductFormErrors>({});
   const [images, setImages] = useState<ProductImage[]>([]);
   const [imageUrlInput, setImageUrlInput] = useState('');
   const [uploadingImage, setUploadingImage] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<ProductForm>(EMPTY_FORM);
+  const [editFormErrors, setEditFormErrors] = useState<ProductFormErrors>({});
   const [editImagePreview, setEditImagePreview] = useState('');
   const [editSelectedFile, setEditSelectedFile] = useState<File | null>(null);
   const [editUploading, setEditUploading] = useState(false);
@@ -457,25 +483,39 @@ export default function SellerDashboard() {
     if (field === 'warranty') {
       const clean = value.replace(/\D/g, "");
       setForm((prev) => ({ ...prev, [field]: clean }));
+      setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     // Para peso, permitir números y punto
     if (field === 'weight') {
       const clean = value.replace(/[^0-9.]/g, "");
       setForm((prev) => ({ ...prev, [field]: clean }));
+      setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     setForm((prev) => ({ ...prev, [field]: value }));
+    setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, value) }));
   };
 
   const handleAddProduct = async () => {
+    const validation = validateForm(form, productFormSchema);
+    if (!validation.valid) {
+      setFormErrors(validation.errors);
+      return;
+    }
     if (!form.name || !form.price || !form.stock || !form.description || !form.category) return;
 
     const priceNum = parseInt(form.price.replace(/\D/g, '')) || 0;
     const stockNum = parseInt(form.stock) || 0;
 
-    if (stockNum < 1) return;
-    if (priceNum <= 0) return;
+    if (stockNum < 1) {
+      setFormErrors((prev) => ({ ...prev, stock: validateProductField('stock', form.stock) }));
+      return;
+    }
+    if (priceNum <= 0) {
+      setFormErrors((prev) => ({ ...prev, price: validateProductField('price', form.price) }));
+      return;
+    }
 
     try {
       setUploadingImage(true);
@@ -512,6 +552,7 @@ export default function SellerDashboard() {
       });
       images.forEach((img) => img.file && URL.revokeObjectURL(img.preview));
       setForm(EMPTY_FORM);
+      setFormErrors({});
       setImages([]);
       setImageUrlInput('');
       setShowAddModal(false);
@@ -546,6 +587,7 @@ export default function SellerDashboard() {
       });
       setEditImagePreview(p.images?.[0] ? resolveImageUrl(p.images[0]) : "");
       setEditSelectedFile(null);
+      setEditFormErrors({});
       setShowEditModal(true);
     } catch (err) {
       console.error("Error loading product:", err);
@@ -556,14 +598,17 @@ export default function SellerDashboard() {
     if (field === 'warranty') {
       const clean = value.replace(/\D/g, "");
       setEditForm((prev) => ({ ...prev, [field]: clean }));
+      setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     if (field === 'weight') {
       const clean = value.replace(/[^0-9.]/g, "");
       setEditForm((prev) => ({ ...prev, [field]: clean }));
+      setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     setEditForm((prev) => ({ ...prev, [field]: value }));
+    setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, value) }));
     if (field === 'imageUrl') {
       setEditImagePreview(value);
       if (value) setEditSelectedFile(null);
@@ -581,12 +626,23 @@ export default function SellerDashboard() {
   };
 
   const handleUpdateProduct = async () => {
+    const validation = validateForm(editForm, productFormSchema);
+    if (!validation.valid) {
+      setEditFormErrors(validation.errors);
+      return;
+    }
     if (!editingId || !editForm.name || !editForm.price || !editForm.stock || !editForm.description || !editForm.category) return;
     const priceNum = parseInt(editForm.price.replace(/\D/g, '')) || 0;
     const stockNum = parseInt(editForm.stock) || 0;
 
-    if (stockNum < 1) return;
-    if (priceNum <= 0) return;
+    if (stockNum < 1) {
+      setEditFormErrors((prev) => ({ ...prev, stock: validateProductField('stock', editForm.stock) }));
+      return;
+    }
+    if (priceNum <= 0) {
+      setEditFormErrors((prev) => ({ ...prev, price: validateProductField('price', editForm.price) }));
+      return;
+    }
     try {
       setEditUploading(true);
       let finalImage = editForm.imageUrl.trim();
@@ -613,6 +669,7 @@ export default function SellerDashboard() {
       setShowEditModal(false);
       setEditingId(null);
       setEditForm(EMPTY_FORM);
+      setEditFormErrors({});
       setEditImagePreview('');
       setEditSelectedFile(null);
       await fetchDashboardData();
@@ -785,7 +842,7 @@ export default function SellerDashboard() {
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-xl font-bold text-white">Mis Productos <span className="text-gray-500 font-normal text-base">({products.length})</span></h2>
               <button
-                onClick={() => setShowAddModal(true)}
+                onClick={() => { setFormErrors({}); setShowAddModal(true); }}
                 className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30 hover:shadow-green-500/50"
               >
                 <PlusIcon className="w-5 h-5" />
@@ -799,7 +856,7 @@ export default function SellerDashboard() {
                 <p className="text-lg font-medium">No tienes productos aún</p>
                 <p className="text-sm mt-1">Agrega tu primer producto para empezar a vender</p>
                 <button
-                  onClick={() => setShowAddModal(true)}
+                  onClick={() => { setFormErrors({}); setShowAddModal(true); }}
                   className="mt-4 inline-flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white px-5 py-2.5 rounded-xl font-semibold transition-all"
                 >
                   <PlusIcon className="w-5 h-5" />
@@ -1184,7 +1241,7 @@ export default function SellerDashboard() {
                 Agregar nuevo producto
               </h2>
               <button
-                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
+                onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
                 className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -1262,6 +1319,7 @@ export default function SellerDashboard() {
                       onChange={(e) => handleFormChange('name', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
+                    {formErrors.name && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.name}</p>}
                   </div>
 
                   <div>
@@ -1275,6 +1333,7 @@ export default function SellerDashboard() {
                       onChange={(e) => handleFormChange('price', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
+                    {formErrors.price && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.price}</p>}
                   </div>
 
                   <div>
@@ -1286,14 +1345,10 @@ export default function SellerDashboard() {
                       min="1"
                       placeholder="Ej: 20"
                       value={form.stock}
-                      onChange={(e) => {
-                        const val = e.target.value;
-                        if (val === '' || parseInt(val) >= 1) {
-                          handleFormChange('stock', val);
-                        }
-                      }}
+                      onChange={(e) => handleFormChange('stock', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
+                    {formErrors.stock && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.stock}</p>}
                   </div>
 
                   <div>
@@ -1313,6 +1368,7 @@ export default function SellerDashboard() {
                       <option value="Tablets">Tablets</option>
                       <option value="Accesorios">Accesorios</option>
                     </select>
+                    {formErrors.category && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.category}</p>}
                   </div>
                 </div>
               </div>
@@ -1326,6 +1382,7 @@ export default function SellerDashboard() {
                   onChange={(e) => handleFormChange('description', e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
                 />
+                {formErrors.description && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.description}</p>}
               </div>
 
               <div>
@@ -1404,7 +1461,7 @@ export default function SellerDashboard() {
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
+                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
                   className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
                 >
                   Cancelar
@@ -1431,7 +1488,7 @@ export default function SellerDashboard() {
                 Editar producto
               </h2>
               <button
-                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
                 className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
@@ -1488,6 +1545,7 @@ export default function SellerDashboard() {
                       onChange={(e) => handleEditFormChange('name', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
+                    {editFormErrors.name && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.name}</p>}
                   </div>
 
                   <div>
@@ -1501,6 +1559,7 @@ export default function SellerDashboard() {
                       onChange={(e) => handleEditFormChange('price', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
+                    {editFormErrors.price && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.price}</p>}
                   </div>
 
                   <div>
@@ -1515,6 +1574,7 @@ export default function SellerDashboard() {
                       onChange={(e) => handleEditFormChange('stock', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
+                    {editFormErrors.stock && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.stock}</p>}
                   </div>
 
                   <div>
@@ -1534,6 +1594,7 @@ export default function SellerDashboard() {
                       <option value="Tablets">Tablets</option>
                       <option value="Accesorios">Accesorios</option>
                     </select>
+                    {editFormErrors.category && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.category}</p>}
                   </div>
                 </div>
               </div>
@@ -1547,6 +1608,7 @@ export default function SellerDashboard() {
                   onChange={(e) => handleEditFormChange('description', e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
                 />
+                {editFormErrors.description && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.description}</p>}
               </div>
 
               <div>
@@ -1625,7 +1687,7 @@ export default function SellerDashboard() {
 
               <div className="flex gap-3 pt-2">
                 <button
-                  onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditImagePreview(''); setEditSelectedFile(null); }}
+                  onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
                   className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
                 >
                   Cancelar
