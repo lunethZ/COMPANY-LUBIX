@@ -1,10 +1,20 @@
 import pytest
+from unittest.mock import MagicMock
+
 from fastapi.responses import StreamingResponse
 
 from app.routers import FileRouter
 
 
 pytestmark = pytest.mark.api
+
+
+@pytest.fixture
+def file_fake_client(monkeypatch):
+    """Crea un MagicMock independiente y lo asigna a FileRouter.subir.client."""
+    fake = MagicMock()
+    monkeypatch.setattr(FileRouter.subir, "client", fake)
+    return fake
 
 
 class _RespuestaMinio:
@@ -34,13 +44,10 @@ def _fallar_get_object(*args, **kwargs):
 
 class TestFileRouter:
     def test_get_file_exitoso_devuelve_stream_y_headers(
-        self, api_client, monkeypatch
+        self, api_client, file_fake_client
     ):
         respuesta = _RespuestaMinio(b"contenido de prueba")
-
-        monkeypatch.setattr(
-            FileRouter.subir.client, "get_object", lambda *a, **k: respuesta
-        )
+        file_fake_client.get_object = lambda *a, **k: respuesta
 
         response = api_client.get("/files/documentos/nota.txt")
 
@@ -55,12 +62,9 @@ class TestFileRouter:
         assert respuesta.cerrada is True
         assert respuesta.liberada is True
 
-    def test_get_file_sin_extension_usa_octet_stream(self, api_client, monkeypatch):
+    def test_get_file_sin_extension_usa_octet_stream(self, api_client, file_fake_client):
         respuesta = _RespuestaMinio(b"binario")
-
-        monkeypatch.setattr(
-            FileRouter.subir.client, "get_object", lambda *a, **k: respuesta
-        )
+        file_fake_client.get_object = lambda *a, **k: respuesta
 
         response = api_client.get("/files/archivo-sin-extension")
 
@@ -73,11 +77,9 @@ class TestFileRouter:
         )
 
     def test_get_file_si_falla_get_object_usa_download_stream(
-        self, api_client, monkeypatch
+        self, api_client, file_fake_client, monkeypatch
     ):
-        monkeypatch.setattr(
-            FileRouter.subir.client, "get_object", _fallar_get_object
-        )
+        file_fake_client.get_object = _fallar_get_object
 
         def _download_stream(file_path):
             return StreamingResponse(
@@ -103,18 +105,14 @@ class TestFileRouter:
         )
 
     def test_hallazgo_h3_si_fallan_ambos_devuelve_404(
-        self, api_client, monkeypatch
+        self, api_client, file_fake_client, monkeypatch
     ):
-        monkeypatch.setattr(
-            FileRouter.subir.client, "get_object", _fallar_get_object
-        )
+        file_fake_client.get_object = _fallar_get_object
 
         def _download_stream_falla(file_path):
             raise RuntimeError("fallback no disponible")
 
-        monkeypatch.setattr(
-            FileRouter.subir, "download_stream", _download_stream_falla
-        )
+        monkeypatch.setattr(FileRouter.subir, "download_stream", _download_stream_falla)
 
         response = api_client.get("/files/no-existe.pdf")
 
@@ -122,13 +120,10 @@ class TestFileRouter:
         assert response.json()["detail"] == "Archivo no encontrado"
 
     def test_get_file_error_al_cerrar_no_cambia_la_respuesta(
-        self, api_client, monkeypatch
+        self, api_client, file_fake_client
     ):
         respuesta = _RespuestaMinio(b"contenido", fallar_al_cerrar=True)
-
-        monkeypatch.setattr(
-            FileRouter.subir.client, "get_object", lambda *a, **k: respuesta
-        )
+        file_fake_client.get_object = lambda *a, **k: respuesta
 
         response = api_client.get("/files/cierre.jpg")
 
