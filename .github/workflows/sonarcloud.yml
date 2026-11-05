@@ -1,0 +1,22 @@
+name: SonarCloud Analysis
+on:
+push:
+branches: [ main, develop ]
+pull_request:
+types: [opened, synchronize, reopened]
+jobs:
+sonarcloud:
+name: SonarCloud Scan
+runs-on: ubuntu-latest
+steps:
+- uses: actions/checkout@v4
+with:
+fetch-depth: 0 # Requiere el historial completo para métricas y git blame
+- name: SonarCloud Scan Action
+uses: SonarSource/sonarcloud-github-action@master
+env:
+GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Generado automáticamente por
+
+GitHub
+
+SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Configurado en el Paso 3
