@@ -92,8 +92,8 @@ export default function BuscarProductoScreen() {
           q: q.trim() || undefined,
           categoria: category || undefined,
           orden: ord || undefined,
-          min: min && !isNaN(Number(min)) ? Number(min) : undefined,
-          max: max && !isNaN(Number(max)) ? Number(max) : undefined,
+          min: min && !Number.isNaN(Number(min)) ? Number(min) : undefined,
+          max: max && !Number.isNaN(Number(max)) ? Number(max) : undefined,
         });
         setResults(data);
       } catch {
