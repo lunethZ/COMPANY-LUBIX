@@ -85,9 +85,9 @@ function isValidEmail(email: string): boolean {
 function isValidExpiry(exp: string): boolean {
   const m = exp.match(/^(\d{2})\/(\d{2})$/);
   if (!m) return false;
-  const month = parseInt(m[1], 10);
+ const month = Number.parseInt(m[1], 10);
   if (month < 1 || month > 12) return false;
-  const year = 2000 + parseInt(m[2], 10);
+  const year = 2000 + Number.parseInt(m[2], 10);
   const now = new Date();
   const expDate = new Date(year, month, 0);
   return expDate >= new Date(now.getFullYear(), now.getMonth(), 1);
