@@ -26,8 +26,8 @@ def create_code_and_send_code(database: Session, user_id: uuid.UUID, email: str,
         code=code,
         type=code_type,
         user_id=user_id,
-        created_at=datetime.utcnow(),
-        expires_at=datetime.utcnow() + timedelta(days=1)  # El código expira en 1 día
+       created_at=datetime.now(timezone.utc).replace(tzinfo=None),
+        expires_at=datetime.now(timezone.utc).replace(tzinfo=None) + timedelta(days=1)  # El código expira en 1 día
     )
 
     database.add(new_code)
