@@ -4,3 +4,21 @@ node_modules
 *.log
 .DS_Store
 .env
+# Dependencias
+
+npm-debug.log
+yarn-error.log
+
+# Archivos sensibles y variables de entorno
+
+.env.local
+.env.*
+
+# Git
+.git/
+.gitignore
+
+# Expo / React Native
+
+dist/
+web-build/
