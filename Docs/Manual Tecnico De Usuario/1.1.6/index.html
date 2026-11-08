@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1.1.6 Mapa de navegación — LUBIX</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --surface: #ffffff;
+      --text: #1f2937;
+      --muted: #5b6776;
+      --line: #dbe3ec;
+      --user: #2563eb;
+      --company: #c2410c;
+      --admin: #0f766e;
+      --green: #16a34a;
+      --shadow: 0 12px 32px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.65;
+    }
+
+    .manual {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 32px 20px 72px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, #0f172a 0%, #1e3a5f 100%);
+      color: #ffffff;
+      border-radius: 24px;
+      padding: 42px;
+      box-shadow: var(--shadow);
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      margin: 0 0 10px;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: #93c5fd;
+      font-weight: 700;
+    }
+
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(1.8rem, 4vw, 2.6rem);
+      line-height: 1.2;
+    }
+
+    .hero p {
+      margin: 14px 0 0;
+      max-width: 820px;
+      color: #dbeafe;
+      font-size: 1.02rem;
+    }
+
+    .toc {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 20px 24px;
+      margin-bottom: 28px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    .toc h2 {
+      margin: 0 0 10px;
+      font-size: 1rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .toc ul {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 22px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .toc a {
+      color: #1d4ed8;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+    }
+
+    .toc a:hover {
+      text-decoration: underline;
+    }
+
+    section {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 30px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    }
+
+    h2 {
+      margin: 0 0 14px;
+      font-size: 1.55rem;
+      line-height: 1.3;
+    }
+
+    h3 {
+      margin: 26px 0 10px;
+      font-size: 1.15rem;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    ul, ol {
+      margin: 0 0 16px;
+      padding-left: 24px;
+    }
+
+    li {
+      margin-bottom: 7px;
+    }
+
+    .grid-two {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+    }
+
+    .panel {
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+    }
+
+    .panel h3 {
+      margin-top: 0;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 640px;
+      background: #ffffff;
+    }
+
+    th, td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: #eef4fb;
+      color: #1e3a5f;
+      font-size: 0.9rem;
+      letter-spacing: 0.02em;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .icon-cell {
+      font-size: 1.2rem;
+      text-align: center;
+      width: 80px;
+    }
+
+    .role-section {
+      border-left: 6px solid var(--line);
+    }
+
+    .role-user {
+      border-left-color: var(--user);
+    }
+
+    .role-company {
+      border-left-color: var(--company);
+    }
+
+    .role-admin {
+      border-left-color: var(--admin);
+    }
+
+    .role-section h2 {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .role-badge {
+      display: inline-block;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 10px;
+      border-radius: 999px;
+      color: #ffffff;
+    }
+
+    .badge-user { background: var(--user); }
+    .badge-company { background: var(--company); }
+    .badge-admin { background: var(--admin); }
+
+    figure {
+      margin: 20px 0 0;
+    }
+
+    figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+    }
+
+    figcaption {
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+      font-style: italic;
+    }
+
+    .note {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-left: 5px solid #2563eb;
+      border-radius: 12px;
+      padding: 16px 18px;
+      color: #1e3a5f;
+      margin: 20px 0 0;
+    }
+
+    .note strong {
+      color: #1d4ed8;
+    }
+
+    footer {
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.88rem;
+      padding-top: 18px;
+    }
+
+    @media (max-width: 760px) {
+      .hero {
+        padding: 30px 24px;
+      }
+
+      section {
+        padding: 22px;
+      }
+
+      .grid-two {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="manual">
+    <header class="hero">
+      <p class="eyebrow">Manual técnico y de usuario · LUBIX</p>
+      <h1>1.1.6 Mapa de navegación</h1>
+      <p>
+        Estructura de navegación de la plataforma LUBIX para los perfiles de usuario,
+        empresa y administrador. Cada mapa parte del inicio de sesión y muestra el menú
+        principal, los módulos y los submódulos correspondientes.
+      </p>
+    </header>
+
+    <nav class="toc" aria-label="Contenido del apartado">
+      <h2>Contenido</h2>
+      <ul>
+        <li><a href="#introduccion">Introducción</a></li>
+        <li><a href="#botones">Botones e iconos</a></li>
+        <li><a href="#mapa-usuario">Mapa del usuario</a></li>
+        <li><a href="#mapa-empresa">Mapa de la empresa</a></li>
+        <li><a href="#mapa-admin">Mapa del administrador</a></li>
+        <li><a href="#correspondencia">Web y móvil</a></li>
+        <li><a href="#buenas-practicas">Buenas prácticas</a></li>
+      </ul>
+    </nav>
+
+    <section id="introduccion">
+      <h2>Introducción</h2>
+      <p>
+        La navegación de LUBIX se concibe como una experiencia orientada a tareas: cada
+        pantalla debe permitir al usuario saber dónde se encuentra, qué puede hacer y cómo
+        regresar al punto anterior sin perder el contexto. La plataforma organiza sus
+        contenidos en una estructura jerárquica de tres niveles —menú principal, módulos y
+        submódulos o acciones— que se adapta al rol de la cuenta: usuario final, empresa o
+        administrador.
+      </p>
+      <p>
+        El acceso se realiza mediante una aplicación web y una aplicación móvil que comparten
+        la misma lógica funcional. En la web, la navegación principal se concentra en la barra
+        superior, el menú del usuario y las pestañas internas de cada panel. En la aplicación
+        móvil, la barra inferior de cinco pestañas —Inicio, Buscar, Categorías, Carrito y
+        Perfil— cumple la función de menú principal.
+      </p>
+
+      <h3>Filosofía de navegación</h3>
+      <ul>
+        <li><strong>Consistencia:</strong> los mismos módulos conservan nombres, iconos y ubicación en web y móvil.</li>
+        <li><strong>Jerarquía visible:</strong> el menú principal conduce a los módulos; cada módulo presenta sus pestañas, filtros o acciones.</li>
+        <li><strong>Acceso por rol:</strong> el sistema muestra únicamente las opciones autorizadas para el tipo de cuenta.</li>
+        <li><strong>Reconocimiento sobre memoria:</strong> los iconos y etiquetas permiten identificar las funciones sin recordar rutas.</li>
+        <li><strong>Prevención de errores:</strong> las acciones destructivas solicitan confirmación o presentan un estado claramente diferenciado.</li>
+        <li><strong>Retroalimentación:</strong> cada operación relevante produce un mensaje de éxito, advertencia o error.</li>
+      </ul>
+
+      <h3>Estructura general</h3>
+      <ol>
+        <li><strong>Capa pública:</strong> inicio, catálogo, búsqueda, detalle de producto, perfil de empresa, inicio de sesión, registro y recuperación de contraseña.</li>
+        <li><strong>Capa de autenticación:</strong> validación de credenciales, verificación de correo, recuperación y restablecimiento de contraseña.</li>
+        <li><strong>Capa de menú principal:</strong> panel o menú correspondiente al rol autenticado.</li>
+        <li><strong>Capa de módulos:</strong> catálogo, carrito, pedidos, productos, empresas, usuarios, PQRS o estadísticas.</li>
+        <li><strong>Capa de submódulos y acciones:</strong> formularios, pestañas internas, filtros, modales, confirmaciones y pantallas de detalle.</li>
+        <li><strong>Capa transversal:</strong> cambio de tema, perfil, cierre de sesión y acceso a soporte mediante PQRS.</li>
+      </ol>
+
+      <div class="grid-two">
+        <div class="panel">
+          <h3>Recomendaciones para el inicio de sesión</h3>
+          <ul>
+            <li>Acceder mediante la dirección oficial y verificar HTTPS en producción.</li>
+            <li>Seleccionar correctamente el tipo de cuenta: Usuario o Empresa.</li>
+            <li>Usar credenciales personales e intransferibles.</li>
+            <li>No recordar contraseñas en equipos compartidos.</li>
+            <li>Verificar la cuenta por correo si aún no está activa.</li>
+            <li>Usar la opción <strong>Recuperar</strong> si se olvidó la contraseña.</li>
+            <li>Revisar que la fecha y hora del dispositivo sean correctas.</li>
+          </ul>
+        </div>
+        <div class="panel">
+          <h3>Recomendaciones para el cierre de sesión</h3>
+          <ul>
+            <li>Cerrar sesión desde el menú del usuario con <strong>Cerrar Sesión</strong>.</li>
+            <li>No basta con cerrar la pestaña o el navegador.</li>
+            <li>En móvil, cerrar sesión desde la pantalla de perfil.</li>
+            <li>En equipos compartidos, cerrar sesión y cerrar el navegador.</li>
+            <li>No usar el botón “Atrás” para volver a una pantalla protegida.</li>
+            <li>Reportar sesiones sospechosas a la mesa de ayuda.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="botones">
+      <h2>Estándar de botones e iconos de la interfaz</h2>
+      <p>
+        La siguiente tabla establece el significado de referencia de los botones, iconos y
+        símbolos más habituales. La representación gráfica puede variar ligeramente entre la
+        aplicación web y la móvil, pero la función descrita se mantiene.
+      </p>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Icono/Símbolo</th>
+              <th>Nombre del Botón</th>
+              <th>Función / Acción</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="icon-cell">🏠</td><td>Inicio</td><td>Regresa a la página principal del rol autenticado o al sitio público.</td></tr>
+            <tr><td class="icon-cell">🔍</td><td>Buscar</td><td>Abre el buscador de productos y permite introducir palabras clave.</td></tr>
+            <tr><td class="icon-cell">🛒</td><td>Carrito</td><td>Abre el carrito de compras; el indicador numérico muestra la cantidad de artículos.</td></tr>
+            <tr><td class="icon-cell">👤</td><td>Perfil / Usuario</td><td>Despliega el menú del usuario con acceso al perfil y al cierre de sesión.</td></tr>
+            <tr><td class="icon-cell">💬</td><td>PQRS</td><td>Abre el módulo de peticiones, quejas, reclamos y sugerencias.</td></tr>
+            <tr><td class="icon-cell">🌙 / ☀️</td><td>Tema</td><td>Alterna entre el modo oscuro y el modo claro de la interfaz.</td></tr>
+            <tr><td class="icon-cell">☰</td><td>Menú</td><td>Abre el menú de navegación lateral o la lista de opciones en dispositivos móviles.</td></tr>
+            <tr><td class="icon-cell">⌄</td><td>Desplegable</td><td>Expande un submenú, una lista de opciones o un panel de filtros.</td></tr>
+            <tr><td class="icon-cell">←</td><td>Volver</td><td>Regresa a la pantalla o al paso anterior sin ejecutar la acción en curso.</td></tr>
+            <tr><td class="icon-cell">✖</td><td>Cerrar</td><td>Cierra una ventana modal, un panel lateral o un formulario sin guardar cambios.</td></tr>
+            <tr><td class="icon-cell">✓</td><td>Guardar / Confirmar</td><td>Guarda los cambios o confirma la acción solicitada.</td></tr>
+            <tr><td class="icon-cell">✚</td><td>Agregar</td><td>Añade un producto al carrito, una dirección, una imagen o un registro nuevo.</td></tr>
+            <tr><td class="icon-cell">−</td><td>Quitar / Disminuir</td><td>Reduce la cantidad de un producto o elimina un elemento de una lista temporal.</td></tr>
+            <tr><td class="icon-cell">🗑️</td><td>Eliminar</td><td>Elimina un producto, una dirección, una solicitud o un registro; normalmente solicita confirmación.</td></tr>
+            <tr><td class="icon-cell">📦</td><td>Pedidos</td><td>Abre el historial o la gestión de pedidos según el rol.</td></tr>
+            <tr><td class="icon-cell">❤️</td><td>Guardados / Favoritos</td><td>Añade o retira un producto de la lista de favoritos.</td></tr>
+            <tr><td class="icon-cell">⭐</td><td>Reseñas</td><td>Permite consultar, crear o gestionar calificaciones y reseñas de productos.</td></tr>
+            <tr><td class="icon-cell">📊</td><td>Estadísticas</td><td>Muestra indicadores, métricas y reportes del panel de empresa o administración.</td></tr>
+            <tr><td class="icon-cell">🏢</td><td>Empresas</td><td>Abre la gestión de empresas registradas y pendientes de validación.</td></tr>
+            <tr><td class="icon-cell">👥</td><td>Usuarios</td><td>Abre la gestión de usuarios registrados.</td></tr>
+            <tr><td class="icon-cell">🛡️</td><td>Seguridad</td><td>Accede a las opciones de seguridad de la cuenta y cambio de contraseña.</td></tr>
+            <tr><td class="icon-cell">📍</td><td>Direcciones</td><td>Abre la gestión de direcciones de envío o de contacto.</td></tr>
+            <tr><td class="icon-cell">💳</td><td>Pago</td><td>Inicia o configura el método de pago dentro del checkout.</td></tr>
+            <tr><td class="icon-cell">📄</td><td>Factura / Documento</td><td>Descarga o consulta facturas, comprobantes y documentos adjuntos.</td></tr>
+            <tr><td class="icon-cell">🔁</td><td>Reintentar</td><td>Vuelve a ejecutar una operación que falló por un error temporal.</td></tr>
+            <tr><td class="icon-cell">❓</td><td>Ayuda</td><td>Abre la orientación, el centro de ayuda o el canal de soporte.</td></tr>
+            <tr><td class="icon-cell">🚪</td><td>Cerrar Sesión</td><td>Finaliza la sesión activa y redirige a la pantalla de inicio de sesión.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="mapa-usuario" class="role-section role-user">
+      <h2><span class="role-badge badge-user">Usuario</span> Mapa de navegación del usuario</h2>
+      <p>
+        El usuario final se autentica y llega a un menú principal desde el cual puede consultar
+        el catálogo, buscar productos, gestionar el carrito, completar una compra, presentar
+        PQRS y administrar su perfil. En la aplicación móvil, este mismo conjunto de funciones
+        se organiza mediante la barra inferior de cinco pestañas.
+      </p>
+      <figure>
+        <img src="LUBIX_flujo_usuario.png" alt="Diagrama de flujo de navegación del usuario: inicio de sesión, menú principal, módulos y submódulos" loading="lazy" decoding="async">
+        <figcaption>Figura 1. Mapa de navegación del usuario: inicio de sesión, menú principal, módulos y submódulos.</figcaption>
+      </figure>
+    </section>
+
+    <section id="mapa-empresa" class="role-section role-company">
+      <h2><span class="role-badge badge-company">Empresa</span> Mapa de navegación de la empresa</h2>
+      <p>
+        La cuenta de empresa accede a un panel orientado a la gestión comercial. Desde el menú
+        principal puede administrar su catálogo, atender pedidos, consultar estadísticas, revisar
+        reseñas, actualizar su perfil y presentar PQRS. En la aplicación móvil, estas funciones
+        se concentran en el dashboard de empresa.
+      </p>
+      <figure>
+        <img src="LUBIX_flujo_empresa.png" alt="Diagrama de flujo de navegación de la empresa: inicio de sesión, menú principal, módulos y submódulos" loading="lazy" decoding="async">
+        <figcaption>Figura 2. Mapa de navegación de la empresa: inicio de sesión, menú principal, módulos y submódulos.</figcaption>
+      </figure>
+    </section>
+
+    <section id="mapa-admin" class="role-section role-admin">
+      <h2><span class="role-badge badge-admin">Administrador</span> Mapa de navegación del administrador</h2>
+      <p>
+        El administrador dispone de un panel de supervisión global. Su menú principal agrupa el
+        resumen de métricas, la gestión de empresas, la gestión de usuarios y la administración
+        de PQRS. Las acciones sensibles, como la validación de una empresa o la resolución de una
+        solicitud, se ejecutan desde el módulo correspondiente y quedan sujetas a las políticas
+        de seguridad y auditoría.
+      </p>
+      <figure>
+        <img src="LUBIX_flujo_admin.png" alt="Diagrama de flujo de navegación del administrador: inicio de sesión, menú principal, módulos y submódulos" loading="lazy" decoding="async">
+        <figcaption>Figura 3. Mapa de navegación del administrador: inicio de sesión, menú principal, módulos y submódulos.</figcaption>
+      </figure>
+      <div class="note">
+        <strong>Cómo leer los diagramas:</strong> los nodos rectangulares representan pantallas,
+        módulos o acciones; los rombos representan decisiones; las flechas indican el flujo
+        permitido. Las líneas discontinuas hacia <strong>Cerrar sesión</strong> significan que la
+        acción está disponible desde el menú del usuario en cualquier módulo.
+      </div>
+    </section>
+
+    <section id="correspondencia">
+      <h2>Correspondencia entre la navegación web y móvil</h2>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Función</th>
+              <th>Acceso web</th>
+              <th>Acceso móvil</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Inicio</td><td>Barra superior o logotipo LUBIX</td><td>Pestaña <strong>Inicio</strong></td></tr>
+            <tr><td>Búsqueda de productos</td><td>Campo de búsqueda de la barra superior</td><td>Pestaña <strong>Buscar</strong></td></tr>
+            <tr><td>Categorías</td><td>Página de inicio o resultados de búsqueda</td><td>Pestaña <strong>Categorías</strong></td></tr>
+            <tr><td>Carrito</td><td>Enlace <strong>Carrito</strong> de la barra superior</td><td>Pestaña <strong>Carrito</strong></td></tr>
+            <tr><td>Perfil</td><td>Menú del usuario &gt; <strong>Ver Perfil</strong></td><td>Pestaña <strong>Perfil</strong></td></tr>
+            <tr><td>PQRS</td><td>Enlace <strong>PQRS</strong> de la barra superior</td><td>No disponible como pestaña; se accede desde la web</td></tr>
+            <tr><td>Cierre de sesión</td><td>Menú del usuario &gt; <strong>Cerrar Sesión</strong></td><td>Pantalla <strong>Perfil</strong> &gt; <strong>Cerrar sesión</strong></td></tr>
+            <tr><td>Panel de empresa</td><td>Menú <strong>Mis productos</strong>, <strong>Pedidos</strong>, <strong>Estadísticas</strong>, <strong>Mi Perfil</strong>, <strong>Reseñas</strong></td><td>Pantalla de dashboard de empresa</td></tr>
+            <tr><td>Panel de administración</td><td>Pestañas <strong>Resumen</strong>, <strong>Empresas</strong>, <strong>Usuarios</strong>, <strong>PQRS</strong></td><td>Pantalla de dashboard de administrador</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="buenas-practicas">
+      <h2>Buenas prácticas de navegación</h2>
+      <ul>
+        <li>Utilizar el menú principal y las pestañas internas para desplazarse.</li>
+        <li>Guardar o cancelar explícitamente antes de abandonar un formulario con datos sin guardar.</li>
+        <li>No abrir varias pestañas para ejecutar la misma operación de compra o de gestión.</li>
+        <li>Revisar el indicador del carrito después de agregar o eliminar productos.</li>
+        <li>Confirmar el rol activo antes de realizar operaciones administrativas o de empresa.</li>
+        <li>Si una pantalla no carga, reintentar o recargar una sola vez; si persiste, reportar el caso con el mensaje exacto y una captura.</li>
+        <li>Al finalizar, cerrar sesión de forma explícita y verificar que la pantalla de inicio de sesión se muestre nuevamente.</li>
+      </ul>
+    </section>
+
+    <footer>
+      LUBIX · Manual técnico y de usuario · Apartado 1.1.6
+    </footer>
+  </main>
+</body>
+</html>
