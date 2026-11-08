@@ -7,7 +7,7 @@ services:
     runtime: python
     plan: free
     region: oregon
-    branch: main
+    branch: s4/deploy-render-neon
     rootDir: backend
     autoDeploy: true
     buildCommand: pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
