@@ -12,13 +12,20 @@ import { AuthModalProvider } from '../context/AuthModalContext';
  * (ThemeProvider > Router > AuthProvider > CartProvider > AuthModalProvider),
  * usando MemoryRouter para poder navegar/leer params en las pruebas.
  */
+interface ProviderOptions extends Omit<RenderOptions, 'wrapper'> {
+  /** Ruta inicial del MemoryRouter (permite probar `useParams` con `<Routes>`). */
+  initialEntries?: string[];
+}
+
 export function renderWithProviders(
   ui: ReactElement,
-  options?: Omit<RenderOptions, 'wrapper'>,
+  options?: ProviderOptions,
 ) {
+  const { initialEntries = ['/'], ...renderOptions } = options ?? {};
+
   const Wrapper = ({ children }: { children: ReactNode }) => (
     <ThemeProvider>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={initialEntries}>
         <AuthProvider>
           <CartProvider>
             <AuthModalProvider>{children}</AuthModalProvider>
@@ -28,5 +35,5 @@ export function renderWithProviders(
     </ThemeProvider>
   );
 
-  return render(ui, { wrapper: Wrapper, ...options });
+  return render(ui, { wrapper: Wrapper, ...renderOptions });
 }
