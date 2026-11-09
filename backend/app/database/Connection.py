@@ -63,6 +63,14 @@ def build_database_url(raw_url: str | None = None) -> str:
 
 DATABASE_URL = build_database_url()
 
+# Las migraciones (Alembic) deben usar la conexión directa/sin pooler. Neon
+# publica esa cadena en DATABASE_URL_UNPOOLED; si no existe, se usa la normal.
+MIGRATION_DATABASE_URL = (
+    build_database_url(config.DATABASE_URL_UNPOOLED)
+    if config.DATABASE_URL_UNPOOLED
+    else DATABASE_URL
+)
+
 _engine_options = {
     "pool_pre_ping": True,
     "echo": False,  # True para activar logs - False para desactivar Logs

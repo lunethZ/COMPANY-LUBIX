@@ -19,7 +19,12 @@ services:
       - key: ENVIRONMENT
         value: production
       # Render inyecta PORT automáticamente; start.sh lo usa sin fijarlo aquí.
+      # URL_DATABASE: cadena pooled de Neon, usada por la app en runtime.
       - key: URL_DATABASE
+        sync: false
+      # DATABASE_URL_UNPOOLED: conexión directa (sin pooler) de Neon, usada por
+      # Alembic para las migraciones (el pooler en modo transacción no es fiable).
+      - key: DATABASE_URL_UNPOOLED
         sync: false
       - key: DB_SSL_MODE
         value: require

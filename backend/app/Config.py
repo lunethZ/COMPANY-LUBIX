@@ -25,6 +25,10 @@ class config():
     # URL_DATABASE es el nombre usado por el proyecto. DATABASE_URL se acepta
     # como alias para plataformas (Render, Heroku, etc.) que usan ese nombre.
     URL_DATABASE = os.getenv("URL_DATABASE") or os.getenv("DATABASE_URL")
+    # Neon entrega la conexión directa (sin pooler) en esta variable; se usa
+    # para migraciones de Alembic, que no soportan bien el pooler en modo
+    # transacción.
+    DATABASE_URL_UNPOOLED = os.getenv("DATABASE_URL_UNPOOLED")
 
     SECRET_KEY = os.getenv("SECRET_KEY")
     ALGORITHM = os.getenv("ALGORITHM")
