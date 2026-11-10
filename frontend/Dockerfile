@@ -8,7 +8,16 @@ COPY package*.json pnpm-lock.yaml ./
 
 RUN pnpm install
 
-COPY . .
+COPY index.html ./
+COPY vite.config.ts ./
+COPY tsconfig.json ./
+COPY tsconfig.app.json ./
+COPY tsconfig.node.json ./
+COPY tailwind.config.js ./
+COPY postcss.config.cjs ./
+COPY eslint.config.js ./
+COPY public ./public
+COPY src ./src
 
 EXPOSE 5173
 
