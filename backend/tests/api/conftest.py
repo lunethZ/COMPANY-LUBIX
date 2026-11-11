@@ -1,24 +1,20 @@
-import sys
-from unittest.mock import MagicMock, patch, AsyncMock
+from unittest.mock import MagicMock
 
-# Mock minio BEFORE any other imports (root conftest patches minio.Minio, not sys.modules)
-_mock_minio = MagicMock()
-_mock_minio.Minio = MagicMock()
-_mock_minio.Minio.bucket_exists = MagicMock(return_value=True)
-_mock_minio.Minio.make_bucket = MagicMock()
-_mock_minio.Minio.put_object = MagicMock(return_value=None)
-_mock_minio.Minio.get_object = MagicMock(return_value=MagicMock(read=MagicMock(return_value=b"data")))
-_mock_minio.Minio.presigned_get_object = MagicMock(return_value="https://presigned.url")
-_mock_minio.Minio.remove_object = MagicMock(return_value=None)
-_mock_minio.error = MagicMock()
-_mock_minio.error.S3Error = type("S3Error", (Exception,), {})
+# Sustituir los métodos del Minio real en lugar de reemplazar `sys.modules`.
+# Reemplazar el módulo globalmente dejaba el doble activo para el resto de la
+# suite (tests/test_file.py, test_company.py, test_user.py fallaban después de
+# los tests de API). El conftest raíz ya parchea bucket_exists/make_bucket/
+# put_object; aquí se completan los métodos que usan los routers.
+import minio as _minio
 
-if "minio" in sys.modules:
-    del sys.modules["minio"]
-if "minio.error" in sys.modules:
-    del sys.modules["minio.error"]
-sys.modules["minio"] = _mock_minio
-sys.modules["minio.error"] = _mock_minio.error
+_minio.Minio.bucket_exists = lambda self, bucket: True
+_minio.Minio.make_bucket = lambda self, bucket: None
+_minio.Minio.put_object = lambda self, *args, **kwargs: None
+_minio.Minio.get_object = lambda self, *args, **kwargs: MagicMock(
+    read=MagicMock(return_value=b"data")
+)
+_minio.Minio.presigned_get_object = lambda self, *args, **kwargs: "https://presigned.url"
+_minio.Minio.remove_object = lambda self, *args, **kwargs: None
 
 # Patch UUID bind processors BEFORE importing models (so model column types get patched)
 import uuid as uuid_lib
@@ -202,17 +198,38 @@ def api_auth_headers_company(api_fake_company):
 
 
 @pytest.fixture(scope="function", autouse=True)
-def _mock_external_services():
+def _mock_external_services(monkeypatch):
     """Mock external services (MinIO, Email, Network) for all tests."""
-    with patch("app.utils.CheckNetwork.check_internet_connection", return_value=True) as mock_net, \
-         patch("app.services.authentication.AuthService.create_code_and_send_code", return_value={"email_sent": True}) as mock_email_send, \
-         patch("app.services.authentication.AuthService.verify_code", return_value=True) as mock_email_verify, \
-         patch("app.services.authentication.AuthService.EmailRegisterCompany", return_value=None) as mock_email_company, \
-         patch("app.services.NasService.subir.upload_file", return_value={"success": True, "object_name": "test.jpg", "path": "test/path.jpg"}) as mock_minio:
-        yield {
-            "network": mock_net,
-            "email_send": mock_email_send,
-            "email_verify": mock_email_verify,
-            "email_company": mock_email_company,
-            "minio": mock_minio,
+    mock_net = MagicMock(return_value=True)
+    mock_email_send = MagicMock(return_value={"email_sent": True})
+    mock_email_verify = MagicMock(return_value=True)
+    mock_email_company = MagicMock(return_value=None)
+    mock_minio = MagicMock(
+        return_value={
+            "success": True,
+            "object_name": "test.jpg",
+            "path": "test/path.jpg",
         }
+    )
+
+    monkeypatch.setattr("app.utils.CheckNetwork.check_internet_connection", mock_net)
+    monkeypatch.setattr(
+        "app.services.authentication.AuthService.create_code_and_send_code",
+        mock_email_send,
+    )
+    monkeypatch.setattr(
+        "app.services.authentication.AuthService.verify_code", mock_email_verify
+    )
+    monkeypatch.setattr(
+        "app.services.authentication.AuthService.EmailRegisterCompany",
+        mock_email_company,
+    )
+    monkeypatch.setattr("app.services.NasService.subir.upload_file", mock_minio)
+
+    yield {
+        "network": mock_net,
+        "email_send": mock_email_send,
+        "email_verify": mock_email_verify,
+        "email_company": mock_email_company,
+        "minio": mock_minio,
+    }
