@@ -2,10 +2,24 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import axios from "axios";
-import { errorDetailMessage } from "../utils/errors";
+import {
+    getPasswordChecks,
+    getPasswordStrength,
+    rules,
+    validateForm,
+} from "../utils/validators";
 import { EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 type RegistrationMode = "usuario" | "empresa";
+
+interface RegistrationValidationError {
+    loc?: (string | number)[];
+    msg?: string;
+}
+
+interface RegistrationErrorResponse {
+    detail?: string | RegistrationValidationError[];
+}
 
 export const Register = () => {
     const navigate = useNavigate();
@@ -34,12 +48,14 @@ export const Register = () => {
 
     const password = form.password;
 
-    const hasMinLength = password.length >= 8;
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasNumber = /[0-9]/.test(password);
+    const {
+        minLength: hasMinLength,
+        hasUpper,
+        hasLower,
+        hasNumber,
+    } = getPasswordChecks(password);
 
-    const strength = [hasMinLength, hasUpper, hasLower, hasNumber].filter(Boolean).length;
+    const strength = getPasswordStrength(password);
     const isPasswordValid = strength === 4;
 
     const getStrengthColor = () => {
@@ -70,58 +86,39 @@ export const Register = () => {
         setFieldErrors({});
 
         if (form.password !== form.confirmPassword) {
+            setFieldErrors({ confirmPassword: "Las contraseñas no coinciden" });
             showPopup("Las contraseñas no coinciden", "error");
             return;
         }
 
-        if (!isPasswordValid) {
-            showPopup("La contraseña no es segura. Debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número.", "error");
-            return;
-        }
+        const validation = validateForm(form, {
+            name: rules.required(
+                mode === "empresa"
+                    ? "El nombre de contacto es obligatorio"
+                    : "El nombre es obligatorio",
+            ),
+            email: [rules.required("El correo es obligatorio"), rules.email()],
+            tell: rules.required("El teléfono es obligatorio"),
+            password: rules.password(),
+            confirmPassword: rules.required("Confirma tu contraseña"),
+            ...(mode === "empresa"
+                ? {
+                    companyName: rules.required("El nombre de la empresa es obligatorio"),
+                    nit: rules.required("El NIT es obligatorio"),
+                    nitDV: rules.required("El dígito de verificación es obligatorio"),
+                    address: rules.required("La dirección es obligatoria"),
+                }
+                : {
+                    surname: rules.required("El apellido es obligatorio"),
+                }),
+        });
 
-        if (mode === "empresa") {
-            if (!form.companyName.trim()) {
-                setFieldErrors({ companyName: "El nombre de la empresa es obligatorio" });
-                showPopup("Completa el nombre de la empresa", "error");
-                return;
-            }
-            if (!form.nit.trim()) {
-                setFieldErrors({ nit: "El NIT es obligatorio" });
-                showPopup("Completa el NIT de la empresa", "error");
-                return;
-            }
-            if (!form.nitDV.trim()) {
-                setFieldErrors({ nitDV: "El dígito de verificación es obligatorio" });
-                showPopup("Completa el dígito de verificación del NIT", "error");
-                return;
-            }
-            if (!form.address.trim()) {
-                setFieldErrors({ address: "La dirección es obligatoria" });
-                showPopup("Completa la dirección de la empresa", "error");
-                return;
-            }
-        } else {
-            if (!form.name.trim()) {
-                setFieldErrors({ name: "El nombre es obligatorio" });
-                showPopup("Completa tu nombre", "error");
-                return;
-            }
-            if (!form.surname.trim()) {
-                setFieldErrors({ surname: "El apellido es obligatorio" });
-                showPopup("Completa tu apellido", "error");
-                return;
-            }
-        }
-
-        if (!form.email.trim()) {
-            setFieldErrors({ email: "El correo es obligatorio" });
-            showPopup("Completa tu correo electrónico", "error");
-            return;
-        }
-
-        if (!form.tell.trim()) {
-            setFieldErrors({ tell: "El teléfono es obligatorio" });
-            showPopup("Completa tu número de teléfono", "error");
+        if (!validation.valid) {
+            setFieldErrors(validation.errors as Record<string, string>);
+            showPopup(
+                validation.firstError?.message ?? "Revisa los campos del formulario",
+                "error",
+            );
             return;
         }
 
@@ -182,7 +179,7 @@ export const Register = () => {
                 }, 2000);
             }
         } catch (error) {
-            if (axios.isAxiosError(error)) {
+            if (axios.isAxiosError<RegistrationErrorResponse>(error)) {
                 const errorData = error.response?.data;
                 let errorMsg = "";
                 const newFieldErrors: Record<string, string> = {};
@@ -191,12 +188,12 @@ export const Register = () => {
                     if (Array.isArray(errorData.detail)) {
                         // Pydantic validation errors
                         const errors = errorData.detail;
-                        errors.forEach((err: any) => {
+                        errors.forEach((err) => {
                             const field = err.loc?.[err.loc.length - 1] || "";
                             const msg = err.msg || "Error de validación";
                             newFieldErrors[field] = msg;
                         });
-                        errorMsg = errors.map((e: any) => e.msg).join(". ");
+                        errorMsg = errors.map((item) => item.msg || "Error de validación").join(". ");
                     } else if (typeof errorData.detail === "string") {
                         errorMsg = errorData.detail;
                         // Map common backend errors to fields
@@ -213,7 +210,9 @@ export const Register = () => {
                 }
 
                 setFieldErrors(newFieldErrors);
-                showPopup(errorMsg, "error");
+                if (Object.keys(newFieldErrors).length === 0) {
+                    showPopup(errorMsg, "error");
+                }
             } else {
                 showPopup("Error desconocido. Intenta de nuevo.", "error");
             }

@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
 import NavbarAuto from '../components/navbar-auto';
 import Footer from '../components/footer';
 import api from '../api/axios';
 import { errorDetailMessage } from '../utils/errors';
+import { rules, validateForm } from '../utils/validators';
 import {
   PaperAirplaneIcon,
   ExclamationTriangleIcon,
@@ -51,8 +51,19 @@ const typeColors: Record<string, string> = {
   eliminacion: 'bg-red-500/10 border-red-500/30 text-red-400',
 };
 
+const pqrsRules = {
+  subject: [
+    rules.required('El asunto es obligatorio'),
+    rules.maxLength(150, 'El asunto debe tener como máximo 150 caracteres'),
+  ],
+  description: [
+    rules.required('La descripción es obligatoria'),
+    rules.minLength(10, 'La descripción debe tener al menos 10 caracteres'),
+    rules.maxLength(2000, 'La descripción debe tener como máximo 2000 caracteres'),
+  ],
+};
+
 export default function PQRSPage() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -70,35 +81,37 @@ export default function PQRSPage() {
   });
 
   const [errors, setErrors] = useState<{ subject?: string; description?: string }>({});
+  const isFormValid = validateForm(form, pqrsRules).valid;
 
   const isDeleteRequest = searchParams.get('type') === 'eliminacion';
 
+  const loadPQRS = useCallback(
+    () => api.get('/pqrs')
+      .then((res) => setPqrsList(res.data || []))
+      .catch((err: unknown) => console.error('Error loading PQRS:', err))
+      .finally(() => setLoading(false)),
+    [],
+  );
+
   useEffect(() => {
     loadPQRS();
-  }, []);
-
-  const loadPQRS = async () => {
-    try {
-      const res = await api.get('/pqrs');
-      setPqrsList(res.data || []);
-    } catch (err) {
-      console.error('Error loading PQRS:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [loadPQRS]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    const nextErrors: { subject?: string; description?: string } = {};
-    if (!form.subject.trim()) nextErrors.subject = 'El asunto es obligatorio';
-    if (!form.description.trim()) nextErrors.description = 'La descripción es obligatoria';
-    if (Object.values(nextErrors).some(Boolean)) {
-      setErrors(nextErrors);
+    const validation = validateForm(form, pqrsRules);
+    setErrors({
+      subject: validation.errors.subject,
+      description: validation.errors.description,
+    });
+
+    if (!validation.valid) {
+      setMessage(validation.firstError?.message ?? 'Revisa los campos del formulario');
+      setMessageType('error');
+      setTimeout(() => { setMessage(''); setMessageType(''); }, 3000);
       return;
     }
-    setErrors({});
 
     setSending(true);
     try {
@@ -114,7 +127,7 @@ export default function PQRSPage() {
       setShowForm(false);
       loadPQRS();
       setTimeout(() => { setMessage(''); setMessageType(''); }, 4000);
-    } catch (err: any) {
+    } catch (err: unknown) {
       setMessage(errorDetailMessage(err, 'Error al enviar la solicitud'));
       setMessageType('error');
       setTimeout(() => { setMessage(''); setMessageType(''); }, 3000);
@@ -292,7 +305,7 @@ export default function PQRSPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={sending}
+                  disabled={sending || !isFormValid}
                   className="flex-1 py-2.5 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2"
                 >
                   {sending ? (

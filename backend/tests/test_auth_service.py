@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
 
 import pytest
@@ -256,7 +256,7 @@ class TestLoginUser:
         assert isinstance(saved, RefreshToken)
         assert saved.token == result.refresh_token
         assert saved.revoked is False
-        assert saved.expires_at > datetime.utcnow()
+        assert saved.expires_at > datetime.now(timezone.utc)
 
         from jose import jwt
         from app.Config import config
@@ -606,7 +606,7 @@ class TestRefreshToken:
         db = fake_db(
             Users=user,
             RefreshToken=SimpleNamespace(
-                token="tok", revoked=False, expires_at=datetime.utcnow() - timedelta(days=1)
+                token="tok", revoked=False, expires_at=datetime.now(timezone.utc) - timedelta(days=1)
             ),
         )
 
@@ -623,7 +623,7 @@ class TestRefreshToken:
         old_token = SimpleNamespace(
             token="tok-viejo",
             revoked=False,
-            expires_at=datetime.utcnow() + timedelta(days=7),
+            expires_at=datetime.now(timezone.utc) + timedelta(days=7),
             user_id=user.id,
         )
         self._stub(monkeypatch, {"sub": str(user.id), "type": "refresh"})

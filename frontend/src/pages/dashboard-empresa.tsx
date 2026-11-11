@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/navbar-empresa';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { rules, validateField, validateForm, type Validator } from '../utils/validators';
 import {
   StarIcon,
   ArrowTrendingUpIcon,
@@ -68,7 +69,7 @@ interface CompanyOrder {
   items: CompanyOrderItem[];
 }
 
-interface ProductForm {
+type ProductForm = {
   name: string;
   price: string;
   stock: string;
@@ -81,7 +82,9 @@ interface ProductForm {
   weight: string;
   dimensions: string;
   imageUrl: string;
-}
+};
+
+type ProductFormErrors = Partial<Record<keyof ProductForm, string>>;
 
 interface ProductImage {
   id: string;
@@ -109,8 +112,6 @@ interface SellerInfo {
 }
 
 const INITIAL_PRODUCTS: Product[] = [];
-
-type ProductFormErrors = Partial<Record<'price' | 'stock' | 'discount', string>>;
 
 const MAX_DISCOUNT_PERCENT = 100;
 
@@ -162,6 +163,27 @@ const EMPTY_FORM: ProductForm = {
   weight: '',
   dimensions: '',
   imageUrl: '',
+};
+
+/** Reglas compartidas del formulario de producto (precio y stock no admiten negativos). */
+const productFormSchema: { [K in keyof ProductForm]?: Validator | Validator[] } = {
+  name: [rules.required('Ingresa el nombre del producto')],
+  price: [
+    rules.required('Ingresa el precio'),
+    rules.positiveNumber('El precio debe ser un número mayor que cero'),
+  ],
+  stock: [
+    rules.required('Ingresa el stock disponible'),
+    rules.positiveNumber('El stock debe ser un número mayor que cero'),
+  ],
+  category: [rules.required('Selecciona una categoría')],
+  description: [rules.required('Ingresa una descripción del producto')],
+};
+
+const validateProductField = (field: keyof ProductForm, value: string): string => {
+  const fieldRules = productFormSchema[field];
+  if (!fieldRules) return '';
+  return validateField(value, fieldRules).message;
 };
 
 const REFERENCE_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400&h=400&fit=crop';
@@ -500,32 +522,44 @@ export default function SellerDashboard() {
     if (field === 'warranty') {
       const clean = value.replace(/\D/g, "");
       setForm((prev) => ({ ...prev, [field]: clean }));
+      setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     // Para peso, permitir números y punto
     if (field === 'weight') {
       const clean = value.replace(/[^0-9.]/g, "");
       setForm((prev) => ({ ...prev, [field]: clean }));
+      setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     if (field === 'price' || field === 'stock' || field === 'discount') {
       const message = validateNumericField(field, value);
       setFormErrors((prev) => ({ ...prev, [field]: message }));
+      setForm((prev) => ({ ...prev, [field]: value }));
+      return;
     }
     setForm((prev) => ({ ...prev, [field]: value }));
+    setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, value) }));
   };
 
   const handleAddProduct = async () => {
-    const errors = collectNumericErrors(form);
-    setFormErrors(errors);
-    if (!form.name || !form.description || !form.category || hasNumericErrors(errors)) return;
+    const validation = validateForm(form, productFormSchema);
+    const numericErrors = collectNumericErrors(form);
+    setFormErrors({ ...validation.errors, ...numericErrors });
+    if (!validation.valid || hasNumericErrors(numericErrors)) return;
 
     const priceNum = Number(form.price) || 0;
     const stockNum = parseInt(form.stock) || 0;
     const discountNum = Number(form.discount) || 0;
 
-    if (stockNum < 1) return;
-    if (priceNum <= 0) return;
+    if (stockNum < 1) {
+      setFormErrors((prev) => ({ ...prev, stock: validateProductField('stock', form.stock) }));
+      return;
+    }
+    if (priceNum <= 0) {
+      setFormErrors((prev) => ({ ...prev, price: validateProductField('price', form.price) }));
+      return;
+    }
 
     try {
       setUploadingImage(true);
@@ -599,6 +633,7 @@ export default function SellerDashboard() {
       });
       setEditImagePreview(p.images?.[0] ? resolveImageUrl(p.images[0]) : "");
       setEditSelectedFile(null);
+      setEditFormErrors({});
       setShowEditModal(true);
     } catch (err) {
       console.error("Error loading product:", err);
@@ -609,18 +644,23 @@ export default function SellerDashboard() {
     if (field === 'warranty') {
       const clean = value.replace(/\D/g, "");
       setEditForm((prev) => ({ ...prev, [field]: clean }));
+      setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     if (field === 'weight') {
       const clean = value.replace(/[^0-9.]/g, "");
       setEditForm((prev) => ({ ...prev, [field]: clean }));
+      setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
     if (field === 'price' || field === 'stock' || field === 'discount') {
       const message = validateNumericField(field, value);
       setEditFormErrors((prev) => ({ ...prev, [field]: message }));
+      setEditForm((prev) => ({ ...prev, [field]: value }));
+      return;
     }
     setEditForm((prev) => ({ ...prev, [field]: value }));
+    setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, value) }));
     if (field === 'imageUrl') {
       setEditImagePreview(value);
       if (value) setEditSelectedFile(null);
@@ -638,16 +678,23 @@ export default function SellerDashboard() {
   };
 
   const handleUpdateProduct = async () => {
-    if (!editingId || !editForm.name || !editForm.description || !editForm.category) return;
-    const errors = collectNumericErrors(editForm);
-    setEditFormErrors(errors);
-    if (hasNumericErrors(errors)) return;
+    if (!editingId) return;
+    const validation = validateForm(editForm, productFormSchema);
+    const numericErrors = collectNumericErrors(editForm);
+    setEditFormErrors({ ...validation.errors, ...numericErrors });
+    if (!validation.valid || hasNumericErrors(numericErrors)) return;
     const priceNum = Number(editForm.price) || 0;
     const stockNum = parseInt(editForm.stock) || 0;
     const discountNum = Number(editForm.discount) || 0;
 
-    if (stockNum < 1) return;
-    if (priceNum <= 0) return;
+    if (stockNum < 1) {
+      setEditFormErrors((prev) => ({ ...prev, stock: validateProductField('stock', editForm.stock) }));
+      return;
+    }
+    if (priceNum <= 0) {
+      setEditFormErrors((prev) => ({ ...prev, price: validateProductField('price', editForm.price) }));
+      return;
+    }
     try {
       setEditUploading(true);
       let finalImage = editForm.imageUrl.trim();
@@ -1326,6 +1373,235 @@ export default function SellerDashboard() {
                       onChange={(e) => handleFormChange('name', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
+                    {formErrors.name && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.name}</p>}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Precio (COP) <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      placeholder="Ej: 3500000"
+                      value={form.price}
+                      onChange={(e) => handleFormChange('price', e.target.value)}
+                      aria-invalid={!!formErrors.price}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.price && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.price}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Stock disponible <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      placeholder="Ej: 20"
+                      value={form.stock}
+                      onChange={(e) => handleFormChange('stock', e.target.value)}
+                      aria-invalid={!!formErrors.stock}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.stock && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.stock}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={MAX_DISCOUNT_PERCENT}
+                      step="1"
+                      placeholder="Ej: 15"
+                      value={form.discount}
+                      onChange={(e) => handleFormChange('discount', e.target.value)}
+                      aria-invalid={!!formErrors.discount}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.discount ? (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.discount}</span>
+                    ) : (
+                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría <span className="text-red-400">*</span></label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => handleFormChange('category', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    >
+                      <option value="">Selecciona una categoría</option>
+                      <option value="Celulares">Celulares</option>
+                      <option value="Computadores">Computadores</option>
+                      <option value="Televisores">Televisores</option>
+                      <option value="Audio">Audio</option>
+                      <option value="Fotografía">Fotografía</option>
+                      <option value="Gaming">Gaming</option>
+                      <option value="Tablets">Tablets</option>
+                      <option value="Accesorios">Accesorios</option>
+                    </select>
+                    {formErrors.category && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.category}</p>}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción <span className="text-red-400">*</span></label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe las características principales del producto..."
+                  value={form.description}
+                  onChange={(e) => handleFormChange('description', e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
+                />
+                {formErrors.description && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.description}</p>}
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                  <ChevronRightIcon className="w-4 h-4 text-green-400" />
+                  Especificaciones técnicas
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Samsung"
+                      value={form.brand}
+                      onChange={(e) => handleFormChange('brand', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Galaxy S24 Ultra"
+                      value={form.model}
+                      onChange={(e) => handleFormChange('model', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía</label>
+                    <select
+                      value={form.warranty}
+                      onChange={(e) => handleFormChange('warranty', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    >
+                      <option value="">Sin garantía</option>
+                      <option value="1">1 mes</option>
+                      <option value="2">2 meses</option>
+                      <option value="3">3 meses</option>
+                      <option value="6">6 meses</option>
+                      <option value="9">9 meses</option>
+                      <option value="12">12 meses</option>
+                      <option value="18">18 meses</option>
+                      <option value="24">24 meses</option>
+                      <option value="36">36 meses</option>
+                      <option value="48">48 meses</option>
+                      <option value="60">60 meses</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Ej: 0.25"
+                        value={form.weight}
+                        onChange={(e) => handleFormChange('weight', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 15 x 7 x 0.9 cm"
+                      value={form.dimensions}
+                      onChange={(e) => handleFormChange('dimensions', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
+                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddProduct}
+                  disabled={!form.name || !form.price || !form.stock || !form.description || !form.category || hasNumericErrors(formErrors) || uploadingImage}
+                  className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
+                >
+                  {uploadingImage ? "Subiendo imágenes..." : "Publicar producto"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <PencilSquareIcon className="w-5 h-5 text-blue-400" />
+                Editar producto
+              </h2>
+              <button
+                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
+                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
+                  </label>
+                  <div className="space-y-3 mb-3">
+                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-blue-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
+                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
+                      <span className="truncate">{editSelectedFile ? editSelectedFile.name : "Click para cambiar archivo (JPG, PNG, WEBP)"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleEditImageFileChange} />
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="o pega URL https://..."
+                        value={editForm.imageUrl}
+                        onChange={(e) => handleEditFormChange('imageUrl', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+                    {editUploading && <p className="text-xs text-blue-400 animate-pulse">Subiendo imagen...</p>}
                   </div>
 
                   <div>
@@ -1580,6 +1856,7 @@ export default function SellerDashboard() {
                       onChange={(e) => handleEditFormChange('name', e.target.value)}
                       className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
+                    {editFormErrors.name && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.name}</p>}
                   </div>
 
                   <div>
@@ -1659,6 +1936,7 @@ export default function SellerDashboard() {
                       <option value="Tablets">Tablets</option>
                       <option value="Accesorios">Accesorios</option>
                     </select>
+                    {editFormErrors.category && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.category}</p>}
                   </div>
                 </div>
               </div>
@@ -1672,6 +1950,7 @@ export default function SellerDashboard() {
                   onChange={(e) => handleEditFormChange('description', e.target.value)}
                   className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
                 />
+                {editFormErrors.description && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.description}</p>}
               </div>
 
               <div>

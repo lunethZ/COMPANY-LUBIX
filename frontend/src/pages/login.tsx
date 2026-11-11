@@ -5,6 +5,7 @@ import axios from "axios";
 import type { LoginRequest, LoginResponse } from "../types/auts";
 import { useAuth } from "../context/AuthContext";
 import { errorDetailMessage } from "../utils/errors";
+import { rules, validateField } from "../utils/validators";
 import { ArrowLeftIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 
 const Login: React.FC = () => {
@@ -42,6 +43,24 @@ const Login: React.FC = () => {
 
     if (!email.trim() || !password) {
       showMessage("Completa todos los campos", "error");
+      return;
+    }
+
+    const emailValidation = validateField(email, [
+      rules.required("El correo es obligatorio"),
+      rules.email(),
+    ]);
+    if (!emailValidation.valid) {
+      showMessage(emailValidation.message, "error");
+      return;
+    }
+
+    const passwordValidation = validateField(
+      password,
+      rules.required("La contraseña es obligatoria"),
+    );
+    if (!passwordValidation.valid) {
+      showMessage(passwordValidation.message, "error");
       return;
     }
 
@@ -104,16 +123,7 @@ const Login: React.FC = () => {
 
     } catch (error: unknown) {
       if (axios.isAxiosError(error)) {
-        const errorData = error.response?.data;
-        let errorMsg = "Error de login";
-
-        if (errorData?.detail) {
-          if (typeof errorData.detail === "string") {
-            errorMsg = errorData.detail;
-          } else if (Array.isArray(errorData.detail)) {
-            errorMsg = errorData.detail.map((e: any) => e.msg).join(". ");
-          }
-        }
+        let errorMsg = errorDetailMessage(error, "Error de login");
 
         // Mostrar mensajes más específicos según el tipo de error
         if (error.response?.status === 400) {

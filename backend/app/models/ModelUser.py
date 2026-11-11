@@ -4,7 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from app.database.Connection import Base
 import uuid
 
-from datetime import datetime
+from datetime import datetime, timezone
 class Users(Base):
     __tablename__ = "users"
     id: Mapped[uuid.UUID] = mapped_column(
@@ -53,7 +53,7 @@ class Users(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow    
+        default=lambda: datetime.now(timezone.utc)
     )
 
     role_id: Mapped[uuid.UUID] = mapped_column(
