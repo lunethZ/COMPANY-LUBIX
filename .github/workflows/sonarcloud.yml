@@ -4,16 +4,21 @@ on:
     branches: [ main, develop ]
   pull_request:
     types: [opened, synchronize, reopened]
+
 jobs:
   sonarcloud:
     name: SonarCloud Scan
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0 # Requiere el historial completo para métricas y git blame
+          
       - name: SonarCloud Scan Action
-        uses: SonarSource/sonarcloud-github-action@master
+        # Se usa la acción actualizada (sonarqube-scan-action) con la versión v4 
+        # para evitar el error del SHA y la advertencia de obsolescencia.
+        uses: SonarSource/sonarqube-scan-action@v4
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Generado automáticamente por GitHub
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }} # Configurado en el Paso 3
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}   # Configurado en tus secrets
