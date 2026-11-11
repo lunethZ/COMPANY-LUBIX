@@ -67,3 +67,6 @@ addopts = "-ra"
 
 [tool.coverage.report]
 include_namespace_packages = true
+fail_under = 50
+show_missing = true
+precision = 2

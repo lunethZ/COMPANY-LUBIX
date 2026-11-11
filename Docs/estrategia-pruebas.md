@@ -29,8 +29,12 @@
 | Config.py | — | 18 statements | 100% |
 | main.py | — | 38 statements | 0% |
 
+### Umbral actual del backend
+
+El umbral mínimo quedó configurado en **50 %** (`fail_under = 50` en `backend/pyproject.toml` y `--cov-fail-under=50` en `backend/pytest.ini`). La suite incluye pruebas unitarias, de API e integración con SQLite en memoria y ya supera el umbral.
+
 ### Próximos pasos
 
 - Implementar tests de servicios restantes (AuthService, JWTService, EmailService auxiliares)
-- Alcanzar el umbral de cobertura semanal (esta semana: línea base 0%, próxima meta: 20%+)
+- Mantener la cobertura por encima del 50 % y ampliar la meta de forma incremental
 - Añadir tests de errores externos y casos edge

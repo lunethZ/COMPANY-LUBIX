@@ -63,7 +63,7 @@ def test_verify_token_expirado_devuelve_expired():
         {
             "sub": "1",
             "type": "access",
-            "exp": datetime.utcnow() - timedelta(minutes=1),
+            "exp": datetime.now(timezone.utc) - timedelta(minutes=1),
         },
         config.SECRET_KEY,
         algorithm=config.ALGORITHM,
@@ -77,7 +77,7 @@ def test_verify_token_firmado_con_otra_clave_devuelve_none():
         {
             "sub": "1",
             "type": "access",
-            "exp": datetime.utcnow() + timedelta(minutes=5),
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=5),
         },
         "otra-clave-secreta",
         algorithm=config.ALGORITHM,

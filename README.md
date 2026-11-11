@@ -196,13 +196,14 @@ POSTGRES_PASSWORD=tu_password_seguro
 POSTGRES_DB=lubix_db
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-DATABASE_URL=postgresql://lubix_user:tu_password_seguro@postgres:5432/lubix_db
+URL_DATABASE=postgresql+psycopg2://lubix_user:tu_password_seguro@postgres:5432/lubix_db
+DB_SSL_MODE=require
 
 # Seguridad y Criptografía
 SECRET_KEY=clave_secreta_alfanumérica_robusta
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
-REFRESH_TOKEN_EXPIRE_DAYS=7
+REFRESH_TOKEN_DAYS=7
 
 # Servicios de Correo (SMTP)
 SMTP_HOST=smtp.gmail.com
@@ -265,6 +266,9 @@ docker compose exec backend uv run alembic upgrade head
 *   **Aplicación Web (React):** `http://localhost:5173`
 *   **Documentación de API (Swagger UI):** `http://localhost:8001/docs`
 *   **Consola de Administración de MinIO:** `http://localhost:9000`
+
+> Para publicar la API en producción con Render + Neon/Supabase, sigue la
+> [Guía de despliegue](Docs/DEPLOYMENT.md).
 
 ---
 
@@ -348,6 +352,7 @@ Para obtener información técnica detallada por subdominio, consulte los siguie
 
 *   **Documentación de Arquitectura Backend:** `backend/README.md`
 *   **Documentación de Diseño Frontend:** `frontend/README.md`
+*   **Guía de Despliegue en Render + Neon/Supabase:** `Docs/DEPLOYMENT.md`
 *   **Especificación de Endpoints y Contratos de API:** `backend/app/docs/ENDPOINTS.md`
 *   **Registro y Directrices de Auditoría:** `backend/app/docs/AUDITORIA.md`
 *   **Especificación de Requisitos Formales:** Ubicados en el directorio `Docs/` (`RFs`, `RNFs` y `HUs`).
