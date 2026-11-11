@@ -71,8 +71,6 @@ const NewPassword: React.FC = () => {
     setLoading(true);
 
     try {
-      console.log("🔥 Restableciendo:", { email: email.trim(), code: code.trim() });
-      
       await api.post("/auth/reset-password-user", {
         email: email.trim(),
         code: code.trim(),

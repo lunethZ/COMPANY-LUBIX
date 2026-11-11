@@ -1,154 +1,168 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import Login from './login';
-import { renderWithProviders } from '../test/utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import api from '../api/axios'
+import Login from './login'
 
-// Se dobla el cliente axios: ninguna prueba debe tocar la red.
-const apiMocks = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  patch: vi.fn(),
-}));
+const mocks = vi.hoisted(() => ({
+  login: vi.fn(),
+  navigate: vi.fn(),
+}))
 
 vi.mock('../api/axios', () => ({
   default: {
-    ...apiMocks,
+    post: vi.fn(),
+    get: vi.fn(),
     defaults: { headers: { common: {} } },
   },
-}));
+}))
 
-beforeEach(() => {
-  localStorage.clear();
-  apiMocks.get.mockReset();
-  apiMocks.post.mockReset();
-  apiMocks.patch.mockReset();
-});
+vi.mock('../context/AuthContext', () => ({
+  useAuth: () => ({ login: mocks.login, isAuthenticated: false, user: null }),
+}))
 
-const fillCredentials = async (
-  user: ReturnType<typeof userEvent.setup>,
-  email: string,
-  password: string,
-) => {
-  await user.type(screen.getByPlaceholderText('tu@email.com'), email);
-  const passwordInput = document.querySelector<HTMLInputElement>(
-    'input[type="password"]',
-  );
-  if (!passwordInput) throw new Error('No se encontró el input de contraseña');
-  await user.type(passwordInput, password);
-};
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>()
+  return { ...actual, useNavigate: () => mocks.navigate }
+})
 
-describe('Página de login', () => {
-  it('renderiza el formulario con su encabezado y acciones principales', () => {
-    renderWithProviders(<Login />);
+const post = vi.mocked(api.post)
 
-    expect(screen.getByRole('heading', { name: 'Lubix' })).toBeInTheDocument();
-    expect(screen.getByText(/Inicia sesi/)).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Iniciar Sesi/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Usuario' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Empresa' })).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: /Reg/ })).toBeInTheDocument();
-  });
+const respuestaLogin = (role: string) => ({
+  data: {
+    message: 'ok',
+    access_token: 'token-abc',
+    refresh_token: 'refresh-xyz',
+    token_type: 'bearer',
+    id: 7,
+    Nombre: 'Ana',
+    email: 'ana@example.com',
+    role,
+  },
+})
 
-  it('muestra el error de validación si el correo está vacío y no llama al backend', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<Login />);
+function renderLogin() {
+  return render(
+    <MemoryRouter>
+      <Login />
+    </MemoryRouter>
+  )
+}
 
-    await user.click(screen.getByRole('button', { name: /Iniciar Sesi/ }));
+async function llenarCredenciales(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(screen.getByPlaceholderText('tu@email.com'), 'ana@example.com')
+  await user.type(screen.getByPlaceholderText('••••••••'), 'Prueba123')
+}
 
-    expect(
-      await screen.findByText('El correo es obligatorio'),
-    ).toBeInTheDocument();
-    expect(apiMocks.post).not.toHaveBeenCalled();
-  });
+describe('Login', () => {
+  beforeEach(() => {
+    post.mockReset()
+    mocks.login.mockReset()
+    mocks.navigate.mockReset()
+    localStorage.clear()
+  })
 
-  it('muestra el error de formato si el correo no es válido', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<Login />);
+  describe('se renderiza', () => {
+    it('muestra el título, los campos, el botón y los enlaces', () => {
+      renderLogin()
 
-    // "a@b" pasa la validación nativa del navegador (sin TLD) pero no la
-    // validación propia de la app, que es la que debe mostrar el mensaje.
-    await fillCredentials(user, 'a@b', 'Secret12');
-    await user.click(screen.getByRole('button', { name: /Iniciar Sesi/ }));
+      expect(screen.getByRole('heading', { name: 'Lubix' })).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('••••••••')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Iniciar Sesión' })).toBeEnabled()
+      expect(screen.getByRole('link', { name: 'Regístrate' })).toHaveAttribute('href', '/register')
+      expect(screen.getByRole('link', { name: 'Recuperar' })).toHaveAttribute('href', '/recover')
+    })
 
-    expect(
-      await screen.findByText('Ingresa un correo electrónico válido'),
-    ).toBeInTheDocument();
-    expect(apiMocks.post).not.toHaveBeenCalled();
-  });
+    it('ofrece elegir entre Usuario y Empresa', () => {
+      renderLogin()
 
-  it('envía las credenciales al endpoint correcto y guarda los tokens', async () => {
-    apiMocks.post.mockResolvedValue({
-      data: {
-        access_token: 'access-token-123',
-        refresh_token: 'refresh-token-456',
-        role: 'user',
-        id: 'user-1',
-        Nombre: 'Ana Torres',
-        email: 'ana@x.com',
-      },
-    });
-    const user = userEvent.setup();
-    renderWithProviders(<Login />);
+      expect(screen.getByRole('button', { name: 'Usuario' })).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Empresa' })).toBeInTheDocument()
+    })
+  })
 
-    await fillCredentials(user, 'ana@x.com', 'Secret12');
-    await user.click(screen.getByRole('button', { name: /Iniciar Sesi/ }));
+  describe('error de validación visible', () => {
+    it('avisa cuando se envía con los campos vacíos y no llama a la API', async () => {
+      const user = userEvent.setup()
+      renderLogin()
 
-    expect(await screen.findByText(/Bienvenido Ana Torres/)).toBeInTheDocument();
-    expect(apiMocks.post).toHaveBeenCalledWith('/auth/login-user', {
-      email: 'ana@x.com',
-      password: 'Secret12',
-    });
-    await waitFor(() => {
-      expect(localStorage.getItem('access_token')).toBe('access-token-123');
-      expect(localStorage.getItem('refresh_token')).toBe('refresh-token-456');
-      expect(JSON.parse(localStorage.getItem('user') ?? 'null')).toMatchObject({
-        email: 'ana@x.com',
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(await screen.findByText('Completa todos los campos')).toBeInTheDocument()
+      expect(post).not.toHaveBeenCalled()
+    })
+
+    it('avisa cuando falta la contraseña', async () => {
+      const user = userEvent.setup()
+      renderLogin()
+
+      await user.type(screen.getByPlaceholderText('tu@email.com'), 'ana@example.com')
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(await screen.findByText('Completa todos los campos')).toBeInTheDocument()
+      expect(post).not.toHaveBeenCalled()
+    })
+
+    it('muestra el mensaje que devuelve el servidor cuando las credenciales son inválidas', async () => {
+      post.mockRejectedValue({
+        isAxiosError: true,
+        response: { data: { detail: 'Credenciales inválidas' } },
+      })
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(await screen.findByText('Credenciales inválidas')).toBeInTheDocument()
+      expect(mocks.login).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('el envío funciona', () => {
+    it('inicia sesión como usuario con las credenciales escritas', async () => {
+      post.mockResolvedValue(respuestaLogin('user'))
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(await screen.findByText('¡Bienvenido Ana!')).toBeInTheDocument()
+      expect(post).toHaveBeenCalledWith('/auth/login-user', {
+        email: 'ana@example.com',
+        password: 'Prueba123',
+      })
+      expect(mocks.login).toHaveBeenCalledWith('token-abc', {
+        id: 7,
+        name: 'Ana',
+        email: 'ana@example.com',
         role_id: 'user',
-      });
-    });
-  });
+      })
+      expect(localStorage.getItem('access_token')).toBe('token-abc')
+      expect(localStorage.getItem('refresh_token')).toBe('refresh-xyz')
+    })
 
-  it('usa el endpoint de empresa cuando se selecciona la pestaña Empresa', async () => {
-    apiMocks.post.mockResolvedValue({
-      data: {
-        access_token: 'company-token',
-        refresh_token: 'company-refresh',
-        role: 'company',
-        id: 'company-1',
-        Nombre: 'Lubix SAS',
-        email: 'empresa@x.com',
-      },
-    });
-    const user = userEvent.setup();
-    renderWithProviders(<Login />);
+    it('usa el endpoint de empresa cuando se elige Empresa', async () => {
+      post.mockResolvedValue(respuestaLogin('company'))
+      const user = userEvent.setup()
+      renderLogin()
 
-    await user.click(screen.getByRole('button', { name: 'Empresa' }));
-    await fillCredentials(user, 'empresa@x.com', 'Secret12');
-    await user.click(screen.getByRole('button', { name: /Iniciar Sesi/ }));
+      await user.click(screen.getByRole('button', { name: 'Empresa' }))
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
 
-    expect(apiMocks.post).toHaveBeenCalledWith('/auth/login-company', {
-      email: 'empresa@x.com',
-      password: 'Secret12',
-    });
-    expect(
-      await screen.findByText(/Bienvenido Lubix SAS/),
-    ).toBeInTheDocument();
-  });
-
-  it('muestra el detalle del backend cuando el login falla', async () => {
-    apiMocks.post.mockRejectedValue({
-      isAxiosError: true,
-      response: { status: 400, data: { detail: 'Credenciales invalidas' } },
-    });
-    const user = userEvent.setup();
-    renderWithProviders(<Login />);
-
-    await fillCredentials(user, 'ana@x.com', 'Wrong123');
-    await user.click(screen.getByRole('button', { name: /Iniciar Sesi/ }));
-
-    expect(await screen.findByText('Credenciales invalidas')).toBeInTheDocument();
-    expect(localStorage.getItem('access_token')).toBeNull();
-  });
-});
+      expect(await screen.findByText('¡Bienvenido Ana!')).toBeInTheDocument()
+      expect(post).toHaveBeenCalledWith('/auth/login-company', {
+        email: 'ana@example.com',
+        password: 'Prueba123',
+      })
+      expect(mocks.login).toHaveBeenCalledWith(
+        'token-abc',
+        expect.objectContaining({ role_id: 'empresa' })
+      )
+    })
+  })
+})

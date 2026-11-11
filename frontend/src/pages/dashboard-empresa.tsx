@@ -73,6 +73,7 @@ type ProductForm = {
   name: string;
   price: string;
   stock: string;
+  discount: string;
   category: string;
   description: string;
   brand: string;
@@ -112,10 +113,48 @@ interface SellerInfo {
 
 const INITIAL_PRODUCTS: Product[] = [];
 
+const MAX_DISCOUNT_PERCENT = 100;
+
+const validateNumericField = (field: 'price' | 'stock' | 'discount', value: string): string | undefined => {
+  const raw = value.trim();
+
+  if (raw === '') {
+    if (field === 'price') return 'Ingresa el precio del producto';
+    if (field === 'stock') return 'Ingresa el stock disponible';
+    return undefined;
+  }
+
+  const parsed = Number(raw);
+
+  if (Number.isNaN(parsed)) {
+    if (field === 'discount') return 'Ingresa un descuento válido';
+    return field === 'price' ? 'Ingresa un precio válido' : 'Ingresa un stock válido';
+  }
+
+  if (field === 'price') return parsed <= 0 ? 'El precio debe ser mayor a 0.' : undefined;
+  if (field === 'stock') return parsed <= 0 ? 'El stock debe ser mayor a 0' : undefined;
+  if (parsed < 0) return 'El descuento no puede ser negativo';
+  if (parsed > MAX_DISCOUNT_PERCENT) return `El descuento no puede superar el ${MAX_DISCOUNT_PERCENT}%`;
+  return undefined;
+};
+
+const collectNumericErrors = (form: ProductForm): ProductFormErrors => {
+  const errors: ProductFormErrors = {};
+  (['price', 'stock', 'discount'] as const).forEach((field) => {
+    const message = validateNumericField(field, form[field]);
+    if (message) errors[field] = message;
+  });
+  return errors;
+};
+
+const hasNumericErrors = (errors: ProductFormErrors): boolean =>
+  Object.values(errors).some(Boolean);
+
 const EMPTY_FORM: ProductForm = {
   name: '',
   price: '',
   stock: '',
+  discount: '',
   category: '',
   description: '',
   brand: '',
@@ -493,20 +532,25 @@ export default function SellerDashboard() {
       setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
+    if (field === 'price' || field === 'stock' || field === 'discount') {
+      const message = validateNumericField(field, value);
+      setFormErrors((prev) => ({ ...prev, [field]: message }));
+      setForm((prev) => ({ ...prev, [field]: value }));
+      return;
+    }
     setForm((prev) => ({ ...prev, [field]: value }));
     setFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, value) }));
   };
 
   const handleAddProduct = async () => {
     const validation = validateForm(form, productFormSchema);
-    if (!validation.valid) {
-      setFormErrors(validation.errors);
-      return;
-    }
-    if (!form.name || !form.price || !form.stock || !form.description || !form.category) return;
+    const numericErrors = collectNumericErrors(form);
+    setFormErrors({ ...validation.errors, ...numericErrors });
+    if (!validation.valid || hasNumericErrors(numericErrors)) return;
 
-    const priceNum = parseInt(form.price.replace(/\D/g, '')) || 0;
+    const priceNum = Number(form.price) || 0;
     const stockNum = parseInt(form.stock) || 0;
+    const discountNum = Number(form.discount) || 0;
 
     if (stockNum < 1) {
       setFormErrors((prev) => ({ ...prev, stock: validateProductField('stock', form.stock) }));
@@ -543,8 +587,8 @@ export default function SellerDashboard() {
         name: form.name,
         price: priceNum,
         images: uploadedImages,
-        discount_enable: false,
-        discount_value: 0,
+        discount_enable: discountNum > 0,
+        discount_value: discountNum,
         stock: stockNum,
         descripcion: [form.description, form.brand, form.model, warrantyWithUnit, weightWithUnit, form.dimensions].filter(Boolean).join(" · ") || form.name,
         technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
@@ -572,10 +616,12 @@ export default function SellerDashboard() {
       const warrantyNum = (spec.warranty || "").replace(/\D/g, "");
       const weightNum = (spec.weight || "").replace(/[^0-9.]/g, "");
       setEditingId(productId);
+      setEditFormErrors({});
       setEditForm({
         name: p.name || "",
         price: String(p.price || ""),
         stock: String(p.stock || ""),
+        discount: p.discount_value != null ? String(p.discount_value) : "",
         category: p.catalog_name || "",
         description: p.descripcion || "",
         brand: spec.brand || "",
@@ -607,6 +653,12 @@ export default function SellerDashboard() {
       setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, clean) }));
       return;
     }
+    if (field === 'price' || field === 'stock' || field === 'discount') {
+      const message = validateNumericField(field, value);
+      setEditFormErrors((prev) => ({ ...prev, [field]: message }));
+      setEditForm((prev) => ({ ...prev, [field]: value }));
+      return;
+    }
     setEditForm((prev) => ({ ...prev, [field]: value }));
     setEditFormErrors((prev) => ({ ...prev, [field]: validateProductField(field, value) }));
     if (field === 'imageUrl') {
@@ -626,14 +678,14 @@ export default function SellerDashboard() {
   };
 
   const handleUpdateProduct = async () => {
+    if (!editingId) return;
     const validation = validateForm(editForm, productFormSchema);
-    if (!validation.valid) {
-      setEditFormErrors(validation.errors);
-      return;
-    }
-    if (!editingId || !editForm.name || !editForm.price || !editForm.stock || !editForm.description || !editForm.category) return;
-    const priceNum = parseInt(editForm.price.replace(/\D/g, '')) || 0;
+    const numericErrors = collectNumericErrors(editForm);
+    setEditFormErrors({ ...validation.errors, ...numericErrors });
+    if (!validation.valid || hasNumericErrors(numericErrors)) return;
+    const priceNum = Number(editForm.price) || 0;
     const stockNum = parseInt(editForm.stock) || 0;
+    const discountNum = Number(editForm.discount) || 0;
 
     if (stockNum < 1) {
       setEditFormErrors((prev) => ({ ...prev, stock: validateProductField('stock', editForm.stock) }));
@@ -662,6 +714,8 @@ export default function SellerDashboard() {
         name: editForm.name,
         price: priceNum,
         images: finalImage ? [finalImage] : [],
+        discount_enable: discountNum > 0,
+        discount_value: discountNum,
         stock: stockNum,
         descripcion: [editForm.description, editForm.brand, editForm.model, warrantyWithUnit, weightWithUnit, editForm.dimensions].filter(Boolean).join(" · ") || editForm.name,
         technical_spec: Object.keys(techSpec).length ? techSpec : undefined,
@@ -1327,13 +1381,18 @@ export default function SellerDashboard() {
                       Precio (COP) <span className="text-red-400">*</span>
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
                       placeholder="Ej: 3500000"
                       value={form.price}
                       onChange={(e) => handleFormChange('price', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      aria-invalid={!!formErrors.price}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
                     />
-                    {formErrors.price && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.price}</p>}
+                    {formErrors.price && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.price}</span>
+                    )}
                   </div>
 
                   <div>
@@ -1343,12 +1402,38 @@ export default function SellerDashboard() {
                     <input
                       type="number"
                       min="1"
+                      step="1"
                       placeholder="Ej: 20"
                       value={form.stock}
                       onChange={(e) => handleFormChange('stock', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      aria-invalid={!!formErrors.stock}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
                     />
-                    {formErrors.stock && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.stock}</p>}
+                    {formErrors.stock && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.stock}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={MAX_DISCOUNT_PERCENT}
+                      step="1"
+                      placeholder="Ej: 15"
+                      value={form.discount}
+                      onChange={(e) => handleFormChange('discount', e.target.value)}
+                      aria-invalid={!!formErrors.discount}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.discount ? (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.discount}</span>
+                    ) : (
+                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                    )}
                   </div>
 
                   <div>
@@ -1468,7 +1553,7 @@ export default function SellerDashboard() {
                 </button>
                 <button
                   onClick={handleAddProduct}
-                  disabled={!form.name || !form.price || !form.stock || !form.description || !form.category || uploadingImage}
+                  disabled={!form.name || !form.price || !form.stock || !form.description || !form.category || hasNumericErrors(formErrors) || uploadingImage}
                   className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
                 >
                   {uploadingImage ? "Subiendo imágenes..." : "Publicar producto"}
@@ -1553,13 +1638,18 @@ export default function SellerDashboard() {
                       Precio (COP) <span className="text-red-400">*</span>
                     </label>
                     <input
-                      type="text"
+                      type="number"
+                      min="0.01"
+                      step="0.01"
                       placeholder="Ej: 3500000"
                       value={editForm.price}
                       onChange={(e) => handleEditFormChange('price', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      aria-invalid={!!editFormErrors.price}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
                     />
-                    {editFormErrors.price && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.price}</p>}
+                    {editFormErrors.price && (
+                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.price}</span>
+                    )}
                   </div>
 
                   <div>
@@ -1569,12 +1659,38 @@ export default function SellerDashboard() {
                     <input
                       type="number"
                       min="1"
+                      step="1"
                       placeholder="Ej: 20"
                       value={editForm.stock}
                       onChange={(e) => handleEditFormChange('stock', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      aria-invalid={!!editFormErrors.stock}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
                     />
-                    {editFormErrors.stock && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.stock}</p>}
+                    {editFormErrors.stock && (
+                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.stock}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={MAX_DISCOUNT_PERCENT}
+                      step="1"
+                      placeholder="Ej: 15"
+                      value={editForm.discount}
+                      onChange={(e) => handleEditFormChange('discount', e.target.value)}
+                      aria-invalid={!!editFormErrors.discount}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
+                    />
+                    {editFormErrors.discount ? (
+                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.discount}</span>
+                    ) : (
+                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                    )}
                   </div>
 
                   <div>
@@ -1694,7 +1810,7 @@ export default function SellerDashboard() {
                 </button>
                 <button
                   onClick={handleUpdateProduct}
-                  disabled={!editForm.name || !editForm.price || !editForm.stock || !editForm.description || !editForm.category || editUploading}
+                  disabled={!editForm.name || !editForm.price || !editForm.stock || !editForm.description || !editForm.category || hasNumericErrors(editFormErrors) || editUploading}
                   className="flex-1 py-3 bg-blue-500 hover:bg-blue-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-blue-500/30"
                 >
                   {editUploading ? "Guardando..." : "Guardar cambios"}

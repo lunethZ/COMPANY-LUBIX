@@ -209,7 +209,7 @@ export default function BuyerDashboard() {
   };
 
   const cancelOrder = async (orderId: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer.")) return;
+    if (!window.confirm("¿Estás seguro de que deseas cancelar este pedido? Esta acción no se puede deshacer bueno.")) return;
     try {
       await api.patch(`/user/orders/${orderId}/cancel`);
       setOrders((prev) =>
@@ -310,9 +310,22 @@ export default function BuyerDashboard() {
         api.get("/user/addresses").catch(() => ({ data: [] })),
       ]);
       const exportData = exportRes.data || {};
-      const orders = ordersRes.data || [];
-      const favorites = favRes.data || [];
-      const addresses = addrRes.data || [];
+      const orders: Array<{
+        id: string;
+        status: string;
+        total?: number;
+        created_at: string;
+        items?: Array<{ name: string; quantity: number }>;
+      }> = ordersRes.data || [];
+      const favorites: Array<{
+        product?: { name?: string; nombre?: string; price?: number };
+      }> = favRes.data || [];
+      const addresses: Array<{
+        label?: string;
+        address?: string;
+        city?: string;
+        is_default?: boolean;
+      }> = addrRes.data || [];
       // Generar HTML bonito
       const html = `<!DOCTYPE html>
 <html lang="es">

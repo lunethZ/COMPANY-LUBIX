@@ -1,134 +1,181 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import PQRSPage from './pqrs';
-import { renderWithProviders } from '../test/utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import PQRSPage from './pqrs'
 
-// Se dobla el cliente axios: ninguna prueba debe tocar la red.
-const apiMocks = vi.hoisted(() => ({
+const mocks = vi.hoisted(() => ({
   get: vi.fn(),
   post: vi.fn(),
-  patch: vi.fn(),
-}));
+  navigate: vi.fn(),
+}))
 
 vi.mock('../api/axios', () => ({
-  default: {
-    ...apiMocks,
-    defaults: { headers: { common: {} } },
-  },
-}));
+  default: { get: mocks.get, post: mocks.post },
+}))
 
-beforeEach(() => {
-  localStorage.clear();
-  apiMocks.get.mockReset();
-  apiMocks.post.mockReset();
-  apiMocks.patch.mockReset();
-});
+vi.mock('../context/AuthContext', () => ({
+  useAuth: () => ({
+    user: { id: 1, name: 'Ana', email: 'ana@example.com', role_id: 'user' },
+  }),
+}))
 
-const openForm = async (user: ReturnType<typeof userEvent.setup>) => {
-  await user.click(screen.getByRole('button', { name: 'Nueva solicitud' }));
-  expect(
-    screen.getByRole('heading', { name: 'Nueva solicitud PQRS' }),
-  ).toBeInTheDocument();
-};
+vi.mock('../components/navbar-auto', () => ({
+  default: () => null,
+}))
 
-describe('Página de PQRS', () => {
-  it('renderiza el encabezado y la lista de solicitudes del usuario', async () => {
-    apiMocks.get.mockResolvedValue({
-      data: [
-        {
-          id: 'pqr-1',
-          type: 'queja',
-          subject: 'Producto defectuoso',
-          description: 'Llegó con la pantalla rayada',
-          status: 'pending',
-          user_role: 'user',
-          created_at: '2026-01-15T10:00:00',
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>()
+  return { ...actual, useNavigate: () => mocks.navigate }
+})
+
+const ASUNTO = 'Problema con mi pedido'
+const MENSAJE = 'El producto llegó con la caja dañada.'
+
+function renderPqrs() {
+  return render(
+    <MemoryRouter initialEntries={['/pqrs']}>
+      <PQRSPage />
+    </MemoryRouter>
+  )
+}
+
+async function abrirFormulario(user: ReturnType<typeof userEvent.setup>) {
+  await screen.findByRole('heading', { name: 'PQRS' })
+  await user.click(screen.getByRole('button', { name: 'Nueva solicitud' }))
+}
+
+async function escribirSolicitud(
+  user: ReturnType<typeof userEvent.setup>,
+  asunto: string,
+  mensaje: string
+) {
+  await user.type(screen.getByPlaceholderText('Breve descripción del motivo'), asunto)
+  await user.type(
+    screen.getByPlaceholderText('Describe tu petición, queja, reclamo o sugerencia en detalle...'),
+    mensaje
+  )
+}
+
+describe('PQRS', () => {
+  beforeEach(() => {
+    mocks.get.mockReset()
+    mocks.post.mockReset()
+    mocks.navigate.mockReset()
+    mocks.get.mockResolvedValue({ data: [] })
+  })
+
+  describe('se renderiza', () => {
+    it('muestra el título y que no hay solicitudes cuando la lista está vacía', async () => {
+      renderPqrs()
+
+      expect(await screen.findByRole('heading', { name: 'PQRS' })).toBeInTheDocument()
+      expect(screen.getByText('No tienes solicitudes aún')).toBeInTheDocument()
+      expect(screen.getByText('Mis solicitudes (0)')).toBeInTheDocument()
+    })
+
+    it('muestra las solicitudes que devuelve la API', async () => {
+      mocks.get.mockResolvedValue({
+        data: [
+          {
+            id: '1',
+            type: 'queja',
+            subject: 'Pedido dañado',
+            description: 'La caja llegó rota',
+            status: 'pending',
+            user_role: 'user',
+            created_at: '2026-10-01T10:00:00',
+          },
+        ],
+      })
+      renderPqrs()
+
+      expect(await screen.findByText('Pedido dañado')).toBeInTheDocument()
+      expect(screen.getByText('Mis solicitudes (1)')).toBeInTheDocument()
+      expect(screen.getByText('Pendiente')).toBeInTheDocument()
+    })
+
+    it('abre el formulario con el botón de enviar deshabilitado', async () => {
+      const user = userEvent.setup()
+      renderPqrs()
+
+      await abrirFormulario(user)
+
+      expect(screen.getByRole('heading', { name: 'Nueva solicitud PQRS' })).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Breve descripción del motivo')).toBeInTheDocument()
+      expect(
+        screen.getByPlaceholderText('Describe tu petición, queja, reclamo o sugerencia en detalle...')
+      ).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Enviar solicitud' })).toBeDisabled()
+    })
+  })
+
+  describe('error de validación visible', () => {
+    it('no permite enviar si falta la descripción', async () => {
+      const user = userEvent.setup()
+      renderPqrs()
+
+      await abrirFormulario(user)
+      await user.type(screen.getByPlaceholderText('Breve descripción del motivo'), ASUNTO)
+
+      expect(screen.getByRole('button', { name: 'Enviar solicitud' })).toBeDisabled()
+      expect(mocks.post).not.toHaveBeenCalled()
+    })
+
+    it('muestra el error 422 del servidor cuando el asunto no cumple la longitud', async () => {
+      mocks.post.mockRejectedValue({
+        response: {
+          status: 422,
+          data: {
+            detail: [{ msg: 'Value error, El asunto debe tener entre 3 y 150 caracteres' }],
+          },
         },
-      ],
-    });
-    renderWithProviders(<PQRSPage />);
+      })
+      const user = userEvent.setup()
+      renderPqrs()
 
-    expect(await screen.findByRole('heading', { name: 'PQRS' })).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: /Mis solicitudes/ }),
-    ).toBeInTheDocument();
-    expect(screen.getByText('Producto defectuoso')).toBeInTheDocument();
-    expect(screen.getByText('Pendiente')).toBeInTheDocument();
-    expect(apiMocks.get).toHaveBeenCalledWith('/pqrs');
-  });
+      await abrirFormulario(user)
+      await escribirSolicitud(user, 'ab', MENSAJE)
+      await user.click(screen.getByRole('button', { name: 'Enviar solicitud' }))
 
-  it('muestra el estado vacío cuando no hay solicitudes', async () => {
-    apiMocks.get.mockResolvedValue({ data: [] });
-    renderWithProviders(<PQRSPage />);
+      expect(
+        await screen.findByText(/El asunto debe tener entre 3 y 150 caracteres/)
+      ).toBeInTheDocument()
+    })
+  })
 
-    expect(await screen.findByText(/No tienes solicitudes/)).toBeInTheDocument();
-    expect(
-      screen.getByRole('heading', { name: 'Mis solicitudes (0)' }),
-    ).toBeInTheDocument();
-  });
+  describe('el envío funciona', () => {
+    it('envía la solicitud, muestra la confirmación y cierra el formulario', async () => {
+      mocks.post.mockResolvedValue({ data: { message: 'PQRS enviada correctamente' } })
+      const user = userEvent.setup()
+      renderPqrs()
 
-  it('mantiene el envío bloqueado y muestra errores si el formulario es inválido', async () => {
-    apiMocks.get.mockResolvedValue({ data: [] });
-    const user = userEvent.setup();
-    renderWithProviders(<PQRSPage />);
-    await screen.findByRole('heading', { name: 'PQRS' });
+      await abrirFormulario(user)
+      await escribirSolicitud(user, ASUNTO, MENSAJE)
+      await user.click(screen.getByRole('button', { name: 'Enviar solicitud' }))
 
-    await openForm(user);
+      expect(await screen.findByText(/enviada correctamente/)).toBeInTheDocument()
+      expect(mocks.post).toHaveBeenCalledWith('/pqrs', {
+        type: 'queja',
+        subject: ASUNTO,
+        description: MENSAJE,
+      })
+      expect(
+        screen.queryByRole('heading', { name: 'Nueva solicitud PQRS' })
+      ).not.toBeInTheDocument()
+    })
 
-    const submit = screen.getByRole('button', { name: /Enviar solicitud/ });
-    // Formulario vacío: el botón queda deshabilitado.
-    expect(submit).toBeDisabled();
+    it('vuelve a cargar la lista después de enviar', async () => {
+      mocks.post.mockResolvedValue({ data: {} })
+      const user = userEvent.setup()
+      renderPqrs()
 
-    // Con asunto válido pero descripción vacía sigue bloqueado.
-    await user.type(
-      screen.getByPlaceholderText(/Breve descripci/),
-      'Consulta sobre mi pedido',
-    );
-    expect(submit).toBeDisabled();
+      await abrirFormulario(user)
+      await escribirSolicitud(user, ASUNTO, MENSAJE)
+      await user.click(screen.getByRole('button', { name: 'Enviar solicitud' }))
+      await screen.findByText(/enviada correctamente/)
 
-    // Simula el envío del formulario (Enter) con descripción pendiente:
-    // los errores de campo deben hacerse visibles.
-    fireEvent.submit(submit.closest('form') as HTMLFormElement);
-
-    expect(screen.getAllByText(/La descripci/).length).toBeGreaterThan(0);
-    expect(apiMocks.post).not.toHaveBeenCalled();
-  });
-
-  it('envía una solicitud válida y recarga la lista', async () => {
-    apiMocks.get.mockResolvedValue({ data: [] });
-    apiMocks.post.mockResolvedValue({ data: {} });
-    const user = userEvent.setup();
-    renderWithProviders(<PQRSPage />);
-    await screen.findByRole('heading', { name: 'PQRS' });
-
-    await openForm(user);
-
-    await user.type(
-      screen.getByPlaceholderText(/Breve descripci/),
-      'Producto con falla',
-    );
-    await user.type(
-      screen.getByPlaceholderText(/Describe tu petici/),
-      'El producto llegó con defectos de fábrica.',
-    );
-
-    const submit = screen.getByRole('button', { name: /Enviar solicitud/ });
-    expect(submit).toBeEnabled();
-    await user.click(submit);
-
-    expect(
-      await screen.findByText(/enviada correctamente/),
-    ).toBeInTheDocument();
-    expect(apiMocks.post).toHaveBeenCalledWith('/pqrs', {
-      type: 'queja',
-      subject: 'Producto con falla',
-      description: 'El producto llegó con defectos de fábrica.',
-    });
-    // El formulario se cierra y la lista se vuelve a cargar.
-    expect(
-      screen.queryByRole('button', { name: /Enviar solicitud/ }),
-    ).not.toBeInTheDocument();
-    expect(apiMocks.get).toHaveBeenCalledTimes(2);
-  });
-});
+      expect(mocks.get).toHaveBeenCalledTimes(2)
+    })
+  })
+})

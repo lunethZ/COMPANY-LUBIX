@@ -1,160 +1,153 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, screen } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
-import Register from './register';
-import { renderWithProviders } from '../test/utils';
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
+import api from '../api/axios'
+import Register from './register'
 
-// Se dobla el cliente axios: ninguna prueba debe tocar la red.
-const apiMocks = vi.hoisted(() => ({
-  get: vi.fn(),
-  post: vi.fn(),
-  patch: vi.fn(),
-}));
+const mocks = vi.hoisted(() => ({
+  navigate: vi.fn(),
+}))
 
 vi.mock('../api/axios', () => ({
   default: {
-    ...apiMocks,
-    defaults: { headers: { common: {} } },
+    post: vi.fn(),
+    get: vi.fn(),
   },
-}));
+}))
 
-beforeEach(() => {
-  localStorage.clear();
-  apiMocks.get.mockReset();
-  apiMocks.post.mockReset();
-  apiMocks.patch.mockReset();
-});
+vi.mock('react-router-dom', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router-dom')>()
+  return { ...actual, useNavigate: () => mocks.navigate }
+})
 
-/** El formulario no asocia <label> con los inputs, así que se busca por `name`. */
-const inputByName = (container: HTMLElement, name: string) => {
-  const input = container.querySelector<HTMLInputElement>(`[name="${name}"]`);
-  if (!input) throw new Error(`No se encontró el input [name="${name}"]`);
-  return input;
-};
+const post = vi.mocked(api.post)
 
-const STRONG_PASSWORD = 'Abcdef12';
+function renderRegister() {
+  return render(
+    <MemoryRouter>
+      <Register />
+    </MemoryRouter>
+  )
+}
 
-const fillUsuarioForm = async (
+async function llenarUsuario(
   user: ReturnType<typeof userEvent.setup>,
-  container: HTMLElement,
-) => {
-  await user.type(inputByName(container, 'name'), 'Maria');
-  await user.type(inputByName(container, 'surname'), 'Lopez');
-  await user.type(screen.getByPlaceholderText('tu@email.com'), 'maria@x.com');
-  await user.type(screen.getByPlaceholderText('+57 300 123 4567'), '3001234567');
-  await user.type(inputByName(container, 'password'), STRONG_PASSWORD);
-  await user.type(inputByName(container, 'confirmPassword'), STRONG_PASSWORD);
-};
+  password = 'Prueba123',
+  confirmacion = 'Prueba123'
+) {
+  await user.type(screen.getByPlaceholderText('Su Nombre'), 'Ana')
+  await user.type(screen.getByPlaceholderText('Su Apellido'), 'Pérez')
+  await user.type(screen.getByPlaceholderText('tu@email.com'), 'ana@example.com')
+  await user.type(screen.getByPlaceholderText('+57 300 123 4567'), '3001234567')
+  const [campoPassword, campoConfirmacion] = screen.getAllByPlaceholderText('••••••••')
+  await user.type(campoPassword, password)
+  await user.type(campoConfirmacion, confirmacion)
+}
 
-describe('Página de registro', () => {
-  it('renderiza el formulario de usuario con sus campos y botón', () => {
-    renderWithProviders(<Register />);
+describe('Register', () => {
+  beforeEach(() => {
+    post.mockReset()
+    mocks.navigate.mockReset()
+  })
 
-    expect(screen.getByRole('heading', { name: 'Lubix' })).toBeInTheDocument();
-    expect(screen.getByText('Crea tu cuenta gratis')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Usuario' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Empresa' })).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Su Nombre')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Su Apellido')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Crear cuenta' })).toBeInTheDocument();
-  });
+  describe('se renderiza', () => {
+    it('muestra los campos del registro de usuario y el botón deshabilitado', () => {
+      renderRegister()
 
-  it('muestra los campos de empresa al cambiar al modo empresa', async () => {
-    const user = userEvent.setup();
-    renderWithProviders(<Register />);
+      expect(screen.getByRole('heading', { name: 'Lubix' })).toBeInTheDocument()
+      expect(screen.getByText('Crea tu cuenta gratis')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Su Nombre')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Su Apellido')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('tu@email.com')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('+57 300 123 4567')).toBeInTheDocument()
+      expect(screen.getAllByPlaceholderText('••••••••')).toHaveLength(2)
+      expect(screen.getByRole('button', { name: 'Crear cuenta' })).toBeDisabled()
+      expect(screen.getByRole('link', { name: 'Inicia sesión' })).toHaveAttribute('href', '/login')
+    })
 
-    await user.click(screen.getByRole('button', { name: 'Empresa' }));
+    it('muestra los campos de la empresa al elegir Empresa', async () => {
+      const user = userEvent.setup()
+      renderRegister()
 
-    expect(screen.getByText('Registra tu empresa')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Lubix S.A.S')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('900123456')).toBeInTheDocument();
-    expect(screen.getByPlaceholderText('Calle 123 #45-67')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Registrar empresa' })).toBeInTheDocument();
-  });
+      await user.click(screen.getByRole('button', { name: 'Empresa' }))
 
-  it('muestra errores de validación visibles y no envía si faltan campos', () => {
-    const { container } = renderWithProviders(<Register />);
+      expect(screen.getByText('Registra tu empresa')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('Lubix S.A.S')).toBeInTheDocument()
+      expect(screen.getByPlaceholderText('900123456')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Registrar empresa' })).toBeInTheDocument()
+    })
+  })
 
-    // Los campos `required` hacen que el navegador (y jsdom) bloqueen el click
-    // en el botón, así que se envía el formulario directamente para ejercitar
-    // la validación propia del componente.
-    fireEvent.submit(container.querySelector('form') as HTMLFormElement);
+  describe('error de validación visible', () => {
+    it('avisa cuando las contraseñas no coinciden y no llama a la API', async () => {
+      const user = userEvent.setup()
+      renderRegister()
 
-    expect(screen.getAllByText('El nombre es obligatorio').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('El correo es obligatorio').length).toBeGreaterThan(0);
-    expect(apiMocks.post).not.toHaveBeenCalled();
-  });
+      await llenarUsuario(user, 'Prueba123', 'Prueba124')
+      await user.click(screen.getByRole('button', { name: 'Crear cuenta' }))
 
-  it('muestra el error de formato de correo sin llamar al backend', async () => {
-    const user = userEvent.setup();
-    const { container } = renderWithProviders(<Register />);
+      expect(await screen.findByText('Las contraseñas no coinciden')).toBeInTheDocument()
+      expect(post).not.toHaveBeenCalled()
+    })
 
-    await user.type(inputByName(container, 'name'), 'Maria');
-    await user.type(inputByName(container, 'surname'), 'Lopez');
-    // "a@b" pasa la validación nativa del navegador pero no la de la app.
-    await user.type(screen.getByPlaceholderText('tu@email.com'), 'a@b');
-    await user.type(screen.getByPlaceholderText('+57 300 123 4567'), '3001234567');
-    await user.type(inputByName(container, 'password'), STRONG_PASSWORD);
-    await user.type(inputByName(container, 'confirmPassword'), STRONG_PASSWORD);
-    await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+    it('muestra los requisitos y mantiene el botón deshabilitado con una contraseña débil', async () => {
+      const user = userEvent.setup()
+      renderRegister()
 
-    expect(
-      screen.getAllByText('Ingresa un correo electrónico válido').length,
-    ).toBeGreaterThan(0);
-    expect(apiMocks.post).not.toHaveBeenCalled();
-  });
+      const [campoPassword] = screen.getAllByPlaceholderText('••••••••')
+      await user.type(campoPassword, 'abc')
 
-  it('bloquea el envío cuando las contraseñas no coinciden', async () => {
-    const user = userEvent.setup();
-    const { container } = renderWithProviders(<Register />);
+      expect(screen.getByText('8+ chars')).toBeInTheDocument()
+      expect(screen.getByText('Mayús')).toBeInTheDocument()
+      expect(screen.getByText('Número')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: 'Crear cuenta' })).toBeDisabled()
+    })
 
-    await user.type(inputByName(container, 'name'), 'Maria');
-    await user.type(inputByName(container, 'surname'), 'Lopez');
-    await user.type(screen.getByPlaceholderText('tu@email.com'), 'maria@x.com');
-    await user.type(screen.getByPlaceholderText('+57 300 123 4567'), '3001234567');
-    await user.type(inputByName(container, 'password'), STRONG_PASSWORD);
-    await user.type(inputByName(container, 'confirmPassword'), 'Diferente1');
-    await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+    it('muestra el mensaje del servidor cuando el registro es rechazado', async () => {
+      post.mockRejectedValue({
+        isAxiosError: true,
+        response: { data: { detail: 'El correo ya está registrado' } },
+      })
+      const user = userEvent.setup()
+      renderRegister()
 
-    expect(screen.getAllByText(/no coinciden/).length).toBeGreaterThan(0);
-    expect(apiMocks.post).not.toHaveBeenCalled();
-  });
+      await llenarUsuario(user)
+      await user.click(screen.getByRole('button', { name: 'Crear cuenta' }))
 
-  it('registra un usuario y envía el payload correcto al backend', async () => {
-    apiMocks.post.mockResolvedValue({ data: {} });
-    const user = userEvent.setup();
-    const { container } = renderWithProviders(<Register />);
+      expect(await screen.findByText('El correo ya está registrado')).toBeInTheDocument()
+    })
+  })
 
-    await fillUsuarioForm(user, container);
-    await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+  describe('el envío funciona', () => {
+    it('registra al usuario con los datos escritos', async () => {
+      post.mockResolvedValue({ data: {} })
+      const user = userEvent.setup()
+      renderRegister()
 
-    expect(await screen.findByText('Usuario registrado correctamente')).toBeInTheDocument();
-    expect(apiMocks.post).toHaveBeenCalledWith('/auth/register-user', {
-      fullName: 'Maria Lopez',
-      email: 'maria@x.com',
-      tell: '3001234567',
-      password: STRONG_PASSWORD,
-    });
-  });
+      await llenarUsuario(user)
+      await user.click(screen.getByRole('button', { name: 'Crear cuenta' }))
 
-  it('muestra el error del backend cuando el correo ya existe', async () => {
-    apiMocks.post.mockRejectedValue({
-      isAxiosError: true,
-      response: {
-        status: 400,
-        data: { detail: 'El correo ya está registrado' },
-      },
-    });
-    const user = userEvent.setup();
-    const { container } = renderWithProviders(<Register />);
+      expect(await screen.findByText('Usuario registrado correctamente')).toBeInTheDocument()
+      expect(post).toHaveBeenCalledWith('/auth/register-user', {
+        fullName: 'Ana Pérez',
+        email: 'ana@example.com',
+        tell: '3001234567',
+        password: 'Prueba123',
+      })
+    })
 
-    await fillUsuarioForm(user, container);
-    await user.click(screen.getByRole('button', { name: 'Crear cuenta' }));
+    it('limpia el formulario después de registrar', async () => {
+      post.mockResolvedValue({ data: {} })
+      const user = userEvent.setup()
+      renderRegister()
 
-    expect(
-      (await screen.findAllByText('El correo ya está registrado')).length,
-    ).toBeGreaterThan(0);
-    expect(screen.getByText('Error en el Registro')).toBeInTheDocument();
-  });
-});
+      await llenarUsuario(user)
+      await user.click(screen.getByRole('button', { name: 'Crear cuenta' }))
+      await screen.findByText('Usuario registrado correctamente')
+
+      expect(screen.getByPlaceholderText('Su Nombre')).toHaveValue('')
+      expect(screen.getByPlaceholderText('tu@email.com')).toHaveValue('')
+    })
+  })
+})

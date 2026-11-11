@@ -55,11 +55,15 @@ dependencies = [
 dev = [
     "pip-audit>=2.10.0",
     # Suite de tests (TestClient de FastAPI necesita httpx)
-    "pytest>=8.3.0",
     "httpx>=0.27.0",
+    "pytest>=9.0.0",
+    "pytest-cov>=7.0.0",
 ]
 
 [tool.pytest.ini_options]
 # Correr `pytest` desde `backend/` descubre la suite automáticamente.
 testpaths = ["tests"]
 addopts = "-ra"
+
+[tool.coverage.report]
+include_namespace_packages = true
