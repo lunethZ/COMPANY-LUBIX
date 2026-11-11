@@ -148,6 +148,172 @@ LUBIX-COMPANY/
     ├── HUs/                           # Historias de Usuario organizadas por módulo
     ├── RFs/                           # Especificación de Requisitos Funcionales
     └── RNFs/                          # Especificación de Requisitos No Funcionales
+│
+├── README.md                              # Este archivo - Documentación principal
+├── docker-compose.yml                     # Orquestación de contenedores
+│
+├── backend/                               # API Backend
+│   ├── main.py                            # Punto de entrada
+│   ├── pyproject.toml                     # Dependencias del proyecto
+│   ├── Dockerfile                         # Contenedor del backend
+│   ├── alembic.ini                        # Configuración de migraciones
+│   ├── README.md                          # Documentación del backend
+│   ├── CHANGELOG.md                       # Histórico de cambios
+│   │
+│   ├── app/
+│   │   ├── main.py                        # Aplicación FastAPI
+│   │   ├── Config.py                      # Configuración global
+│   │   │
+│   │   ├── database/
+│   │   │   └── Connection.py              # Conexión a PostgreSQL
+│   │   │
+│   │   ├── models/                        # Modelos SQLAlchemy
+│   │   │   ├── ModelUser.py
+│   │   │   ├── ModelCompany.py
+│   │   │   ├── ModelProduct.py
+│   │   │   ├── ModelRole.py
+│   │   │   ├── ModelCode.py
+│   │   │   └── ModelRefreshToken.py
+│   │   │
+│   │   ├── schemas/                       # Esquemas Pydantic
+│   │   │   ├── SchemaAuthUser.py
+│   │   │   ├── SchemaAuthCompany.py
+│   │   │   ├── SchemaProduct.py
+│   │   │   └── dashboard/
+│   │   │       └── SchemaCompany.py
+│   │   │
+│   │   ├── routers/                       # Rutas API
+│   │   │   ├── AuthRouters.py             # Autenticación
+│   │   │   ├── CompanyRouter.py           # Gestión de empresas
+│   │   │   ├── CardRouters.py             # Carrito de compras
+│   │   │   └── HealthRouter.py            # Health check
+│   │   │
+│   │   ├── services/                      # Lógica de negocio
+│   │   │   ├── authentication/
+│   │   │   │   ├── AuthService.py
+│   │   │   │   └── JWTService.py
+│   │   │   ├── email/
+│   │   │   │   ├── EmailService.py
+│   │   │   │   ├── SaveAndGenerateCode.py
+│   │   │   │   └── template/
+│   │   │   │       ├── EmailRegisterUser.py
+│   │   │   │       ├── EmailRegisterCompany.py
+│   │   │   │       ├── EmailVerify.py
+│   │   │   │       └── EmailForgotPassword.py
+│   │   │   ├── CompanyServices/
+│   │   │   │   ├── Dasboard.py
+│   │   │   │   └── Products.py
+│   │   │   └── NasService.py              # Gestión de MinIO
+│   │   │
+│   │   ├── middleware/
+│   │   │   ├── AuthMiddleware.py          # Validación de JWT
+│   │   │   └── CorsMiddleware.py          # CORS
+│   │   │
+│   │   ├── utils/
+│   │   │   ├── Security.py                # Utilidades de seguridad
+│   │   │   ├── CheckNetwork.py            # Validaciones de red
+│   │   │   ├── Config.py                  # Configuración
+│   │   │   ├── seed.py                    # Datos iniciales
+│   │   │   └── TestDatabase.py            # Pruebas de BD
+│   │   │
+│   │   └── docs/
+│   │       ├── ENDPOINTS.md               # Documentación de endpoints
+│   │       └── AUDITORIA.md               # Auditoría del sistema
+│   │
+│   └── alembic/                           # Migraciones de BD
+│       ├── env.py
+│       ├── script.py.mako
+│       └── versions/
+│           ├── 8604d5f49af7_initial_migration.py
+│           └── ebac4a669c65_add_new_table_product_and_catalog.py
+│
+├── frontend/                              # Aplicación React
+│   ├── package.json                       # Dependencias npm
+│   ├── pnpm-lock.yaml                     # Lock file
+│   ├── vite.config.ts                     # Configuración Vite
+│   ├── tailwind.config.js                 # Configuración Tailwind
+│   ├── tsconfig.json                      # Configuración TypeScript
+│   ├── index.html                         # HTML principal
+│   ├── Dockerfile                         # Contenedor del frontend
+│   ├── README.md                          # Documentación del frontend
+│   ├── eslint.config.js                   # Configuración ESLint
+│   ├── postcss.config.cjs                 # Configuración PostCSS
+│   │
+│   ├── public/                            # Recursos estáticos
+│   │
+│   └── src/
+│       ├── main.tsx                       # Punto de entrada
+│       ├── App.tsx                        # Componente raíz
+│       ├── index.css                      # Estilos globales + Variables CSS
+│       ├── App.css
+│       │
+│       ├── components/                    # Componentes reutilizables
+│       │   └── navbar.tsx
+│       │
+│       ├── pages/                         # Páginas/Rutas
+│       │   ├── login.tsx
+│       │   ├── registrer.tsx
+│       │   ├── reset-password.tsx
+│       │   └── Home.tsx
+│       │
+│       ├── context/                       # Context API
+│       │   ├── ThemeContext.tsx
+│       │   ├── ThemeProvider.tsx
+│       │   ├── AuthContext.tsx
+│       │   └── AuthProvider.tsx
+│       │
+│       ├── services/                      # Servicios HTTP
+│       │   └── Consumo de APIs
+│       │
+│       ├── types/                         # Tipos TypeScript
+│       │   └── Definiciones de tipos
+│       │
+│       ├── constants/                     # Constantes
+│       │   └── Valores globales
+│       │
+│       ├── assets/                        # Imágenes, iconos
+│       │   └── Recursos multimedia
+│       │
+│       └── api/                           # Configuración de APIs
+│           └── Cliente HTTP
+│
+└── Docs/                                  # Documentación del proyecto
+    ├── HUs/                               # Historias de Usuario
+    │   ├── Administración/
+    │   ├── Autenticación/
+    │   ├── Carrito De Compras/
+    │   ├── Catalogo/
+    │   ├── Pedidos/
+    │   ├── Perfil de Usuario/
+    │   ├── Productos/
+    │   └── Soporte/
+    │
+    ├── RFs/                               # Requisitos Funcionales
+    │   ├── Administración/
+    │   ├── Autenticación/
+    │   ├── Carrito de Compras/
+    │   ├── Catalogo/
+    │   ├── Pedidos/
+    │   ├── Perfil de Usuario/
+    │   ├── Productos/
+    │   └── Soporte/
+    │
+    └── RNFs/                              # Requisitos No Funcionales
+        ├── RNF-001 — Tiempo de respuesta.md
+        ├── RNF-002 — Concurrencia.md
+        ├── RNF-003 — Autenticación segura.md
+        ├── RNF-004 — Encriptación de contraseñas.md
+        ├── RNF-005 — Protección contra ataques.md
+        ├── RNF-006 — Escalabilidad horizontal.md
+        ├── RNF-007 — Crecimiento de datos.md
+        ├── RNF-008 — Disponibilidad del sistema.md
+        ├── RNF-009 — Recuperación ante fallos.md
+        ├── RNF-010 — Facilidad de uso.md
+        ├── RNF-011 — Diseño responsivo.md
+        ├── RNF-012 — Compatibilidad con navegadores.md
+        ├── RNF-013 — Compatibilidad móvil.md
+        ├── RNF-014 — Arquitectura modular.md
+        └── RNF-015 — Registro de actividades.md
 ```
 
 ---
@@ -165,10 +331,24 @@ Para el despliegue de la infraestructura local, asegúrese de contar con las sig
 *   Python 3.13
 *   Node.js 18+ y pnpm (`npm install -g pnpm`)
 *   PostgreSQL 16
+### Mínimo requerido
+
+- **Docker** (v20.10+) — [Descargar](https://www.docker.com/products/docker-desktop)
+- **Docker Compose** (v2.0+) — Incluido en Docker Desktop
+- **Git** — Control de versiones
+- **Editor de código** — VS Code recomendado
+
+### Desarrollo local (opcional)
+
+- **Python 3.13** — [Descargar](https://www.python.org/downloads/)
+- **Node.js 18+** y **pnpm** — [Descargar](https://nodejs.org/) y `npm install -g pnpm`
+- **PostgreSQL 16** — [Descargar](https://www.postgresql.org/download/)
 
 ---
 
 ## Instalación y Configuración
+
+### Paso 1: Clonar el Repositorio
 
 **1. Clonar el Repositorio**
 ```bash
@@ -178,6 +358,10 @@ cd lubix-company
 
 **2. Configuración de Variables de Entorno**
 Duplique el archivo de ejemplo para establecer sus parámetros locales:
+### Paso 2: Crear Archivo de Variables de Entorno
+
+En la raíz del proyecto, crea un archivo `.env`:
+
 ```bash
 # Linux/macOS
 cp .env.example .env
@@ -188,6 +372,12 @@ copy .env.example .env
 
 **3. Parametrización del Archivo `.env`**
 Edite el archivo `.env` garantizando la definición de las siguientes credenciales y parámetros clave:
+
+### Paso 3: Configurar Variables de Entorno
+
+Edita el archivo `.env` y configura las siguientes variables:
+
+#### PostgreSQL
 
 ```env
 # Base de Datos
@@ -201,11 +391,18 @@ DB_SSL_MODE=require
 
 # Seguridad y Criptografía
 SECRET_KEY=clave_secreta_alfanumérica_robusta
+#### JWT
+
+```env
+SECRET_KEY=tu_clave_secreta_muy_larga_y_segura
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
 REFRESH_TOKEN_DAYS=7
 
 # Servicios de Correo (SMTP)
+#### SMTP (Gmail)
+
+```env
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=tu_email@gmail.com
@@ -213,12 +410,18 @@ SMTP_PASSWORD=contraseña_de_aplicacion_autorizada
 SENDER_EMAIL=tu_email@gmail.com
 
 # Almacenamiento de Objetos (MinIO)
+#### MinIO
+
+```env
 MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=minioadmin123
 MINIO_URL=http://minio:9000
 MINIO_BUCKET=lubix
 
 # Configuración del Entorno de Aplicación
+#### Backend
+
+```env
 BACKEND_URL=http://localhost:8001
 ENVIRONMENT=development
 LOG_LEVEL=INFO
@@ -230,6 +433,19 @@ Durante la instalación inicial, habilite el script de seed modificando temporal
 RUN_SEED=True
 ```
 Una vez inicializados los datos de prueba o configuración base, revierta este valor a `False` para prevenir sobreescrituras en reinicios posteriores.
+**IMPORTANTE SOBRE SEED**: La primera vez que ejecutes el proyecto, activa la seed:
+
+```env
+RUN_SEED=True
+```
+
+Después de que se complete la inicialización, apágala:
+
+```env
+RUN_SEED=False
+```
+
+### Paso 4: Construir los Contenedores
 
 **4. Construcción de Contenedores**
 ```bash
@@ -239,6 +455,18 @@ docker compose build
 ---
 
 ## Despliegue y Ejecución
+Este comando construirá:
+
+- Backend (FastAPI con Python 3.13)
+- Frontend (React con Node.js)
+- PostgreSQL
+- MinIO
+
+---
+
+## Ejecución del Proyecto
+
+### Iniciar con Docker Compose
 
 ### Inicialización de Servicios mediante Docker
 ```bash
@@ -253,6 +481,44 @@ docker compose ps
 
 ### Ejecución de Migraciones Estructurales (Base de Datos)
 Es mandatario aplicar el modelo relacional a la base de datos vacía durante el primer despliegue:
+Deberías ver:
+
+```
+NAME                COMMAND                  SERVICE      STATUS      PORTS
+lubix-postgres      postgres                 postgres     Up          0.0.0.0:5434->5432/tcp
+lubix-minio         minio server /data       minio        Up          0.0.0.0:9000->9000/tcp
+lubix-backend       uvicorn app.main:app    backend      Up          0.0.0.0:8001->8000/tcp
+lubix-frontend      npm run dev              frontend     Up          0.0.0.0:5173->5173/tcp
+```
+
+### Ver Logs
+
+```bash
+# Ver todos los logs
+docker compose logs -f
+
+# Ver solo del backend
+docker compose logs -f backend
+
+# Ver solo del frontend
+docker compose logs -f frontend
+
+# Ver solo de PostgreSQL
+docker compose logs -f postgres
+```
+
+### Acceder a los Servicios
+
+| Servicio | URL | Descripción |
+|----------|-----|-------------|
+| Frontend | [http://localhost:5173](http://localhost:5173) | Aplicación React |
+| Backend API | [http://localhost:8001](http://localhost:8001) | API FastAPI |
+| API Docs | [http://localhost:8001/docs](http://localhost:8001/docs) | Swagger UI |
+| MinIO | [http://localhost:9000](http://localhost:9000) | Almacenamiento de archivos |
+
+### Ejecutar Migraciones de Base de Datos
+
+#### Primera ejecución (crear esquema):
 
 ```bash
 # Generación de la migración inicial (Solo primera vez o al modificar modelos)
@@ -273,6 +539,9 @@ docker compose exec backend uv run alembic upgrade head
 ---
 
 ## Entorno de Desarrollo Local
+## Desarrollo Local (sin Docker)
+
+Si prefieres desarrollar sin Docker:
 
 Para equipos de desarrollo que prefieran ejecutar los servicios fuera de la capa de orquestación de Docker:
 
@@ -295,6 +564,99 @@ pnpm run dev
 ---
 
 ## Flujo de Desarrollo
+## Documentación
+
+### Documentación del Backend
+
+Ver [backend/README.md](backend/README.md) para detalles sobre:
+
+- Estructura de carpetas
+- Modelos de datos
+- Servicios y utilidades
+- Configuración de variables de entorno
+
+### Documentación del Frontend
+
+Ver [frontend/README.md](frontend/README.md) para detalles sobre:
+
+- Sistema de colores y temas
+- Componentes reutilizables
+- Context API
+- Guía de estilos
+
+### Endpoints de API
+
+Ver [backend/app/docs/ENDPOINTS.md](backend/app/docs/ENDPOINTS.md) para:
+
+- Listado completo de endpoints
+- Parámetros de entrada/salida
+- Ejemplos de uso
+
+### Auditoría del Sistema
+
+Ver [backend/app/docs/AUDITORIA.md](backend/app/docs/AUDITORIA.md) para:
+
+- Registro de actividades
+- Historial de cambios
+- Logs del sistema
+
+### Historias de Usuario
+
+Ver carpeta [Docs/HUs/](Docs/HUs/) para las historias de usuario de cada módulo
+
+### Requisitos Funcionales
+
+Ver carpeta [Docs/RFs/](Docs/RFs/) para los requisitos funcionales detallados
+
+### Requisitos No Funcionales
+
+Ver carpeta [Docs/RNFs/](Docs/RNFs/) para:
+
+- Tiempo de respuesta
+- Concurrencia
+- Seguridad
+- Escalabilidad
+- Disponibilidad
+- Y más...
+
+---
+
+## Flujo de Desarrollo
+
+### 1. Crear una rama para tu feature
+
+```bash
+git checkout -b feature/tu-feature
+```
+
+### 2. Hacer cambios
+
+#### Backend
+
+- Editar modelos en `backend/app/models/`
+- Crear endpoints en `backend/app/routers/`
+- Agregar lógica en `backend/app/services/`
+
+#### Frontend
+
+- Crear componentes en `frontend/src/components/`
+- Crear páginas en `frontend/src/pages/`
+- Agregar servicios en `frontend/src/services/`
+
+### 3. Generar migración (si hay cambios en BD)
+
+```bash
+docker compose exec backend uv run alembic revision --autogenerate -m "Descripción del cambio"
+```
+
+### 4. Hacer commit
+
+```bash
+git add .
+git commit -m "feat: descripción del cambio"
+```
+
+### 5. Push a rama
 
 El ciclo de vida del código en este repositorio debe adherirse a las prácticas de integración estructurada:
 
@@ -311,6 +673,7 @@ El ciclo de vida del código en este repositorio debe adherirse a las prácticas
 ---
 
 ## Resolución de Problemas
+## Troubleshooting
 
 **Conflictos de Puertos de Red:**
 Si los puertos predeterminados están ocupados, modifique el mapeo en el archivo `docker-compose.yml`. Por ejemplo, para alterar el puerto de la API: `ports: ["8002:8000"]`.
@@ -349,6 +712,26 @@ La arquitectura de LUBIX implementa medidas defensivas estándar de la industria
 ## Documentación y Referencias
 
 Para obtener información técnica detallada por subdominio, consulte los siguientes recursos adjuntos en el código fuente:
+- **JWT** — Tokens de autenticación seguros con expiración
+- **bcrypt** — Hash de contraseñas con salt
+- **CORS** — Control de acceso entre dominios
+- **Rate Limiting** — Protección contra ataques de fuerza bruta
+- **HTTPS** — Recomendado para producción
+- **Validación** — Pydantic valida todos los inputs
+- **SQL Injection** — SQLAlchemy previene inyecciones
+
+**Para producción:**
+
+- Cambiar `ENVIRONMENT=production`
+- Usar HTTPS obligatoriamente
+- Cambiar `SECRET_KEY` a un valor único y fuerte
+- Cambiar todas las contraseñas por defecto
+- Habilitar backup automático de BD
+- Configurar logs y monitoreo
+
+---
+
+## Versionado
 
 *   **Documentación de Arquitectura Backend:** `backend/README.md`
 *   **Documentación de Diseño Frontend:** `frontend/README.md`
@@ -364,6 +747,9 @@ Para obtener información técnica detallada por subdominio, consulte los siguie
 *   **Versión del Proyecto:** 1.0.0
 *   **Versión del Backend API:** 1.1.1b
 *   **Versión del Cliente Web:** 0.0.0
+---
+
+## Soporte
 
 Para trazabilidad detallada de lanzamientos, consulte el archivo `backend/CHANGELOG.md`. Ante incidencias técnicas o propuestas de nuevas funcionalidades, se requiere la apertura formal de un *Issue* en el repositorio institucional.
 
