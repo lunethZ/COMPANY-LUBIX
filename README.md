@@ -2,141 +2,152 @@
 
 **Solución integral de gestión de usuarios, empresas y productos**
 
-Repositorio principal del código fuente de la compañía Lubix.
+Repositorio principal del código fuente de LUBIX Company.
 
 ---
 
 ## Tabla de Contenidos
 
-- [Descripción General](#descripción-general)
-- [Características Principales](#características-principales)
-- [Stack Tecnológico](#stack-tecnológico)
-- [Estructura del Proyecto](#estructura-del-proyecto)
-- [Requisitos Previos](#requisitos-previos)
-- [Instalación y Configuración](#instalación-y-configuración)
-- [Ejecución del Proyecto](#ejecución-del-proyecto)
-- [Documentación](#documentación)
-- [Versionado](#versionado)
+1. [Resumen Ejecutivo](#resumen-ejecutivo)
+2. [Capacidades Principales del Sistema](#capacidades-principales-del-sistema)
+3. [Arquitectura y Stack Tecnológico](#arquitectura-y-stack-tecnológico)
+4. [Estructura del Proyecto](#estructura-del-proyecto)
+5. [Requisitos Previos](#requisitos-previos)
+6. [Instalación y Configuración](#instalación-y-configuración)
+7. [Despliegue y Ejecución](#despliegue-y-ejecución)
+8. [Entorno de Desarrollo Local](#entorno-de-desarrollo-local)
+9. [Flujo de Desarrollo](#flujo-de-desarrollo)
+10. [Resolución de Problemas](#resolución-de-problemas)
+11. [Seguridad](#seguridad)
+12. [Documentación y Referencias](#documentación-y-referencias)
+13. [Versionado y Soporte](#versionado-y-soporte)
 
 ---
 
-## Descripción General
+## Resumen Ejecutivo
 
-**LUBIX** es una plataforma completa de gestión empresarial que integra:
+**LUBIX** es una plataforma de gestión empresarial de alto rendimiento diseñada para la administración integral de organizaciones. Su arquitectura se fundamenta en los siguientes pilares:
 
-- **Backend** — API REST robusta construida con FastAPI y Python 3.13
-- **Frontend** — Interfaz de usuario moderna con React, TypeScript y Tailwind CSS
-- **Base de Datos** — PostgreSQL para almacenamiento relacional
-- **Almacenamiento** — MinIO para gestión de archivos e imágenes
-- **Autenticación** — Sistema seguro con JWT y bcrypt
-- **Comunicaciones** — Envío de correos mediante SMTP
+*   **Backend:** API REST robusta desarrollada con FastAPI y Python 3.13, optimizada para procesamiento asíncrono.
+*   **Frontend:** Interfaz de usuario de última generación construida sobre React, TypeScript y Tailwind CSS.
+*   **Persistencia de Datos:** Almacenamiento relacional garantizado mediante PostgreSQL.
+*   **Gestión de Activos:** Administración de archivos multimedia a través de MinIO.
+*   **Seguridad:** Sistema de autenticación de grado industrial utilizando JWT (JSON Web Tokens) y cifrado bcrypt.
+*   **Notificaciones:** Servicio de mensajería integrado mediante protocolo SMTP.
 
-Esta arquitectura permite escalabilidad horizontal, mantenibilidad y una experiencia de usuario excepcional.
-
----
-
-## Características Principales
-
-### Autenticación y Seguridad
-
-- Registro de usuarios
-- Inicio de sesión con JWT (JSON Web Tokens)
-- Middleware de autenticación segura
-- Encriptación de contraseñas con bcrypt
-- Recuperación de contraseña mediante correo electrónico
-- Verificación de cuenta por correo electrónico
-- Tokens de refresco automático
-
-### Gestión de Usuarios
-
-- CRUD completo de usuarios
-- Gestión de roles y permisos
-- Perfiles de usuario personalizables
-- Auditoría de actividades
-
-### Gestión de Empresas
-
-- Creación y gestión de empresas
-- Gestión de catálogos de productos
-- Dashboard analítico en tiempo real
-- Gestión de códigos y promociones
-
-### Gestión de Productos
-
-- CRUD de productos
-- Gestión de categorías
-- Almacenamiento de imágenes en MinIO
-- Información detallada de productos
-
-### Carrito de Compras
-
-- Gestión de carritos
-- Cálculo dinámico de totales
-- Gestión de pedidos
-
-### Experiencia de Usuario
-
-- Tema claro/oscuro automático
-- Interfaz responsiva
-- Diseño moderno con Tailwind CSS
-- Componentes reutilizables
+Esta infraestructura modular garantiza escalabilidad horizontal, alta disponibilidad y un mantenimiento eficiente a lo largo del ciclo de vida del software.
 
 ---
 
-## Stack Tecnológico
+## Capacidades Principales del Sistema
+
+**Autenticación y Control de Acceso**
+*   Registro seguro e inicio de sesión unificado mediante JWT.
+*   Middleware de validación de identidad.
+*   Cifrado de credenciales mediante algoritmos bcrypt.
+*   Flujos de verificación de cuenta y recuperación de contraseña vía correo electrónico.
+*   Gestión automatizada de tokens de refresco.
+
+**Administración de Usuarios y Perfiles**
+*   Módulo completo (CRUD) para la gestión de usuarios.
+*   Asignación de roles y control granular de permisos.
+*   Personalización avanzada de perfiles.
+*   Trazabilidad y auditoría de actividades en el sistema.
+
+**Gestión Organizacional (Empresas)**
+*   Creación, configuración y monitoreo de entidades empresariales.
+*   Administración de catálogos de servicios y productos.
+*   Panel de control (Dashboard) con métricas analíticas en tiempo real.
+*   Gestión de promociones y códigos de descuento.
+
+**Gestión de Inventario e E-commerce**
+*   Módulo completo (CRUD) para la administración de productos y categorización.
+*   Almacenamiento escalable de imágenes de producto mediante MinIO.
+*   Carrito de compras con cálculo dinámico de subtotales e impuestos.
+*   Sistema integral de gestión y seguimiento de pedidos.
+
+**Experiencia de Usuario (UX/UI)**
+*   Arquitectura responsiva para compatibilidad multiplataforma.
+*   Transición fluida entre temas de visualización (claro/oscuro).
+*   Sistema de diseño coherente basado en Tailwind CSS.
+
+---
+
+## Arquitectura y Stack Tecnológico
 
 ### Backend
 
-| Tecnología | Versión | Uso |
-|-----------|---------|-----|
-| **Python** | 3.13 | Lenguaje principal |
-| **FastAPI** | 0.135.1 | Framework web |
-| **Uvicorn** | ASGI | Servidor web |
-| **SQLAlchemy** | ORM | Manejo de base de datos |
-| **Alembic** | Migraciones | Control de esquema de BD |
-| **PostgreSQL** | 16 | Base de datos relacional |
-| **psycopg2** | Driver | Conexión a PostgreSQL |
-| **Pydantic** | 2.12.5 | Validación de datos |
-| **python-jose** | JWT | Tokens de autenticación |
-| **bcrypt** | 3.2.2 | Hash de contraseñas |
-| **python-dotenv** | Variables de entorno | Configuración |
-| **MinIO SDK** | 7.2.20 | Almacenamiento de archivos |
-| **smtplib** | SMTP | Envío de correos |
-| **Docker** | Contenerización | Despliegue |
-| **UV** | Gestión de dependencias | Instalación rápida |
+| Tecnología | Versión | Propósito |
+| :--- | :--- | :--- |
+| **Python** | 3.13 | Lenguaje de programación principal |
+| **FastAPI** | 0.135.1 | Framework de desarrollo de API REST |
+| **Uvicorn** | ASGI | Servidor web asíncrono |
+| **SQLAlchemy** | ORM | Mapeo objeto-relacional |
+| **Alembic** | CLI | Gestión de migraciones de base de datos |
+| **PostgreSQL** | 16 | Motor de base de datos relacional |
+| **psycopg2** | Driver | Conector para PostgreSQL |
+| **Pydantic** | 2.12.5 | Validación de esquemas y serialización |
+| **python-jose** | JWT | Generación y validación de tokens |
+| **bcrypt** | 3.2.2 | Algoritmo de hash de contraseñas |
+| **MinIO SDK** | 7.2.20 | Cliente de integración de almacenamiento |
+| **UV** | CLI | Gestor avanzado de dependencias |
 
 ### Frontend
 
-| Tecnología | Versión | Uso |
-|-----------|---------|-----|
-| **React** | 19.2.6 | Librería UI |
-| **TypeScript** | 6.0.3 | Tipado estático |
-| **Vite** | 8.0.14 | Build tool |
-| **React Router** | 7.15.1 | Enrutamiento |
-| **Tailwind CSS** | 3.4.19 | Estilos utilitarios |
-| **Axios** | 1.16.1 | Cliente HTTP |
-| **PostCSS** | Procesamiento de estilos | Pre-procesador CSS |
-| **Heroicons** | Iconografía | Componentes de iconos |
-| **Swiper** | 12.2.0 | Carruseles |
-| **Docker** | Contenerización | Despliegue |
+| Tecnología | Versión | Propósito |
+| :--- | :--- | :--- |
+| **React** | 19.2.6 | Librería principal de interfaces |
+| **TypeScript** | 6.0.3 | Tipado estático para JavaScript |
+| **Vite** | 8.0.14 | Herramienta de construcción (Build tool) |
+| **React Router** | 7.15.1 | Enrutamiento de la aplicación (SPA) |
+| **Tailwind CSS** | 3.4.19 | Framework de estilos utilitarios |
+| **Axios** | 1.16.1 | Cliente HTTP para consumo de API |
+| **Swiper** | 12.2.0 | Implementación de carruseles interactivos |
 
-### Infraestructura
+### Infraestructura y Despliegue
 
-| Servicio | Versión | Puerto | Uso |
-|---------|---------|--------|-----|
-| **PostgreSQL** | 16 | 5434 | Base de datos |
-| **MinIO** | latest | 9000 | Almacenamiento de archivos |
-| **Backend** | FastAPI | 8001 | API REST |
-| **Frontend** | React | 5173* | Aplicación web |
-
-*El puerto del frontend es configurable en Vite
+| Servicio | Puerto | Descripción |
+| :--- | :--- | :--- |
+| **PostgreSQL** | 5434 (Host) -> 5432 | Base de datos principal |
+| **MinIO** | 9000 | Servidor de almacenamiento de objetos |
+| **Backend (API)** | 8001 (Host) -> 8000 | Capa de servicios REST |
+| **Frontend (Web)**| 5173 | Aplicación de usuario (Configurable en Vite) |
 
 ---
 
 ## Estructura del Proyecto
 
-```
+```text
 LUBIX-COMPANY/
+├── docker-compose.yml                 # Orquestación de infraestructura Docker
+├── backend/                           # API REST (FastAPI)
+│   ├── main.py                        # Punto de entrada de la aplicación
+│   ├── pyproject.toml                 # Configuración de dependencias (UV)
+│   ├── Dockerfile                     # Definición de contenedor Backend
+│   ├── alembic/                       # Directorio de migraciones (Alembic)
+│   └── app/                           # Código fuente de la API
+│       ├── database/                  # Conectividad de datos
+│       ├── models/                    # Modelos de dominio (SQLAlchemy)
+│       ├── schemas/                   # Esquemas de validación (Pydantic)
+│       ├── routers/                   # Controladores y rutas (Endpoints)
+│       ├── services/                  # Lógica de negocio core
+│       ├── middleware/                # Interceptores (Autenticación, CORS)
+│       └── utils/                     # Utilidades transversales y Seeders
+├── frontend/                          # Aplicación Cliente (React)
+│   ├── package.json                   # Configuración y dependencias NPM
+│   ├── vite.config.ts                 # Configuración del empaquetador
+│   ├── tailwind.config.js             # Configuración de sistema de diseño
+│   ├── Dockerfile                     # Definición de contenedor Frontend
+│   └── src/                           # Código fuente del cliente
+│       ├── components/                # Componentes de UI reutilizables
+│       ├── pages/                     # Vistas y pantallas principales
+│       ├── context/                   # Gestión de estado global (Context API)
+│       ├── services/                  # Integración HTTP con Backend
+│       └── types/                     # Definiciones de tipado TypeScript
+└── Docs/                              # Documentación oficial del proyecto
+    ├── HUs/                           # Historias de Usuario organizadas por módulo
+    ├── RFs/                           # Especificación de Requisitos Funcionales
+    └── RNFs/                          # Especificación de Requisitos No Funcionales
 │
 ├── README.md                              # Este archivo - Documentación principal
 ├── docker-compose.yml                     # Orquestación de contenedores
@@ -309,8 +320,17 @@ LUBIX-COMPANY/
 
 ## Requisitos Previos
 
-Antes de instalar y ejecutar el proyecto, asegúrate de tener:
+Para el despliegue de la infraestructura local, asegúrese de contar con las siguientes herramientas en su entorno:
 
+**Requisitos Estándar (Entorno Dockerizado):**
+*   **Docker** (v20.10 o superior)
+*   **Docker Compose** (v2.0 o superior)
+*   **Git**
+
+**Requisitos Adicionales (Entorno de Desarrollo Híbrido):**
+*   Python 3.13
+*   Node.js 18+ y pnpm (`npm install -g pnpm`)
+*   PostgreSQL 16
 ### Mínimo requerido
 
 - **Docker** (v20.10+) — [Descargar](https://www.docker.com/products/docker-desktop)
@@ -330,11 +350,14 @@ Antes de instalar y ejecutar el proyecto, asegúrate de tener:
 
 ### Paso 1: Clonar el Repositorio
 
+**1. Clonar el Repositorio**
 ```bash
 git clone https://github.com/RehnieyAl/lubix-company.git
 cd lubix-company
 ```
 
+**2. Configuración de Variables de Entorno**
+Duplique el archivo de ejemplo para establecer sus parámetros locales:
 ### Paso 2: Crear Archivo de Variables de Entorno
 
 En la raíz del proyecto, crea un archivo `.env`:
@@ -347,6 +370,9 @@ cp .env.example .env
 copy .env.example .env
 ```
 
+**3. Parametrización del Archivo `.env`**
+Edite el archivo `.env` garantizando la definición de las siguientes credenciales y parámetros clave:
+
 ### Paso 3: Configurar Variables de Entorno
 
 Edita el archivo `.env` y configura las siguientes variables:
@@ -354,33 +380,36 @@ Edita el archivo `.env` y configura las siguientes variables:
 #### PostgreSQL
 
 ```env
+# Base de Datos
 POSTGRES_USER=lubix_user
 POSTGRES_PASSWORD=tu_password_seguro
 POSTGRES_DB=lubix_db
 POSTGRES_HOST=postgres
 POSTGRES_PORT=5432
-DATABASE_URL=postgresql://lubix_user:tu_password_seguro@postgres:5432/lubix_db
-```
+URL_DATABASE=postgresql+psycopg2://lubix_user:tu_password_seguro@postgres:5432/lubix_db
+DB_SSL_MODE=require
 
+# Seguridad y Criptografía
+SECRET_KEY=clave_secreta_alfanumérica_robusta
 #### JWT
 
 ```env
 SECRET_KEY=tu_clave_secreta_muy_larga_y_segura
 ALGORITHM=HS256
 ACCESS_TOKEN_EXPIRE_MINUTES=30
-REFRESH_TOKEN_EXPIRE_DAYS=7
-```
+REFRESH_TOKEN_DAYS=7
 
+# Servicios de Correo (SMTP)
 #### SMTP (Gmail)
 
 ```env
 SMTP_HOST=smtp.gmail.com
 SMTP_PORT=587
 SMTP_USER=tu_email@gmail.com
-SMTP_PASSWORD=tu_contraseña_de_aplicacion
+SMTP_PASSWORD=contraseña_de_aplicacion_autorizada
 SENDER_EMAIL=tu_email@gmail.com
-```
 
+# Almacenamiento de Objetos (MinIO)
 #### MinIO
 
 ```env
@@ -388,17 +417,22 @@ MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=minioadmin123
 MINIO_URL=http://minio:9000
 MINIO_BUCKET=lubix
-```
 
+# Configuración del Entorno de Aplicación
 #### Backend
 
 ```env
 BACKEND_URL=http://localhost:8001
 ENVIRONMENT=development
 LOG_LEVEL=INFO
-RUN_SEED=False  # Cambiar a True solo en la primera ejecución
 ```
 
+**Nota sobre Población de Datos Iniciales (Seed):**
+Durante la instalación inicial, habilite el script de seed modificando temporalmente la variable de entorno:
+```env
+RUN_SEED=True
+```
+Una vez inicializados los datos de prueba o configuración base, revierta este valor a `False` para prevenir sobreescrituras en reinicios posteriores.
 **IMPORTANTE SOBRE SEED**: La primera vez que ejecutes el proyecto, activa la seed:
 
 ```env
@@ -413,10 +447,14 @@ RUN_SEED=False
 
 ### Paso 4: Construir los Contenedores
 
+**4. Construcción de Contenedores**
 ```bash
 docker compose build
 ```
 
+---
+
+## Despliegue y Ejecución
 Este comando construirá:
 
 - Backend (FastAPI con Python 3.13)
@@ -430,16 +468,19 @@ Este comando construirá:
 
 ### Iniciar con Docker Compose
 
+### Inicialización de Servicios mediante Docker
 ```bash
 docker compose up -d
 ```
 
-### Ver Estado de los Contenedores
-
+### Verificación de Estado
+Para validar que los cuatro servicios principales operan correctamente, ejecute:
 ```bash
 docker compose ps
 ```
 
+### Ejecución de Migraciones Estructurales (Base de Datos)
+Es mandatario aplicar el modelo relacional a la base de datos vacía durante el primer despliegue:
 Deberías ver:
 
 ```
@@ -480,72 +521,49 @@ docker compose logs -f postgres
 #### Primera ejecución (crear esquema):
 
 ```bash
-docker compose exec backend uv run alembic revision --autogenerate -m "Initial migration"
+# Generación de la migración inicial (Solo primera vez o al modificar modelos)
+docker compose exec backend uv run alembic revision --autogenerate -m "Migración inicial"
+
+# Aplicación del esquema en la base de datos
 docker compose exec backend uv run alembic upgrade head
 ```
 
-#### Ejecuciones posteriores:
+### Accesos Directos
+*   **Aplicación Web (React):** `http://localhost:5173`
+*   **Documentación de API (Swagger UI):** `http://localhost:8001/docs`
+*   **Consola de Administración de MinIO:** `http://localhost:9000`
 
-```bash
-docker compose exec backend uv run alembic upgrade head
-```
-
-### Detener Contenedores
-
-```bash
-docker compose down
-```
-
-### Eliminar Todo (incluido volúmenes)
-
-```bash
-docker compose down -v
-```
+> Para publicar la API en producción con Render + Neon/Supabase, sigue la
+> [Guía de despliegue](Docs/DEPLOYMENT.md).
 
 ---
 
+## Entorno de Desarrollo Local
 ## Desarrollo Local (sin Docker)
 
 Si prefieres desarrollar sin Docker:
 
-### Backend
+Para equipos de desarrollo que prefieran ejecutar los servicios fuera de la capa de orquestación de Docker:
 
+**Servicios Backend:**
 ```bash
 cd backend
-
-# Crear entorno virtual
 python -m venv venv
-
-# Activar entorno virtual
-# Windows:
-venv\Scripts\activate
-# Linux/macOS:
-source venv/bin/activate
-
-# Instalar dependencias
+source venv/bin/activate  # En Windows: venv\Scripts\activate
 uv pip install -r requirements.txt
-
-# Ejecutar servidor
 uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Frontend
-
+**Servicios Frontend:**
 ```bash
 cd frontend
-
-# Instalar dependencias
 pnpm install
-
-# Ejecutar servidor de desarrollo
 pnpm run dev
-
-# Compilar para producción
-pnpm run build
 ```
 
 ---
 
+## Flujo de Desarrollo
 ## Documentación
 
 ### Documentación del Backend
@@ -640,64 +658,33 @@ git commit -m "feat: descripción del cambio"
 
 ### 5. Push a rama
 
-```bash
-git push origin feature/tu-feature
-```
+El ciclo de vida del código en este repositorio debe adherirse a las prácticas de integración estructurada:
 
-### 6. Crear Pull Request
-
-Crea un PR con descripción clara de los cambios
+1.  **Aislamiento:** Cree una rama derivada basada en la nomenclatura estándar.
+    `git checkout -b feature/nombre-de-la-funcionalidad`
+2.  **Desarrollo y Migraciones:** Tras alterar los modelos en `backend/app/models/`, es obligatorio generar un archivo de migración.
+    `docker compose exec backend uv run alembic revision --autogenerate -m "Detalle del modelo"`
+3.  **Confirmación y Subida (Commits Atómicos):**
+    `git add .`
+    `git commit -m "docs(readme): actualizar documentacion general del proyecto"`
+    `git push origin feature/nombre-de-la-funcionalidad`
+4.  **Integración:** Genere un Pull Request hacia la rama `main` documentando el alcance de las modificaciones para revisión por pares (Code Review).
 
 ---
 
+## Resolución de Problemas
 ## Troubleshooting
 
-### Error: "Puerto ya está en uso"
+**Conflictos de Puertos de Red:**
+Si los puertos predeterminados están ocupados, modifique el mapeo en el archivo `docker-compose.yml`. Por ejemplo, para alterar el puerto de la API: `ports: ["8002:8000"]`.
 
+**Fallo de Conexión a Base de Datos:**
+Verifique la disponibilidad del contenedor de base de datos (`docker compose logs postgres`) y certifique que el formato y las credenciales de la cadena `DATABASE_URL` en su `.env` coinciden exactamente con la configuración de Docker.
+
+**Reconstrucción Limpia de Contenedores:**
+En caso de inconsistencias críticas en el entorno, proceda con una reconstrucción desde cero, eliminando volúmenes de datos temporales:
 ```bash
-# Cambiar puertos en docker-compose.yml o en .env
-# Por ejemplo, cambiar 8001 a 8002:
-ports:
-  - "8002:8000"
-```
-
-### Error: "No se puede conectar a la base de datos"
-
-```bash
-# Verificar que PostgreSQL esté corriendo
-docker compose logs postgres
-
-# Revisar variables de entorno en .env
-# Asegúrate que DATABASE_URL sea correcto
-```
-
-### Error: "MinIO no responde"
-
-```bash
-# Ver logs de MinIO
-docker compose logs minio
-
-# Reiniciar MinIO
-docker compose restart minio
-```
-
-### Error: "Frontend no carga"
-
-```bash
-# Limpiar caché y pnpm
-pnpm store prune
-rm -rf node_modules pnpm-lock.yaml
-pnpm install
-pnpm run dev
-```
-
-### Limpiar todo y empezar de cero
-
-```bash
-# Eliminar todos los contenedores y volúmenes
 docker compose down -v
-
-# Reconstruir desde cero
 docker compose build --no-cache
 docker compose up -d
 ```
@@ -706,8 +693,25 @@ docker compose up -d
 
 ## Seguridad
 
-Este proyecto implementa varias capas de seguridad:
+La arquitectura de LUBIX implementa medidas defensivas estándar de la industria:
 
+*   **Autenticación:** Implementación estricta de JWT con control de expiración.
+*   **Criptografía:** Almacenamiento unidireccional de contraseñas mediante Bcrypt con salt aleatorio.
+*   **Intercambio de Origen Cruzado:** Políticas de CORS limitadas y explícitas.
+*   **Validación de Entradas:** Filtrado riguroso mediante esquemas fuertemente tipados de Pydantic.
+*   **Prevención de Inyección:** Utilización exclusiva de un ORM (SQLAlchemy) para neutralizar ataques SQL.
+
+**Directivas para Entornos de Producción:**
+*   Asegurar que la variable `ENVIRONMENT` esté definida como `production`.
+*   Desplegar exclusivamente bajo certificados TLS/SSL (HTTPS).
+*   Aplicar rotación de credenciales predeterminadas (incluyendo MinIO y Base de datos).
+*   Establecer sistemas de monitoreo y copias de seguridad automatizadas para los volúmenes de PostgreSQL.
+
+---
+
+## Documentación y Referencias
+
+Para obtener información técnica detallada por subdominio, consulte los siguientes recursos adjuntos en el código fuente:
 - **JWT** — Tokens de autenticación seguros con expiración
 - **bcrypt** — Hash de contraseñas con salt
 - **CORS** — Control de acceso entre dominios
@@ -729,17 +733,25 @@ Este proyecto implementa varias capas de seguridad:
 
 ## Versionado
 
-- **Versión Backend:** 1.1.1b
-- **Versión Frontend:** 0.0.0
-- **Versión del Proyecto:** 1.0.0
+*   **Documentación de Arquitectura Backend:** `backend/README.md`
+*   **Documentación de Diseño Frontend:** `frontend/README.md`
+*   **Guía de Despliegue en Render + Neon/Supabase:** `Docs/DEPLOYMENT.md`
+*   **Especificación de Endpoints y Contratos de API:** `backend/app/docs/ENDPOINTS.md`
+*   **Registro y Directrices de Auditoría:** `backend/app/docs/AUDITORIA.md`
+*   **Especificación de Requisitos Formales:** Ubicados en el directorio `Docs/` (`RFs`, `RNFs` y `HUs`).
 
-Ver [backend/CHANGELOG.md](backend/CHANGELOG.md) para historial de cambios
+---
 
+## Versionado y Soporte
+
+*   **Versión del Proyecto:** 1.0.0
+*   **Versión del Backend API:** 1.1.1b
+*   **Versión del Cliente Web:** 0.0.0
 ---
 
 ## Soporte
 
-Para reportar bugs o solicitar features, abra un issue en el repositorio.
+Para trazabilidad detallada de lanzamientos, consulte el archivo `backend/CHANGELOG.md`. Ante incidencias técnicas o propuestas de nuevas funcionalidades, se requiere la apertura formal de un *Issue* en el repositorio institucional.
 
 ---
 

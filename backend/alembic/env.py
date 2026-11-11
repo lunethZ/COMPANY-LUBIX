@@ -8,14 +8,16 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from app.database.Connection import Base
+from app.database.Connection import Base, MIGRATION_DATABASE_URL
 from app.models import *  # Importa todos los modelos para que Alembic pueda detectarlos
-from app.Config import config as settings
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-config.set_main_option("sqlalchemy.url", settings.URL_DATABASE )
+# MIGRATION_DATABASE_URL ya viene normalizada (driver psycopg2 + sslmode para la
+# nube) y prioriza la conexión directa de Neon (DATABASE_URL_UNPOOLED).
+# El replace evita que ConfigParser interprete los '%' de contraseñas codificadas.
+config.set_main_option("sqlalchemy.url", MIGRATION_DATABASE_URL.replace("%", "%%"))
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 

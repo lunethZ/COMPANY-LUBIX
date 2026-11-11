@@ -1,16 +1,18 @@
 # Este servicio se encarga de generar códigos de verificación o recuperación de contraseña,
 # almacenarlos en la base de datos y enviarlos por correo electrónico al usuario.
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from app.models.ModelCode import Codes, typeCode
 from app.services.email.template.EmailForgotPassword import EmailForgotPassword
 from app.services.email.template.EmailVerify import EmailVerify
 
-import random
+import secrets
 import uuid
 
-def generate_code(length=6) -> str:
-    return ''.join(random.choices('0123456789', k=length))
+CODE_DIGITS = "0123456789"
+
+def generate_code(length: int = 6) -> str:
+    return ''.join(secrets.choice(CODE_DIGITS) for _ in range(length))
 
 # Crear un nuevo codigo
 # Eliminar cualquier código existente para 
@@ -26,8 +28,8 @@ def create_code_and_send_code(database: Session, user_id: uuid.UUID, email: str,
         code=code,
         type=code_type,
         user_id=user_id,
-        created_at=datetime.utcnow(),
-        expires_at=datetime.utcnow() + timedelta(days=1)  # El código expira en 1 día
+        created_at=datetime.now(timezone.utc),
+        expires_at=datetime.now(timezone.utc) + timedelta(days=1)  # El código expira en 1 día
     )
 
     database.add(new_code)
@@ -57,7 +59,7 @@ def verify_code(database: Session, user_id: uuid.UUID, code: str, code_type: typ
         Codes.user_id == user_id,
         Codes.code == code,
         Codes.type == code_type,
-        Codes.expires_at > datetime.utcnow()
+        Codes.expires_at > datetime.now(timezone.utc)
     ).first()
 
     if code_entry:

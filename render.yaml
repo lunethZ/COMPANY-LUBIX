@@ -1,0 +1,75 @@
+# Despliegue del backend LUBIX en Render (Web Service) con PostgreSQL gestionado
+# en Neon o Supabase. Las migraciones se aplican automáticamente al arrancar
+# mediante backend/start.sh (alembic upgrade head) antes de lanzar Uvicorn.
+services:
+  - type: web
+    name: lubix-api
+    runtime: python
+    plan: free
+    region: oregon
+    branch: main
+    rootDir: backend
+    autoDeploy: true
+    buildCommand: pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
+    startCommand: bash start.sh
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.13.5"
+      - key: ENVIRONMENT
+        value: production
+      # Render inyecta PORT automáticamente; start.sh lo usa sin fijarlo aquí.
+      # URL_DATABASE: cadena pooled de Neon, usada por la app en runtime.
+      - key: URL_DATABASE
+        sync: false
+      # DATABASE_URL_UNPOOLED: conexión directa (sin pooler) de Neon, usada por
+      # Alembic para las migraciones (el pooler en modo transacción no es fiable).
+      - key: DATABASE_URL_UNPOOLED
+        sync: false
+      - key: DB_SSL_MODE
+        value: require
+      - key: DB_POOL_SIZE
+        value: "5"
+      - key: DB_MAX_OVERFLOW
+        value: "2"
+      - key: DB_POOL_RECYCLE
+        value: "300"
+      - key: DB_MIGRATION_RETRIES
+        value: "10"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALGORITHM
+        value: HS256
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "60"
+      - key: REFRESH_TOKEN_DAYS
+        value: "7"
+      - key: URL_FRONTEND
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false
+      - key: GMAIL_USERNAME
+        sync: false
+      - key: GMAIL_APP_PASSWORD
+        sync: false
+      - key: MINIO_ENDPOINT
+        sync: false
+      - key: MINIO_SECURE
+        value: "true"
+      - key: MINIO_BUCKET
+        value: uploads
+      - key: MINIO_ROOT_USER
+        sync: false
+      - key: MINIO_ROOT_PASSWORD
+        sync: false
+      - key: MINIO_AUTO_CREATE_BUCKET
+        value: "false"
+      - key: ADMIN_DEFAULT
+        sync: false
+      - key: PASSWORD_DEFAULT
+        sync: false
+      # Primer despliegue: true (crea roles y admin). Después: false.
+      - key: RUN_SEED
+        sync: false
+      - key: WEB_CONCURRENCY
+        value: "1"

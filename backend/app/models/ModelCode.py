@@ -5,7 +5,7 @@
 # y permite acceder al usuario relacionado con ORM
 from sqlalchemy import String, Enum, ForeignKey, DateTime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from app.database.Connection import Base
 from enum import Enum as typerEnum
 from sqlalchemy.dialects.postgresql import UUID
@@ -33,12 +33,12 @@ class Codes(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow    
+        default=lambda: datetime.now(timezone.utc)
     )
 
     expires_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=lambda: datetime.utcnow() + timedelta(minutes=15)
+        default=lambda: datetime.now(timezone.utc) + timedelta(minutes=15)
     )
     
     user_id: Mapped[uuid.UUID] = mapped_column(
