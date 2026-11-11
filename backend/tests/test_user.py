@@ -505,10 +505,10 @@ def test_upload_avatar_devuelve_200(client, seed):
 def test_upload_avatar_fallo_de_almacenamiento_devuelve_500(client, seed, monkeypatch):
     user = seed.user()
 
-    def boom(*args, **kwargs):
-        raise RuntimeError("minio caído")
-
-    monkeypatch.setattr("minio.Minio.put_object", boom)
+    monkeypatch.setattr(
+        "app.services.NasService.subir.upload_file",
+        lambda *args, **kwargs: {"success": False},
+    )
 
     response = client.post(
         "/user/avatar/upload",

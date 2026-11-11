@@ -435,10 +435,10 @@ def test_upload_logo_devuelve_200(client, seed):
 def test_upload_logo_fallo_devuelve_500(client, seed, monkeypatch):
     company = seed.company()
 
-    def boom(*args, **kwargs):
-        raise RuntimeError("minio caído")
-
-    monkeypatch.setattr("minio.Minio.put_object", boom)
+    monkeypatch.setattr(
+        "app.services.NasService.subir.upload_file",
+        lambda *args, **kwargs: {"success": False},
+    )
 
     response = client.patch(
         "/company/dashboard/upload-logo",
@@ -481,10 +481,10 @@ def test_upload_product_image_devuelve_200(client, seed):
 def test_upload_product_image_fallo_devuelve_500(client, seed, monkeypatch):
     company = seed.company()
 
-    def boom(*args, **kwargs):
-        raise RuntimeError("minio caído")
-
-    monkeypatch.setattr("minio.Minio.put_object", boom)
+    monkeypatch.setattr(
+        "app.services.NasService.subir.upload_file",
+        lambda *args, **kwargs: {"success": False},
+    )
 
     response = client.post(
         "/company/products/upload-image",

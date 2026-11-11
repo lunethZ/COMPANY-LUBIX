@@ -28,22 +28,26 @@ class _Stream:
 def minio_con_archivo(monkeypatch):
     """`get_object` devuelve un archivo de prueba."""
 
-    def fake_get_object(self, bucket, object_name, *args, **kwargs):
+    def fake_get_object(bucket, object_name, *args, **kwargs):
         if object_name == "no-existe.png":
             raise RuntimeError("NoSuchKey")
         return _Stream(b"contenido-binario")
 
-    monkeypatch.setattr("minio.Minio.get_object", fake_get_object)
+    monkeypatch.setattr(
+        "app.services.NasService.subir.client.get_object", fake_get_object
+    )
 
 
 @pytest.fixture()
 def minio_sin_archivos(monkeypatch):
     """Ni `get_object` ni `download_stream` encuentran nada."""
 
-    def fake_get_object(self, bucket, object_name, *args, **kwargs):
+    def fake_get_object(bucket, object_name, *args, **kwargs):
         raise RuntimeError("NoSuchKey")
 
-    monkeypatch.setattr("minio.Minio.get_object", fake_get_object)
+    monkeypatch.setattr(
+        "app.services.NasService.subir.client.get_object", fake_get_object
+    )
 
 
 def test_get_file_devuelve_200_y_su_forma(client, minio_con_archivo):
@@ -86,8 +90,8 @@ def test_get_file_con_get_object_roto_tambien_devuelve_404(client, minio_con_arc
         lambda self, name: (_ for _ in ()).throw(RuntimeError("sin red")),
     )
     monkeypatch.setattr(
-        "minio.Minio.get_object",
-        lambda self, bucket, name, *a, **k: (_ for _ in ()).throw(RuntimeError("fallo")),
+        "app.services.NasService.subir.client.get_object",
+        lambda bucket, name, *a, **k: (_ for _ in ()).throw(RuntimeError("fallo")),
     )
 
     response = client.get("/files/roto.png")

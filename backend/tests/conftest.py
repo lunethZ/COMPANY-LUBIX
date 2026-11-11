@@ -367,6 +367,27 @@ def client(db):
         fastapi_app.dependency_overrides.clear()
 
 
+@pytest.fixture(autouse=True)
+def no_real_minio(monkeypatch):
+    """Keep the shared storage service isolated from MinIO in every test."""
+    from app.services.NasService import subir
+
+    monkeypatch.setattr(
+        subir,
+        "upload_file",
+        lambda *args, **kwargs: {
+            "success": True,
+            "object_name": "test.jpg",
+            "path": "test/path.jpg",
+        },
+    )
+    monkeypatch.setattr(
+        subir.client,
+        "get_object",
+        lambda *args, **kwargs: FakeObjectStream(),
+    )
+
+
 @pytest.fixture()
 def error_client(db):
     """Cliente que devuelve el 500 en lugar de relanzar la excepción."""
