@@ -366,3 +366,9 @@ Para obtener información técnica detallada por subdominio, consulte los siguie
 *   **Versión del Cliente Web:** 0.0.0
 
 Para trazabilidad detallada de lanzamientos, consulte el archivo `backend/CHANGELOG.md`. Ante incidencias técnicas o propuestas de nuevas funcionalidades, se requiere la apertura formal de un *Issue* en el repositorio institucional.
+
+---
+
+## Licencia
+
+Este proyecto es propiedad de LUBIX-COMPANY. Todos los derechos reservados.

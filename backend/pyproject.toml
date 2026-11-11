@@ -63,6 +63,7 @@ dev = [
 [tool.pytest.ini_options]
 # Correr `pytest` desde `backend/` descubre la suite automáticamente.
 testpaths = ["tests"]
+pythonpath = ["."]
 addopts = "-ra"
 
 [tool.coverage.report]

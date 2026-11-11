@@ -1603,6 +1603,232 @@ export default function SellerDashboard() {
                     </div>
                     {editUploading && <p className="text-xs text-blue-400 animate-pulse">Subiendo imagen...</p>}
                   </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Precio (COP) <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0.01"
+                      step="0.01"
+                      placeholder="Ej: 3500000"
+                      value={form.price}
+                      onChange={(e) => handleFormChange('price', e.target.value)}
+                      aria-invalid={!!formErrors.price}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.price && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.price}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Stock disponible <span className="text-red-400">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="1"
+                      step="1"
+                      placeholder="Ej: 20"
+                      value={form.stock}
+                      onChange={(e) => handleFormChange('stock', e.target.value)}
+                      aria-invalid={!!formErrors.stock}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.stock && (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.stock}</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    </label>
+                    <input
+                      type="number"
+                      min="0"
+                      max={MAX_DISCOUNT_PERCENT}
+                      step="1"
+                      placeholder="Ej: 15"
+                      value={form.discount}
+                      onChange={(e) => handleFormChange('discount', e.target.value)}
+                      aria-invalid={!!formErrors.discount}
+                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                    />
+                    {formErrors.discount ? (
+                      <span className="block text-red-500 text-sm mt-1">{formErrors.discount}</span>
+                    ) : (
+                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                    )}
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría <span className="text-red-400">*</span></label>
+                    <select
+                      value={form.category}
+                      onChange={(e) => handleFormChange('category', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    >
+                      <option value="">Selecciona una categoría</option>
+                      <option value="Celulares">Celulares</option>
+                      <option value="Computadores">Computadores</option>
+                      <option value="Televisores">Televisores</option>
+                      <option value="Audio">Audio</option>
+                      <option value="Fotografía">Fotografía</option>
+                      <option value="Gaming">Gaming</option>
+                      <option value="Tablets">Tablets</option>
+                      <option value="Accesorios">Accesorios</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción <span className="text-red-400">*</span></label>
+                <textarea
+                  rows={3}
+                  placeholder="Describe las características principales del producto..."
+                  value={form.description}
+                  onChange={(e) => handleFormChange('description', e.target.value)}
+                  className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
+                />
+              </div>
+
+              <div>
+                <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
+                  <ChevronRightIcon className="w-4 h-4 text-green-400" />
+                  Especificaciones técnicas
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Samsung"
+                      value={form.brand}
+                      onChange={(e) => handleFormChange('brand', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: Galaxy S24 Ultra"
+                      value={form.model}
+                      onChange={(e) => handleFormChange('model', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía</label>
+                    <select
+                      value={form.warranty}
+                      onChange={(e) => handleFormChange('warranty', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    >
+                      <option value="">Sin garantía</option>
+                      <option value="1">1 mes</option>
+                      <option value="2">2 meses</option>
+                      <option value="3">3 meses</option>
+                      <option value="6">6 meses</option>
+                      <option value="9">9 meses</option>
+                      <option value="12">12 meses</option>
+                      <option value="18">18 meses</option>
+                      <option value="24">24 meses</option>
+                      <option value="36">36 meses</option>
+                      <option value="48">48 meses</option>
+                      <option value="60">60 meses</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        inputMode="decimal"
+                        placeholder="Ej: 0.25"
+                        value={form.weight}
+                        onChange={(e) => handleFormChange('weight', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      />
+                      <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
+                    </div>
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <input
+                      type="text"
+                      placeholder="Ej: 15 x 7 x 0.9 cm"
+                      value={form.dimensions}
+                      onChange={(e) => handleFormChange('dimensions', e.target.value)}
+                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-3 pt-2">
+                <button
+                  onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
+                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                >
+                  Cancelar
+                </button>
+                <button
+                  onClick={handleAddProduct}
+                  disabled={!form.name || !form.price || !form.stock || !form.description || !form.category || hasNumericErrors(formErrors) || uploadingImage}
+                  className="flex-1 py-3 bg-green-500 hover:bg-green-400 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30"
+                >
+                  {uploadingImage ? "Subiendo imágenes..." : "Publicar producto"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditModal && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
+              <h2 className="text-xl font-bold text-white flex items-center gap-2">
+                <PencilSquareIcon className="w-5 h-5 text-blue-400" />
+                Editar producto
+              </h2>
+              <button
+                onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
+                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+              >
+                <XMarkIcon className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">
+                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
+                  </label>
+                  <div className="space-y-3 mb-3">
+                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-blue-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
+                      <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
+                      <span className="truncate">{editSelectedFile ? editSelectedFile.name : "Click para cambiar archivo (JPG, PNG, WEBP)"}</span>
+                      <input type="file" accept="image/*" className="hidden" onChange={handleEditImageFileChange} />
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        placeholder="o pega URL https://..."
+                        value={editForm.imageUrl}
+                        onChange={(e) => handleEditFormChange('imageUrl', e.target.value)}
+                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      />
+                    </div>
+                    {editUploading && <p className="text-xs text-blue-400 animate-pulse">Subiendo imagen...</p>}
+                  </div>
                   <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
                     {editImagePreview ? (
                       <img src={editImagePreview} alt="Preview" className="w-full h-full object-cover" onError={() => setEditImagePreview(REFERENCE_IMAGE)} />
