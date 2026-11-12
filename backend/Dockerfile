@@ -9,12 +9,7 @@ RUN apt-get update && apt-get install -y \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy project files
-COPY . .
-
-RUN chmod +x start.sh
-
-# Install main dependencies
+# Install main dependencies (before copying code, to reuse the layer cache)
 RUN pip install --no-cache-dir \
     alembic==1.18.4 \
     bcrypt==3.2.2 \
@@ -33,6 +28,14 @@ RUN pip install --no-cache-dir \
     sqlalchemy==2.0.48 \
     uvicorn==0.41.0
 
+# Copy only the files needed at runtime (avoids leaking .env, .venv, .git, etc.)
+COPY ./app /app/app
+COPY ./alembic /app/alembic
+COPY ./alembic.ini /app/alembic.ini
+COPY ./start.sh /app/start.sh
+
+RUN chmod +x /app/start.sh
+
 EXPOSE 8000
 
-CMD ["./start.sh"]
+CMD ["/app/start.sh"]

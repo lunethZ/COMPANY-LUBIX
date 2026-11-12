@@ -1,11 +1,34 @@
+# Python environment and caches
 .venv
 venv/
-__pycache__
-*.pyc
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Environment and secrets
 .env
+.env.*
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+secrets*
+*credentials*
+
+# Version control
 .git
 .gitignore
-README.md
+
+# Local database and logs
 *.sqlite
 *.db
-.pytest_cache
+*.log
+
+# Project metadata not needed in the image
+README.md
+CHANGELOG.md
+Dockerfile
+.dockerignore
