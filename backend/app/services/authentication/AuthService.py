@@ -2,7 +2,7 @@
 # incluyendo registro, inicio de sesión, verificación de correo electrónico, 
 # recuperación de contraseña y cierre de sesión.
 from fastapi import HTTPException
-from datetime import datetime, timedelta
+from datetime import timedelta
 from app.models.ModelCompany import Company
 from app.models.ModelUser import Users
 from app.models.ModelRole import Role
@@ -23,6 +23,7 @@ from app.utils.Security import hash_password, verify_password
 from app.services.email.SaveAndGenerateCode import create_code_and_send_code, verify_code
 from app.services.email.template.EmailRegisterCompany import EmailRegisterCompany
 from app.Config import config
+from app.utils.Time import utcnow_naive
 
 def register_user_service(user: createUser, database: Session):
     user_role = database.query(Role).filter(Role.name == "user").first()
@@ -272,7 +273,7 @@ def save_refresh_token(database: Session, user_id, token: str):
         token=token,
         revoked=False,
         user_id=user_id,
-        expires_at=datetime.utcnow() + timedelta(days=config.REFRESH_TOKEN_DAYS)
+        expires_at=utcnow_naive() + timedelta(days=config.REFRESH_TOKEN_DAYS)
     )
     database.add(new_token)
     database.commit()
@@ -315,7 +316,7 @@ def refresh_token_service(data: RefreshRequest, database: Session):
     if db_token.revoked:
         raise HTTPException(status_code=401, detail="Sesión revocada")
     
-    if db_token.expires_at and db_token.expires_at < datetime.utcnow():
+    if db_token.expires_at and db_token.expires_at < utcnow_naive():
         raise HTTPException(status_code=401, detail="Sesión expirada")
 
     db_token.revoked = True

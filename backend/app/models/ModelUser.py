@@ -2,6 +2,7 @@ from sqlalchemy import String, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy.dialects.postgresql import UUID
 from app.database.Connection import Base
+from app.utils.Time import utcnow_naive
 import uuid
 
 from datetime import datetime
@@ -53,7 +54,7 @@ class Users(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow    
+        default=utcnow_naive
     )
 
     role_id: Mapped[uuid.UUID] = mapped_column(

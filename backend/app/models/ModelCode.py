@@ -9,7 +9,9 @@ from datetime import datetime, timedelta
 from app.database.Connection import Base
 from enum import Enum as typerEnum
 from sqlalchemy.dialects.postgresql import UUID
+from app.utils.Time import utcnow_naive
 import uuid
+
 
 class typeCode(str, typerEnum):
     resetPassword = "resetPassword"
@@ -33,12 +35,12 @@ class Codes(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow    
+        default=utcnow_naive
     )
 
     expires_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=lambda: datetime.utcnow() + timedelta(minutes=15)
+        default=lambda: utcnow_naive() + timedelta(minutes=15)
     )
     
     user_id: Mapped[uuid.UUID] = mapped_column(

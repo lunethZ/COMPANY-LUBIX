@@ -1,6 +1,6 @@
 """Tests de la middleware de autenticación y de permisos por rol."""
 
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 
 from jose import jwt
 
@@ -15,7 +15,7 @@ def _expired_access_token(user_id: str) -> str:
         "sub": user_id,
         "role": "user",
         "type": "access",
-        "exp": datetime.utcnow() - timedelta(minutes=5),
+        "exp": datetime.now(timezone.utc) - timedelta(minutes=5),
     }
     return jwt.encode(payload, config.SECRET_KEY, algorithm=config.ALGORITHM)
 

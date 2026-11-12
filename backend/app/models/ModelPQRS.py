@@ -4,6 +4,7 @@ from sqlalchemy.dialects.postgresql import UUID
 import uuid
 from datetime import datetime
 from app.database.Connection import Base
+from app.utils.Time import utcnow_naive
 
 
 class PQRS(Base):
@@ -49,7 +50,7 @@ class PQRS(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow
+        default=utcnow_naive
     )
 
     user: Mapped["Users"] = relationship(

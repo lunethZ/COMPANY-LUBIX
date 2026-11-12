@@ -279,17 +279,18 @@ class Seed:
 
     def code(self, user, *, code: str = "123456", kind: str = "verifyEmail"):
         """Inserta un código de verificación / recuperación vigente."""
-        from datetime import datetime, timedelta
+        from datetime import timedelta
 
         from app.models.ModelCode import Codes, typeCode
+        from app.utils.Time import utcnow_naive
 
         with self.session() as session:
             entry = Codes(
                 code=code,
                 type=typeCode(kind),
                 user_id=user.id,
-                created_at=datetime.utcnow(),
-                expires_at=datetime.utcnow() + timedelta(minutes=15),
+                created_at=utcnow_naive(),
+                expires_at=utcnow_naive() + timedelta(minutes=15),
             )
             session.add(entry)
             session.flush()

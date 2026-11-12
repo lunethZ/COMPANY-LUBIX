@@ -2,6 +2,7 @@ from sqlalchemy import String, ForeignKey, DateTime, Boolean
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from datetime import datetime
 from app.database.Connection import Base
+from app.utils.Time import utcnow_naive
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
 
@@ -22,7 +23,7 @@ class RefreshToken(Base):
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime,
-        default=datetime.utcnow    
+        default=utcnow_naive
     )
     
     expires_at: Mapped[datetime] = mapped_column(
