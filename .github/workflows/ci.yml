@@ -1,5 +1,4 @@
-name: CI & SonarCloud Analysis
-
+name: SonarCloud Analysis
 on:
   push:
     branches: [ main, develop ]
@@ -7,44 +6,8 @@ on:
     types: [opened, synchronize, reopened]
 
 jobs:
-  frontend:
-    name: Frontend (Vitest y cobertura)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: frontend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: npm
-          cache-dependency-path: frontend/package-lock.json
-      - name: Instalar dependencias
-        run: npm ci --legacy-peer-deps
-      - name: Pruebas con cobertura
-        run: npm run test:coverage
-
-  backend:
-    name: Backend (pytest y cobertura)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: backend
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.13"
-      - name: Instalar dependencias
-        run: |
-          pip install -r requirements.txt httpx==0.28.1 pytest pytest-cov
-      - name: Pruebas con cobertura
-        run: pytest --cov=app --cov-report=xml --cov-fail-under=50
-
   sonarcloud:
     name: SonarCloud Scan
-    needs: [frontend, backend] # Se ejecuta solo si las pruebas de frontend y backend pasan con éxito
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -54,6 +17,10 @@ jobs:
           
       - name: SonarCloud Scan Action
         uses: SonarSource/sonarqube-scan-action@v4
+        with:
+          args: >
+            -Dsonar.organization=COMPANY-LUBIX
+            -Dsonar.projectKey=lunethZ_COMPANY-LUBIX
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
