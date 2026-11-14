@@ -23,12 +23,6 @@ interface Producto {
   numResenas: number;
 }
 
-const OFERTAS = [
-  { titulo: "Oferta 1", descripcion: "Hasta 40% en laptops", color: "bg-gradient-to-tr from-emerald-500 to-green-700 text-white", imagen: "/portatil.png" },
-  { titulo: "Oferta 2", descripcion: "Smartphones con 30% de descuento", color: "bg-gradient-to-tr from-emerald-950 to-gray-900 text-white", imagen: "/iphone.png" },
-  { titulo: "Oferta 3", descripcion: "Accesorios 2x1", color: "bg-gradient-to-tr from-emerald-500 to-green-700 text-white", imagen: "/televisor.png" },
-];
-
 const formatCOP = (value: number) => {
   return "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 };
@@ -72,13 +66,13 @@ const HomeUsuario: React.FC = () => {
   useEffect(() => {
     api.get("/products/search")
       .then((res) => {
-        const items = (res.data.products || []).map((p: any) => ({
+        const items = (res.data.products || []).map((p: { id: string; name: string; descripcion: string; price: number; discount_enable?: boolean; discount_value?: number; images?: string[]; stock?: number; company_name?: string; company_id?: string; avg_rating?: number; review_count?: number }) => ({
           id: p.id,
           nombre: p.name,
           desc: p.descripcion,
           precio: p.price,
           antes: null,
-          descuento: p.discount_enable && p.discount_value > 0 ? `-${p.discount_value}%` : null,
+          descuento: p.discount_enable && (p.discount_value ?? 0) > 0 ? `-${p.discount_value ?? 0}%` : null,
           imagen: p.images?.[0] || "/placeholder.png",
           imagenes: p.images?.length ? p.images : ["/placeholder.png"],
           categoria: "General",
@@ -99,7 +93,7 @@ const HomeUsuario: React.FC = () => {
     if (!user) return;
     api.get("/user/favorites")
       .then((res) => {
-        const ids = new Set<string>((res.data || []).map((f: any) => String(f.product?.id)));
+        const ids = new Set<string>((res.data || []).map((f: { product?: { id?: string } }) => String(f.product?.id)));
         setFavorites(ids);
       })
       .catch(() => {});

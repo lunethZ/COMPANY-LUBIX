@@ -4,11 +4,11 @@ import Navbar from '../components/navbar-empresa';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
 import { rules, validateField, validateForm, type Validator } from '../utils/validators';
+import { errorDetailMessage } from '../utils/errors';
 import {
   StarIcon,
   ArrowTrendingUpIcon,
   CubeIcon,          
-  EyeIcon,
   CurrencyDollarIcon,
   PlusIcon,
   TrashIcon,          
@@ -38,6 +38,15 @@ interface Product {
   stock: number;
   active: boolean;
   category: string;
+}
+
+interface Review {
+  id: string;
+  user_name?: string;
+  comment?: string;
+  rating: number;
+  created_at: string;
+  productName?: string;
 }
 
 interface CompanyOrderItem {
@@ -216,14 +225,11 @@ export default function SellerDashboard() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [companyOrders, setCompanyOrders] = useState<CompanyOrder[]>([]);
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
-  const [reviews, setReviews] = useState<any[]>([]);
+  const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [logoUploading, setLogoUploading] = useState(false);
-  const [bannerUploading, setBannerUploading] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
-  const [bannerError, setBannerError] = useState<string | null>(null);
   const [logoSuccess, setLogoSuccess] = useState<boolean | null>(null);
-  const [bannerSuccess, setBannerSuccess] = useState<boolean | null>(null);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState<ProductFormErrors>({});
@@ -242,14 +248,6 @@ export default function SellerDashboard() {
     email: '',
     phone: '',
   });
-
-  useEffect(() => {
-    fetchDashboardData();
-  }, []);
-
-  useEffect(() => {
-    fetchReviewsData();
-  }, [activeTab]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -308,7 +306,7 @@ export default function SellerDashboard() {
         phone: profile.tellCompany || "",
       });
 
-      const apiProducts = (productsRes.data || []).map((p: any) => ({
+      const apiProducts = (productsRes.data || []).map((p: { id: string; name: string; price: number; images?: string[]; sold?: number; views?: number; stock: number; status?: string; catalog_name?: string }) => ({
         id: p.id,
         name: p.name,
         price: p.price,
@@ -338,7 +336,7 @@ export default function SellerDashboard() {
       const products = productsRes.data || [];
       
       // Fetch reviews for each product (limited to 3 most recent per product)
-      const allReviews: any[] = [];
+      const allReviews: Review[] = [];
       for (const product of products) {
         try {
           const reviewsRes = await api.get(`/products/${product.id}/reviews`);
@@ -346,7 +344,7 @@ export default function SellerDashboard() {
           // Take only 3 most recent reviews per product
           const limitedReviews = productReviews.slice(0, 3);
           allReviews.push(
-            ...limitedReviews.map((r: any) => ({
+            ...limitedReviews.map((r: { id: string; user_name?: string; comment?: string; rating: number; created_at: string }) => ({
               ...r,
               productName: product.name,
             }))
@@ -363,6 +361,18 @@ export default function SellerDashboard() {
       setReviewsLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      await fetchDashboardData();
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      await fetchReviewsData();
+    })();
+  }, [activeTab]);
 
   const totalRevenue = sellerInfo.totalRevenue || products.reduce((acc, p) => acc + p.price * p.sold, 0);
   const activeProducts = products.filter((p) => p.active);
@@ -401,8 +411,8 @@ export default function SellerDashboard() {
       setLogoSuccess(true);
       setSellerInfo((prev) => ({ ...prev, logo: res.data.logo || null }));
       setTimeout(() => setLogoSuccess(null), 2000);
-    } catch (err: any) {
-      setLogoError(err?.response?.data?.detail || "Error al subir la foto de perfil");
+    } catch (err: unknown) {
+      setLogoError(errorDetailMessage(err, "Error al subir la foto de perfil"));
       console.error("Error uploading logo:", err);
     } finally {
       setLogoUploading(false);
@@ -412,23 +422,15 @@ export default function SellerDashboard() {
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setBannerUploading(true);
-    setBannerError(null);
-    setBannerSuccess(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
       const res = await api.patch("/company/dashboard/upload-banner", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      setBannerSuccess(true);
       setSellerInfo((prev) => ({ ...prev, banner: res.data.banner || null }));
-      setTimeout(() => setBannerSuccess(null), 2000);
-    } catch (err: any) {
-      setBannerError(err?.response?.data?.detail || "Error al subir el banner");
+    } catch (err: unknown) {
       console.error("Error uploading banner:", err);
-    } finally {
-      setBannerUploading(false);
     }
   };
 

@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- el contexto exporta el provider y el hook a propósito */
 import { createContext, useContext, useState, useCallback } from "react";
 import type { ReactNode } from "react";
 

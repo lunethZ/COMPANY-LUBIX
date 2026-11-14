@@ -83,39 +83,42 @@ function BuscarProducto() {
     return params;
   }, [query, category, sortBy, minPrice, maxPrice]);
 
-  const doSearch = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = buildSearchParams();
-      setSearchParams(params, { replace: true });
-
-      const res = await api.get("/products/search", { params });
-      setResults(res.data.products || res.data || []);
-    } catch {
-      setResults([]);
-    } finally {
-      setLoading(false);
-    }
-  }, [buildSearchParams, setSearchParams]);
-
   // Escuchar cambios directamente desde la URL (en caso de que el Navbar cambie el parámetro "q")
-  useEffect(() => {
-    const qParam = searchParams.get("q") || "";
+  const qParam = searchParams.get("q") || "";
+  const [prevQParam, setPrevQParam] = useState(qParam);
+  if (prevQParam !== qParam) {
+    setPrevQParam(qParam);
     setQuery(qParam);
-  }, [searchParams]);
+  }
 
   // Cargar categorías reales desde backend
   useEffect(() => {
     api.get("/products/catalogs").then(res => {
-      const cats = (res.data || []).map((c: any) => c.name).filter(Boolean);
+      const cats = (res.data || []).map((c: { name?: string }) => c.name).filter(Boolean);
       if (cats.length) setCategories(cats);
     }).catch(() => {});
   }, []);
 
   // Disparar la búsqueda siempre (sin filtros muestra todos los productos de empresas)
   useEffect(() => {
-    doSearch();
-  }, [query, category, sortBy, minPrice, maxPrice, doSearch]);
+    let cancelled = false;
+    (async () => {
+      const params = buildSearchParams();
+      setSearchParams(params, { replace: true });
+      setLoading(true);
+      try {
+        const res = await api.get("/products/search", { params });
+        if (!cancelled) setResults(res.data.products || res.data || []);
+      } catch {
+        if (!cancelled) setResults([]);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [buildSearchParams, setSearchParams]);
 
   const clearFilters = () => {
     setCategory("");
