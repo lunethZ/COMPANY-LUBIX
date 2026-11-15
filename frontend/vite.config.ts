@@ -30,8 +30,9 @@ export default defineConfig({
       reporter: ['text', 'html', 'json-summary'],
       reportsDirectory: './coverage',
       include: ['src/**/*.{ts,tsx}'],
-      // Umbral de CI (S3): mínimo 40 % en los formularios que ya tienen pruebas de RTL.
+      // Umbral de CI: cobertura global mínima de líneas (P-04) y umbrales por formulario.
       thresholds: {
+        global: { lines: 60 },
         'src/pages/login.tsx': { statements: 40, branches: 40, functions: 40, lines: 40 },
         'src/pages/register.tsx': { statements: 40, branches: 40, functions: 40, lines: 40 },
         'src/pages/pqrs.tsx': { statements: 40, branches: 40, functions: 40, lines: 40 }
