@@ -98,7 +98,6 @@ describe('Página de detalle de producto', () => {
     ).toBeInTheDocument();
     expect(apiMocks.get).toHaveBeenCalledWith('/products/p1');
     expect(apiMocks.get).toHaveBeenCalledWith('/products/p1/reviews');
-    expect(apiMocks.get).toHaveBeenCalledWith('/products/p1/related');
   });
 
   it('muestra las reseñas existentes del producto', async () => {

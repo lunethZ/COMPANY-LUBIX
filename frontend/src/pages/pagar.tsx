@@ -14,7 +14,6 @@ import {
   ShoppingBagIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
-  TicketIcon,
   ShieldCheckIcon,
   TruckIcon,
 } from "@heroicons/react/24/outline";
@@ -93,12 +92,6 @@ function isValidExpiry(exp: string): boolean {
   return expDate >= new Date(now.getFullYear(), now.getMonth(), 1);
 }
 
-function generateOrderNumber(): string {
-  const ts = Date.now().toString(36).toUpperCase();
-  const rnd = Math.floor(Math.random() * 1000).toString().padStart(3, "0");
-  return `LUBX-${ts.slice(-6)}${rnd}`;
-}
-
 const resolveImage = (img?: string) => {
   if (!img) return "/placeholder.png";
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
@@ -150,20 +143,22 @@ const PagarPage = () => {
           api.get("/user/dashboard/me").catch(() => ({ data: {} })),
           api.get("/user/addresses").catch(() => ({ data: [] })),
         ]);
-        const me: any = meRes.data || {};
-        const addrs: any[] = addrRes.data || [];
-        const defAddr = addrs.find((a: any) => a.is_default) || addrs[0];
+        const me: { fullName?: string; email?: string; tell?: string } = meRes.data || {};
+        const addrs: Array<{ address?: string; city?: string; department?: string; postal_code?: string; is_default?: boolean }> = addrRes.data || [];
+        const defAddr = addrs.find((a) => a.is_default) || addrs[0];
         setEnvio(prev => ({
           ...prev,
-          nombre: me.fullName || (user as any)?.name || prev.nombre,
-          email: me.email || (user as any)?.email || prev.email,
+          nombre: me.fullName || (user as { name?: string } | null)?.name || prev.nombre,
+          email: me.email || (user as { email?: string } | null)?.email || prev.email,
           telefono: me.tell || prev.telefono,
           direccion: defAddr?.address || prev.direccion,
           ciudad: defAddr?.city || prev.ciudad,
           departamento: defAddr?.department || prev.departamento,
           codigoPostal: defAddr?.postal_code || prev.codigoPostal,
         }));
-      } catch {}
+      } catch {
+        // La pre-carga es best effort; se mantienen los valores previos.
+      }
     };
     prefill();
   }, [user]);

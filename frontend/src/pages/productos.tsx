@@ -54,10 +54,6 @@ export default function ProductosPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
-  useEffect(() => {
-    fetchProducts();
-  }, []);
-
   const fetchProducts = async () => {
     setLoading(true);
     try {
@@ -69,6 +65,12 @@ export default function ProductosPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      await fetchProducts();
+    })();
+  }, []);
 
   const handleSelectProduct = async (product: Product) => {
     setLoadingDetail(true);

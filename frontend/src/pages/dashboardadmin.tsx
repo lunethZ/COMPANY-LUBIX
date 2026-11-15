@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import NavbarAdmin from '../components/navbar-admin';
 import api from '../api/axios';
 import { useAuth } from '../context/AuthContext';
+import { errorDetailMessage } from '../utils/errors';
 
 interface CompanyItem {
   id: string;
@@ -118,9 +119,9 @@ export default function DashboardAdminPage() {
       await api.patch(`/admin/users/${u.id}/toggle-status`);
       const [statsRes, companiesRes, usersRes, pqrsRes] = await reloadData();
       applyData(statsRes.data, companiesRes.data, usersRes.data, pqrsRes.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error toggling user status:", err);
-      setError(err?.response?.data?.detail || "No se pudo cambiar el estado del usuario.");
+      setError(errorDetailMessage(err, "No se pudo cambiar el estado del usuario."));
     } finally {
       setDeletingId(null);
     }
@@ -138,9 +139,9 @@ export default function DashboardAdminPage() {
       await api.patch(`/admin/companies/${company.id}/toggle-status`);
       const [statsRes, companiesRes, usersRes, pqrsRes] = await reloadData();
       applyData(statsRes.data, companiesRes.data, usersRes.data, pqrsRes.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error toggling company status:", err);
-      setError(err?.response?.data?.detail || "No se pudo cambiar el estado de la empresa.");
+      setError(errorDetailMessage(err, "No se pudo cambiar el estado de la empresa."));
     } finally {
       setDeletingId(null);
     }
