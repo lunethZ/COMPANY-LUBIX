@@ -360,3 +360,53 @@ def test_cart_rol_company_devuelve_401(client, seed):
 
     assert response.status_code == 401
     assert response.json() == {"detail": "no tienes permiso para acceder a este recurso"}
+
+def test_get_cart_aplica_descuento(client, seed):
+    user = seed.user()
+    product = seed.product(seed.company(), price=100.0, stock=10)
+
+    with seed.session() as session:
+        from app.models.ModelProduct import Product
+
+        row = session.get(Product, product.id)
+        row.discount_enable = True
+        row.discount_value = 10
+
+    assert _add(client, seed, user, product, quantity=2).status_code == 200
+
+    body = client.get("/cart", headers=seed.headers(user)).json()
+    item = body["items"][0]
+
+    assert item["discount_enable"] is True
+    assert item["discount_value"] == 10
+    assert item["unit_price"] == 90.0
+    assert item["line_total"] == 180.0
+    assert body["subtotal"] == 180.0
+
+
+def test_add_item_sin_quantity_usa_uno(client, seed):
+    user = seed.user()
+    product = seed.product(seed.company())
+
+    response = client.post(
+        "/cart/items",
+        json={"product_id": str(product.id)},
+        headers=seed.headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json()["item"]["quantity"] == 1
+
+
+def test_add_item_quantity_cero_se_normaliza_a_uno(client, seed):
+    user = seed.user()
+    product = seed.product(seed.company())
+
+    response = client.post(
+        "/cart/items",
+        json={"product_id": str(product.id), "quantity": 0},
+        headers=seed.headers(user),
+    )
+
+    assert response.status_code == 200
+    assert response.json()["item"]["quantity"] == 1
