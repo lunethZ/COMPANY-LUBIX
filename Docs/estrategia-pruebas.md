@@ -31,10 +31,10 @@
 
 ### Umbral actual del backend
 
-El umbral mínimo quedó configurado en **50 %** (`fail_under = 50` en `backend/pyproject.toml` y `--cov-fail-under=50` en `backend/pytest.ini`). La suite incluye pruebas unitarias, de API e integración con SQLite en memoria y ya supera el umbral.
+El umbral mínimo quedó configurado en **80 %** (`fail_under = 80` en `backend/pyproject.toml` y `--cov-fail-under=80` en `backend/pytest.ini`). La suite incluye pruebas unitarias, de API e integración con SQLite en memoria y ya supera el umbral.
 
 ### Próximos pasos
 
 - Implementar tests de servicios restantes (AuthService, JWTService, EmailService auxiliares)
-- Mantener la cobertura por encima del 50 % y ampliar la meta de forma incremental
+- Mantener la cobertura por encima del 80 % y ampliar la meta de forma incremental
 - Añadir tests de errores externos y casos edge

@@ -84,7 +84,7 @@ En Render las migraciones se ejecutan automáticamente al arrancar (`backend/sta
 pytest
 ```
 
-El umbral mínimo es **50 %** (`fail_under = 50` en `pyproject.toml` y `--cov-fail-under=50` en `pytest.ini`).
+El umbral mínimo es **80 %** (`fail_under = 80` en `pyproject.toml` y `--cov-fail-under=80` en `pytest.ini`).
 
 ## Despliegue
 

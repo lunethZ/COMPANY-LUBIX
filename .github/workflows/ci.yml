@@ -39,5 +39,5 @@ jobs:
       - name: Instalar dependencias
         run: >
           pip install -r requirements.txt httpx==0.28.1 pytest pytest-cov
-      - name: Pruebas con cobertura (umbral 50 %)
-        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=50
+      - name: Pruebas con cobertura (umbral 80 %)
+        run: pytest --cov=app --cov-report=term-missing --cov-fail-under=80
