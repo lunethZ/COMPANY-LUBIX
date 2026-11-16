@@ -8,7 +8,7 @@
 | Nombre | Solicitar devolución |
 | Módulo | Pedidos |
 | Prioridad | Media |
-| Estado | Implementado |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

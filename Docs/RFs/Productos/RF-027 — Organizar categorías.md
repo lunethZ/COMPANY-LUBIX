@@ -8,7 +8,7 @@
 | Nombre | Organizar categorías |
 | Módulo | Productos |
 | Prioridad | Media |
-| Estado | Implementado |
+| Estado | Parcial |
 | Fecha | Febrero 2026 |
 
 ---
