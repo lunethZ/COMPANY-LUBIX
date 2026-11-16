@@ -8,7 +8,7 @@
 | Título | Ver reseñas de producto |
 | Módulo | Catálogo |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-067 |
 
 ---

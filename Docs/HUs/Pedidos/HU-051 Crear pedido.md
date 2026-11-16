@@ -8,7 +8,7 @@
 | Título | Crear pedido |
 | Módulo | Pedidos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-051 |
 
 ---

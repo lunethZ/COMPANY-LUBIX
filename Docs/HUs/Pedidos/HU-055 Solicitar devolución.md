@@ -8,7 +8,7 @@
 | Título | Solicitar devolución |
 | Módulo | Pedidos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | No implementado |
 | RF asociados | RF-055 |
 
 ---

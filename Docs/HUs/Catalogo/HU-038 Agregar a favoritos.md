@@ -8,7 +8,7 @@
 | Título | Agregar a favoritos |
 | Módulo | Catálogo |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-038 |
 
 ---

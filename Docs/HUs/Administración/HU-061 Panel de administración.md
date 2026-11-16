@@ -8,7 +8,7 @@
 | Título | Panel de administración |
 | Módulo | Administración |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-061 |
 
 ---

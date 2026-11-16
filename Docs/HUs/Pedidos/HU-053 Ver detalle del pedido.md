@@ -8,7 +8,7 @@
 | Título | Ver detalle del pedido |
 | Módulo | Pedidos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-053 |
 
 ---

@@ -8,7 +8,7 @@
 | Título | Enviar PQRS |
 | Módulo | Soporte |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-065 |
 
 ---
