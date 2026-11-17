@@ -58,7 +58,7 @@ describe('MSW - Integración API en Login (Éxito y Error)', () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/Credenciales inválidas/i)).toBeInTheDocument();
+      expect(screen.getByText(/Error de Inicio de Sesion/i)).toBeInTheDocument();
     });
   });
 });
