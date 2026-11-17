@@ -16,7 +16,7 @@ Hoy el proyecto corre solo en desarrollo, con `docker-compose.yml`:
 
 Lo que hay que cambiar antes de publicar:
 
-- El frontend se ejecuta con `pnpm run dev` (servidor de desarrollo). En producción se compila con `pnpm build` y se sirve la carpeta `dist/` como archivos estáticos.
+- El frontend se ejecuta con `npm run dev` (servidor de desarrollo). En producción se compila con `npm run build` y se sirve la carpeta `dist/` como archivos estáticos.
 - `backend/start.sh` arranca uvicorn con `--reload`, que es solo para desarrollo.
 - `CorsMiddleware.py` tiene una lista fija de orígenes `localhost`. Con un dominio real hay que agregar el origen HTTPS, o servir web y API desde el mismo dominio para no depender de CORS.
 - La URL de la API entra al frontend en tiempo de compilación mediante `VITE_API_URL`.

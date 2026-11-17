@@ -12,7 +12,7 @@ Instalar y ejecutar LUBIX **desde cero** en una máquina usando Docker Compose.
 
 - **Docker** v20.10+ y **Docker Compose** v2.
 - **Git**.
-- Opcional (desarrollo local sin Docker): **Python 3.13 + UV**, **Node.js 18+ + pnpm**, **PostgreSQL 16**.
+- Opcional (desarrollo local sin Docker): **Python 3.13 + UV**, **Node.js 18+ + npm**, **PostgreSQL 16**.
 
 > Hardware mínimo y stack completo: ver [`Ficha_Tecnica.md`](./Ficha_Tecnica.md).
 
@@ -133,7 +133,7 @@ docker compose build --no-cache && docker compose up -d   # reconstruir desde ce
 | Puerto en uso | Cambiar el mapeo en `docker-compose.yml` |
 | Backend no conecta a BD | Revisar `URL_DATABASE` y `docker compose logs postgres` |
 | MinIO no responde | `docker compose restart minio` |
-| Frontend no carga | `pnpm store prune && rm -rf node_modules && pnpm install` |
+| Frontend no carga | `rm -rf node_modules && npm ci` |
 
 ## 8. Pendientes para v1
 

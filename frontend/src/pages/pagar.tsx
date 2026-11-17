@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import api from "../api/axios";
+import { API_BASE_URL } from "../api/config";
 import { useCart } from "../context/CartContext";
 import { useAuth } from "../context/AuthContext";
 import {
@@ -95,7 +96,7 @@ function isValidExpiry(exp: string): boolean {
 const resolveImage = (img?: string) => {
   if (!img) return "/placeholder.png";
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
-  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const base = API_BASE_URL;
   const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
   return `${base}${path.replace("/files/files", "/files")}`;
 };

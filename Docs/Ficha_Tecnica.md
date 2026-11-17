@@ -114,7 +114,7 @@ Componentes internos del backend: `routers/` (endpoints), `services/` (lógica d
 | MinIO | `minio/minio` | latest |
 | Contenedores | Docker + Docker Compose | v2 |
 | Gestor de deps (backend) | UV | — |
-| Gestor de deps (frontend) | pnpm | Node.js 18+ |
+| Gestor de deps (frontend) | npm | Node.js 18+ |
 
 ---
 
@@ -132,8 +132,9 @@ Puertos definidos en `docker-compose.yml` (formato `host:contenedor`):
 | MinIO – Consola | 9101 | 9001 | http://localhost:9101 |
 | Móvil – Metro/Expo | 8081 | 8081 | http://localhost:8081 |
 
-> El frontend consume la API mediante `VITE_API_URL` (por defecto `http://localhost:8002`) y la app
-> móvil mediante `EXPO_PUBLIC_API_URL`. Ajustar según el entorno de despliegue.
+> El frontend consume la API mediante `VITE_API_URL` (fallback: `https://lubix-api.onrender.com` en
+> producción y `http://localhost:8002` en desarrollo) y la app móvil mediante `EXPO_PUBLIC_API_URL`.
+> Ajustar según el entorno de despliegue.
 
 ---
 
@@ -147,7 +148,7 @@ Puertos definidos en `docker-compose.yml` (formato `host:contenedor`):
 | JWT | Autenticación basada en tokens | `SECRET_KEY`, `ALGORITHM=HS256` |
 | Sentry (opcional) | Observabilidad de errores | SDK `sentry-sdk` |
 
-Dependencias principales resueltas vía `backend/pyproject.toml` (UV) y `frontend|mobile/package.json` (pnpm/npm).
+Dependencias principales resueltas vía `backend/pyproject.toml` (UV) y `frontend|mobile/package.json` (npm).
 
 ---
 
@@ -175,7 +176,7 @@ Dependencias principales resueltas vía `backend/pyproject.toml` (UV) y `fronten
 | Python | 3.13+ | Ejecución local del backend |
 | UV | — | Gestión de dependencias backend |
 | Node.js | 18+ | Frontend web / móvil |
-| pnpm | — | Dependencias frontend |
+| npm | — | Dependencias frontend |
 | PostgreSQL | 16 | Si no se usa el contenedor |
 
 ### 6.3 Requisitos de red

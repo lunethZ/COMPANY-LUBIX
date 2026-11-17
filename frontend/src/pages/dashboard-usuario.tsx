@@ -5,12 +5,13 @@ import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios';
+import { API_BASE_URL } from '../api/config';
 import { errorDetailMessage } from '../utils/errors';
 
 const resolveFileUrl = (path?: string | null) => {
   if (!path) return "";
   if (path.startsWith("http://") || path.startsWith("https://")) return path;
-  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const base = API_BASE_URL;
   const clean = path.replace(/^\/+/, "").replace(/^files\//, "");
   return `${base}/files/${clean}`;
 };

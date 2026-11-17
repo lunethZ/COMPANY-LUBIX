@@ -79,7 +79,7 @@ services:
     branch: main
     rootDir: frontend
     autoDeploy: true
-    buildCommand: npm ci --legacy-peer-deps && npm run build
+    buildCommand: npm ci && npm run build
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import api from "../api/axios";
+import { API_BASE_URL } from "../api/config";
 import { StarIcon, CubeIcon, CheckBadgeIcon } from "@heroicons/react/24/outline";
 
 interface CompanyProfile {
@@ -33,7 +34,7 @@ const REFERENCE_IMAGE = "https://images.unsplash.com/photo-1523275335684-37898b6
 const resolveImageUrl = (img?: string) => {
   if (!img) return REFERENCE_IMAGE;
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
-  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const base = API_BASE_URL;
   const path = img.startsWith("/files") ? img : `/files/${img.replace(/^\/+/, "")}`;
   return `${base}${path.replace("/files/files", "/files")}`;
 };

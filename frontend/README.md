@@ -93,14 +93,14 @@ frontend/
 Antes de iniciar, asegúrate de tener instalado:
 
 - Node.js 20 o superior
-- PNPM
+- npm (incluido con Node.js)
 - Docker Desktop (opcional, solo si vas a usar contenedores)
 
 Verificar instalación:
 
 ```bash
 node -v
-pnpm -v
+npm -v
 docker --version
 ```
 
@@ -118,13 +118,13 @@ cd frontend
 ### 2. Instalar dependencias
 
 ```bash
-pnpm install
+npm install
 ```
 
 ### 3. Ejecutar el proyecto
 
 ```bash
-pnpm dev
+npm run dev
 ```
 
 Abrir en el navegador:
@@ -326,7 +326,7 @@ docker logs -f frontend-app
 Cuando se realicen cambios importantes en:
 
 - `package.json`
-- `pnpm-lock.yaml`
+- `package-lock.json`
 - `Dockerfile`
 
 es necesario reconstruir la imagen.
@@ -364,12 +364,11 @@ Dockerfile actual:
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
-RUN npm install -g pnpm
-COPY package*.json pnpm-lock.yaml ./
-RUN pnpm install
+COPY package*.json ./
+RUN npm ci
 COPY . .
 EXPOSE 5173
-CMD ["pnpm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
+CMD ["npm", "run", "dev", "--", "--host", "0.0.0.0", "--port", "5173"]
 ```
 
 La bandera `--host 0.0.0.0` es la que permite que el servidor de desarrollo acepte conexiones desde fuera del propio contenedor, necesaria para acceder desde otras máquinas de la red.
@@ -452,10 +451,10 @@ function MiComponente() {
 
 | Comando | Descripción |
 |---|---|
-| `pnpm dev` | Inicia el servidor de desarrollo |
-| `pnpm build` | Genera el build de producción en `dist/` |
-| `pnpm preview` | Previsualiza el build de producción |
-| `pnpm lint` | Verifica reglas de calidad de código |
+| `npm run dev` | Inicia el servidor de desarrollo |
+| `npm run build` | Genera el build de producción en `dist/` |
+| `npm run preview` | Previsualiza el build de producción |
+| `npm run lint` | Verifica reglas de calidad de código |
 
 ---
 
@@ -474,7 +473,7 @@ function MiComponente() {
 **El puerto 5173 está ocupado**
 
 ```bash
-pnpm dev -- --port 3000
+npm run dev -- --port 3000
 ```
 
 **Docker no inicia**
@@ -497,14 +496,14 @@ En Linux/macOS:
 
 ```bash
 rm -rf node_modules
-pnpm install
+npm install
 ```
 
 En PowerShell:
 
 ```powershell
 Remove-Item -Recurse -Force node_modules
-pnpm install
+npm install
 ```
 
 ---
