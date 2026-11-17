@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useAuthModal } from "../context/AuthModalContext";
 import api from "../api/axios";
+import { API_BASE_URL } from "../api/config";
 import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import {DevicePhoneMobileIcon,ComputerDesktopIcon,SpeakerWaveIcon,CameraIcon,ClockIcon}from "@heroicons/react/24/outline"
@@ -30,7 +31,7 @@ const formatCOP = (value: number) => {
 const resolveImage = (img?: string) => {
   if (!img || img === "/placeholder.png") return "/placeholder.png";
   if (img.startsWith("http://") || img.startsWith("https://")) return img;
-  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+  const base = API_BASE_URL;
   const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
   return `${base}${path.replace("/files/files", "/files")}`;
 };

@@ -26,7 +26,7 @@ jobs:
 
       - name: Instalar dependencias del frontend
         working-directory: frontend
-        run: npm ci --legacy-peer-deps
+        run: npm ci
 
       - name: Pruebas y cobertura del frontend
         working-directory: frontend
