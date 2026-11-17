@@ -38,9 +38,6 @@ playwright-report/
 *.sqlite3
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
 
 # Editors and operating-system files
 .vscode/*

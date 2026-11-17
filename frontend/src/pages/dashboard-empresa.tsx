@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/navbar-empresa';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import { API_BASE_URL } from '../api/config';
 import { rules, validateField, validateForm, type Validator } from '../utils/validators';
 import { errorDetailMessage } from '../utils/errors';
 import {
@@ -468,7 +469,7 @@ export default function SellerDashboard() {
   const resolveImageUrl = (img?: string) => {
     if (!img) return REFERENCE_IMAGE;
     if (img.startsWith("http://") || img.startsWith("https://")) return img;
-    const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+    const base = API_BASE_URL;
     const path = img.startsWith("/files") ? img : `/files/${img.replace(/^\/+/, "")}`;
     return `${base}${path.replace("/files/files", "/files")}`;
   };

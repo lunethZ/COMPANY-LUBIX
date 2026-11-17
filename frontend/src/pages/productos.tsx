@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import NavbarEmpresa from '../components/navbar-empresa';
 import api from '../api/axios';
+import { API_BASE_URL } from '../api/config';
 
 interface Review {
   id: string;
@@ -33,7 +34,7 @@ const REFERENCE_IMAGE = 'https://images.unsplash.com/photo-1523275335684-37898b6
 const resolveImage = (img?: string) => {
   if (!img || img === '/placeholder.png') return '/placeholder.png';
   if (img.startsWith('http://') || img.startsWith('https://')) return img;
-  const base = (import.meta.env.VITE_API_URL || 'http://localhost:8002').replace(/\/$/, '');
+  const base = API_BASE_URL;
   const path = img.startsWith('/files') ? img : img.startsWith('/') ? `/files${img}` : `/files/${img}`;
   return `${base}${path.replace('/files/files', '/files')}`;
 };

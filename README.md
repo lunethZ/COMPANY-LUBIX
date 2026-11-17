@@ -229,7 +229,7 @@ LUBIX-COMPANY/
 │
 ├── frontend/                              # Aplicación React
 │   ├── package.json                       # Dependencias npm
-│   ├── pnpm-lock.yaml                     # Lock file
+│   ├── package-lock.json                  # Lock file (npm)
 │   ├── vite.config.ts                     # Configuración Vite
 │   ├── tailwind.config.js                 # Configuración Tailwind
 │   ├── tsconfig.json                      # Configuración TypeScript
@@ -329,7 +329,7 @@ Para el despliegue de la infraestructura local, asegúrese de contar con las sig
 
 **Requisitos Adicionales (Entorno de Desarrollo Híbrido):**
 *   Python 3.13
-*   Node.js 18+ y pnpm (`npm install -g pnpm`)
+*   Node.js 18+ y npm (incluido con Node.js)
 *   PostgreSQL 16
 ### Mínimo requerido
 
@@ -341,7 +341,7 @@ Para el despliegue de la infraestructura local, asegúrese de contar con las sig
 ### Desarrollo local (opcional)
 
 - **Python 3.13** — [Descargar](https://www.python.org/downloads/)
-- **Node.js 18+** y **pnpm** — [Descargar](https://nodejs.org/) y `npm install -g pnpm`
+- **Node.js 18+** y **npm** — [Descargar](https://nodejs.org/) (npm viene incluido)
 - **PostgreSQL 16** — [Descargar](https://www.postgresql.org/download/)
 
 ---
@@ -557,8 +557,8 @@ uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 **Servicios Frontend:**
 ```bash
 cd frontend
-pnpm install
-pnpm run dev
+npm install
+npm run dev
 ```
 
 ---
