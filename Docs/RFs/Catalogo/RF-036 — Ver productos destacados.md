@@ -8,7 +8,7 @@
 | Nombre | Ver productos destacados |
 | Módulo | Catálogo |
 | Prioridad | Media |
-| Estado | Implementado |
+| Estado | Parcial |
 | Fecha | Febrero 2026 |
 
 ---

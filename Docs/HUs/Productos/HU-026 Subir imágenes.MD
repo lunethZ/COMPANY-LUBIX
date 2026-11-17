@@ -8,7 +8,7 @@
 | Título | Subir imágenes de producto |
 | Módulo | Productos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-026 |
 
 ---

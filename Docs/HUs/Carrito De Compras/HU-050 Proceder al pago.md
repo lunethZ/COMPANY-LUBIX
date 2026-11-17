@@ -8,7 +8,7 @@
 | Título | Proceder al pago |
 | Módulo | Carrito de Compras |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-050 |
 
 ---

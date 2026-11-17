@@ -8,7 +8,7 @@
 | Título | Compartir producto |
 | Módulo | Catálogo |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | No implementado |
 | RF asociados | RF-040 |
 
 ---

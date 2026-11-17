@@ -8,7 +8,7 @@
 | Nombre | Eliminar cupón |
 | Módulo | Carrito de Compras |
 | Prioridad | Media |
-| Estado | Implementado |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

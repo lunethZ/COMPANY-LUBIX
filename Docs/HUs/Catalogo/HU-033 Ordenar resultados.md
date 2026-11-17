@@ -8,7 +8,7 @@
 | Título | Ordenar resultados |
 | Módulo | Catálogo |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-033 |
 
 ---

@@ -8,7 +8,7 @@
 | Título | Abrir reclamación |
 | Módulo | Pedidos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-059 |
 
 ---

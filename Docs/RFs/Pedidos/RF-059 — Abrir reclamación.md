@@ -8,7 +8,7 @@
 | Nombre | Abrir reclamación |
 | Módulo | Pedidos |
 | Prioridad | Media |
-| Estado | Implementado |
+| Estado | Parcial |
 | Fecha | Febrero 2026 |
 
 ---

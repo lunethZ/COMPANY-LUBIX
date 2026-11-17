@@ -8,7 +8,7 @@
 | Título | Descargar datos personales |
 | Módulo | Perfil de Usuario |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-020 |
 
 ---

@@ -8,7 +8,7 @@
 | Título | Eliminar cupón |
 | Módulo | Carrito de Compras |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | No implementado |
 | RF asociados | RF-048 |
 
 ---

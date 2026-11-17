@@ -8,7 +8,7 @@
 | Título | Crear producto |
 | Módulo | Productos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-021 |
 
 ---

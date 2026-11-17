@@ -1,40 +1,51 @@
-# Estrategia de Pruebas - LUBIX Backend
+# Estrategia de Pruebas — LUBIX
 
-## Línea base de cobertura backend
+## 1. Propósito y alcance
 
-- **Fecha:** 2026-10-18
-- **Comando usado:** `python -m pytest --cov=app --cov-report=term-missing`
-- **Herramientas:** pytest 9.1.1, pytest-cov 7.1.6, coverage 7.16.2, Python 3.14.3
-- **Porcentaje total de cobertura (línea base):** 0% (0/309 líneas cubiertas)
-- **Comentario:** Registro inicial sin tests unitarios. Se creó un test mínimo `tests/test_main.py` que verifica que el módulo `app` se importa correctamente. Todos los módulos del paquete `app` quedaban sin cubrir (309 statements 100% missed).
+Definir la estrategia, niveles de prueba, herramientas, criterios de aceptación y métricas vigentes de aseguramiento de calidad para el backend (FastAPI / Python) y el frontend (React / TypeScript) de la plataforma **LUBIX**, sustituyendo la línea base inicial del 18 de octubre de 2026.
 
-### Post-primeras pruebas (EmailService + NasService)
+## 2. Niveles y tipos de prueba
 
-- **Fecha:** 2026-10-18 (mismo día)
-- **Comando usado:** `python -m pytest --cov=app --cov-report=term-missing`
-- **Herramientas:** pytest 9.1.1, pytest-cov 7.1.6, coverage 7.16.2, Python 3.14.3
-- **Porcentaje total de cobertura:** 22% (309 de 397 statements ahora cubiertos)
-- **Comentario:** Se agregaron tests unitarios con dobles (mock/unittest.mock):
-  - `test_email_service.py`: 2 tests que cubren EmailService.smtp completamente (100% cobertura en EmailService.py, 23 statements)
-  - `test_nas_service.py`: 10 tests que cubren NasService methods con mocks de Minio client (72% cobertura en NasService.py, 65 statements; 18 statements aún no cubiertos)
+- **Pruebas unitarias (`pytest`):** Validación aislada de servicios (`AuthService`, `JWTService`, `EmailService`, `NasService`, catálogo, carrito, pedidos y PQRS), validadores y utilidades usando dobles (`unittest.mock`).
+- **Pruebas de API e integración (`pytest` + `TestClient`):** Verificación de endpoints REST, códigos HTTP, esquemas Pydantic, autenticación JWT y flujos completos contra base de datos SQLite en memoria.
+- **Pruebas de componentes y frontend (`Vitest` + Testing Library):** Validación de vistas, contextos (`AuthModalContext`, `CartContext`) m flujos de usuario en `frontend/src/`.
+- **Análisis estático y calidad de código:** Ejecución automatizada de linters (`ESLint`) m análisis continuo en **SonarQube Cloud** en cada Pull Request hacia `Develop` y `main`.
 
-### Estado actual
+## 3. Entorno y herramientas de ejecución
 
-| Componente | Archivos | Statements | Cobertura |
-|------------|----------|------------|-----------|
-| `app/` | 51 archivos Python | 397 statements | 22% |
-| Tests | 13 tests (test_main.py, test_email_service.py, test_nas_service.py) | — | 13 passed |
-| EmailService.py | — | 23 statements | 100% |
-| NasService.py | — | 65 statements | 72% |
-| Config.py | — | 18 statements | 100% |
-| main.py | — | 38 statements | 0% |
+- **Backend:** Python 3.14, `pytest`, `pytest-cov`, `coverage`, SQLite en memoria para aislamiento de datos.
+- **Frontend:** Node.js, `Vitest`, `ESLint`, TypeScript.
+- **CI/CD:** GitHub Actions (`.github/workflows/ci.yml` y `.github/workflows/sonarcloud.yml`).
+- **Comando de ejecución backend:**
+  ```bash
+  python -m pytest --cov=app --cov-report=term-missing
+  ```
 
-### Umbral actual del backend
+## 4. Evolución y línea base histórica
 
-El umbral mínimo quedó configurado en **80 %** (`fail_under = 80` en `backend/pyproject.toml` y `--cov-fail-under=80` en `backend/pytest.ini`). La suite incluye pruebas unitarias, de API e integración con SQLite en memoria y ya supera el umbral.
+- **Línea base inicial (2026-10-18):** `0 %` de cobertura (`0/309` líneas cubiertas) con un único test de humo en `tests/test_main.py`.
+- **Iteración 1 — Primeras pruebas unitarias (2026-10-18):** `22 %` de cobertura (`309/397` statements) con **13 pruebas** (`test_main.py`, `test_email_service.py`, `test_nas_service.py`) m umbral inicial configurado en `50 %` .
+- **Consolidación actual (2026-11-16):** Unificación de suites de prueba (`p03-p04-unificar-suites-umbral-80`), alcanzando **528 pruebas** ejecutadas con éxito y una cobertura global de **~89 %** en el backend.
 
-### Próximos pasos
+## 5. Estado actual de cobertura y métricas
 
-- Implementar tests de servicios restantes (AuthService, JWTService, EmailService auxiliares)
-- Mantener la cobertura por encima del 80 % y ampliar la meta de forma incremental
-- Añadir tests de errores externos y casos edge
+- **Fecha de actualización:** 2026-11-16
+
+| Métrica / Componente | Valor registrado (2026-11-16) | Referencia anterior (2026-10-18) | Estado |
+|----------------------|-------------------------------|------------------------------------|--------|
+| **Suite backend (`pytest`)** | **528 pruebas aprobadas** | 13 pruebas | Actualizado |
+| **Cobertura global backend (`app/`)** | **~89 %** | 22 % | Supera umbral |
+| **Umbral mínimo exigido (`fail_under`)** | **80 %** | 50 % | Cumple |
+| **Quality Gate (SonarQube Cloud)** | **>= 80 % en código nuevo** | — | Activo en CI |
+
+## 6. Criterios de aceptación y umbrales de calidad
+
+- **Umbral de cobertura backend:** Configurado en **80 %** (`fail_under = 80` un `backend/pyproject.toml` m `--cov-fail-under=80` en `backend/pytest.ini`). Todo Pull Request que descienda por debajo de este porcentaje falla automáticamente en CI.
+- **Cero fallos en suite:** El 100 % de las **528 pruebas** deben aprobar antes de fusionar cambios en `Develop` o `main`.
+- **Estándar SonarCloud:** Cobertura mínima del **80 %** sobre código nuevo y cero vulnerabilidades críticas bloqueantes.
+
+## 7. Mantenimiento y próximos pasos
+
+- Mantener la cobertura del backend por encima del umbral obligatorio del **80 %** (actualmente en **~89 %**) ante cada nuevo endpoint o regla de negocio.
+- Ampliar la cobertura de pruebas end-to-end y de componentes en el frontend (`Vitest`).
+- Incorporar pruebas unitarias para el módulo de compartir producto (`RF-040`) cuando salga de deuda técnica e ingrese al alcance funcional.

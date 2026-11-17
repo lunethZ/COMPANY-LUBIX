@@ -8,7 +8,7 @@
 | Título | Guardar y recuperar carrito |
 | Módulo | Carrito de Compras |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-049 |
 
 ---

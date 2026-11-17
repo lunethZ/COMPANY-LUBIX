@@ -8,7 +8,7 @@
 | Nombre | Gestión de sesiones |
 | Módulo | Autenticación |
 | Prioridad | Alta |
-| Estado | Implementado |
+| Estado | Parcial |
 | Fecha | Febrero 2026 |
 
 ---

@@ -8,7 +8,7 @@
 | Título | Organizar categorías |
 | Módulo | Productos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-027 |
 
 ---

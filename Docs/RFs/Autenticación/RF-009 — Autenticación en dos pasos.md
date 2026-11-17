@@ -8,7 +8,7 @@
 | Nombre | 2FA |
 | Módulo | Autenticación |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

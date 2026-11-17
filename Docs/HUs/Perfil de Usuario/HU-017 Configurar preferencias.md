@@ -8,7 +8,7 @@
 | Título | Configurar preferencias |
 | Módulo | Perfil de Usuario |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-017 |
 
 ---

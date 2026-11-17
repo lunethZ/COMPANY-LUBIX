@@ -8,7 +8,7 @@
 | Título | Gestionar inventario |
 | Módulo | Productos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-025 |
 
 ---
