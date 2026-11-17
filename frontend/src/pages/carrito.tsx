@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
@@ -6,13 +5,13 @@ import { TrashIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/AuthContext";
 import { useCart } from "../context/CartContext";
 import { useAuthModal } from "../context/AuthModalContext";
-import { resolveImage } from "../pages/producto-detalle";
+import { resolveImage } from "../utils/images";
 
 const CartPage = () => {
   const { items, subtotal, totalItems, increment, decrement, removeItem } = useCart();
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuth();
-  const { openLogin, openRegister } = useAuthModal();
+  const { openLogin } = useAuthModal();
 
   const homeRoute = user?.role_id === "user"
     ? "/home-usuario"

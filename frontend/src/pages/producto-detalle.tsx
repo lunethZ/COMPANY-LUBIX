@@ -11,12 +11,11 @@ import {
   HeartIcon as HeartOutline,
   StarIcon,
   ShoppingBagIcon,
-  ShieldCheckIcon,
-  TruckIcon,
   ArrowLeftIcon,
   CheckBadgeIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
+import { resolveImage } from "../utils/images";
 
 interface Review {
   id: string;
@@ -89,14 +88,6 @@ const EstrellasEditables = ({
 const formatCOP = (value: number) =>
   "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
 
-export const resolveImage = (img?: string) => {
-  if (!img || img === "/placeholder.png") return "/placeholder.png";
-  if (img.startsWith("http://") || img.startsWith("https://")) return img;
-  const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
-  const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
-  return `${base}${path.replace("/files/files", "/files")}`;
-};
-
 const ProductoDetalle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -111,7 +102,6 @@ const ProductoDetalle: React.FC = () => {
   const [isFav, setIsFav] = useState(false);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [reviewsLoading, setReviewsLoading] = useState(true);
-  const [relatedProducts, setRelatedProducts] = useState<any[]>([]);
   const [quantity, setQuantity] = useState(1);
 
   const [reviewForm, setReviewForm] = useState({ rating: 0, title: "", comment: "" });
@@ -124,22 +114,22 @@ const ProductoDetalle: React.FC = () => {
 
   useEffect(() => {
     if (!id) return;
-    setLoading(true);
-    Promise.all([
-      api.get(`/products/${id}`),
-      api.get(`/products/${id}/reviews`).catch(() => ({ data: [] })),
-      api.get(`/products/${id}/related`).catch(() => ({ data: { products: [] } })),
-    ])
-      .then(([prodRes, revRes, relRes]) => {
+    (async () => {
+      setLoading(true);
+      try {
+        const [prodRes, revRes] = await Promise.all([
+          api.get(`/products/${id}`),
+          api.get(`/products/${id}/reviews`).catch(() => ({ data: [] })),
+        ]);
         setProducto(prodRes.data);
         setReviews(revRes.data || []);
-        setRelatedProducts(relRes.data?.products || []);
-      })
-      .catch(() => setNotFound(true))
-      .finally(() => {
+      } catch {
+        setNotFound(true);
+      } finally {
         setLoading(false);
         setReviewsLoading(false);
-      });
+      }
+    })();
   }, [id]);
 
   useEffect(() => {
@@ -147,7 +137,7 @@ const ProductoDetalle: React.FC = () => {
     api
       .get("/user/favorites")
       .then((res) => {
-        const favIds = (res.data || []).map((f: any) => String(f.product?.id));
+        const favIds = (res.data || []).map((f: { product?: { id?: string } }) => String(f.product?.id));
         setIsFav(favIds.includes(String(id)));
       })
       .catch(() => {});
@@ -238,7 +228,7 @@ const ProductoDetalle: React.FC = () => {
     setSubmittingReview(true);
     setReviewMsg("");
     try {
-      const res = await api.post(`/products/${producto.id}/reviews`, {
+      await api.post(`/products/${producto.id}/reviews`, {
         rating: reviewForm.rating,
         title: reviewForm.title || undefined,
         comment: reviewForm.comment,
@@ -260,7 +250,7 @@ const ProductoDetalle: React.FC = () => {
             }
           : prev
       );
-    } catch (err: any) {
+    } catch (err) {
       setReviewMsg(
         errorDetailMessage(err, "Error al publicar la reseña")
       );

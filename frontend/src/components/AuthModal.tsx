@@ -13,13 +13,13 @@ type RegistrationMode = "usuario" | "empresa";
 export default function AuthModal() {
   const { isOpen, initialTab, close } = useAuthModal();
   const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
 
   const [tab, setTab] = useState<AuthTab>(initialTab);
-
-  useEffect(() => {
+  const [prevInitialTab, setPrevInitialTab] = useState(initialTab);
+  if (prevInitialTab !== initialTab) {
+    setPrevInitialTab(initialTab);
     setTab(initialTab);
-  }, [initialTab]);
+  }
 
   useEffect(() => {
     if (isAuthenticated && isOpen) {
@@ -182,7 +182,7 @@ function LoginForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: (
         let errorMsg = "Error de login";
         if (errorData?.detail) {
           if (typeof errorData.detail === "string") errorMsg = errorData.detail;
-          else if (Array.isArray(errorData.detail)) errorMsg = errorData.detail.map((e: any) => e.msg).join(". ");
+          else if (Array.isArray(errorData.detail)) errorMsg = errorData.detail.map((e: { msg?: string }) => e.msg).join(". ");
         }
         if (error.response?.status === 400 && errorMsg.includes("incorrectos")) {
           errorMsg = "El correo o la contraseña son incorrectos.";
@@ -357,7 +357,7 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
         let errorMsg = "";
         if (errorData?.detail) {
           if (Array.isArray(errorData.detail)) {
-            errorMsg = errorData.detail.map((e: any) => e.msg).join(". ");
+            errorMsg = errorData.detail.map((e: { msg?: string }) => e.msg).join(". ");
           } else if (typeof errorData.detail === "string") {
             errorMsg = errorData.detail;
           }

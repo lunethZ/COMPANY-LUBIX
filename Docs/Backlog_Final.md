@@ -19,7 +19,7 @@
 | Hecho | 48 (71%) |
 | Parcial | 11 (16%) |
 | No implementado | 9 (13%) |
-| **Avance global** | **79 %** |
+| **Avance global** | **78 %** |
 
 ## Avance por módulo
 
@@ -94,7 +94,7 @@
 | RF-037 | Ver productos nuevos | 🟡 Parcial | 30 % | Sin endpoint ni orden por fecha de creación; solo se listan productos en general. |
 | RF-038 | Agregar a favoritos | ✅ Hecho | 100 % | `POST /favorites/{product_id}` (alterna) y `GET /favorites`. |
 | RF-039 | Eliminar de favoritos | ✅ Hecho | 100 % | El mismo `POST /favorites/{product_id}` elimina si ya existe. |
-| RF-040 | Compartir producto | ❌ No implementado | 0 % | No se encontró código de compartir en el frontend ni en el backend. Verificar en la app antes de entregar. |
+| RF-040 | Compartir producto | ❌ No implementado | 0 % | Sin endpoint ni componente de compartir; fuera de alcance, queda como deuda técnica. |
 | RF-067 | Ver reseñas de producto | ✅ Hecho | 100 % | `GET /products/{id}/reviews`. |
 | RF-068 | Crear reseña de producto | ✅ Hecho | 100 % | `POST /products/{id}/reviews`. |
 
@@ -153,7 +153,7 @@ Estos requisitos no se construyeron en esta entrega. Cada uno queda registrado c
 - **RF-018 Gestionar métodos de pago**: Solo existe el campo `payment_method` dentro del pedido; no hay métodos guardados por usuario. Se mantiene pago simulado; fuera de alcance.
 - **RF-028 Gestionar atributos de producto**: Sin modelo ni endpoint de atributos. Fuera de alcance; deuda técnica.
 - **RF-029 Duplicar producto**: Sin endpoint de duplicado. Fuera de alcance; el producto se puede volver a crear manualmente.
-- **RF-040 Compartir producto**: No se encontró código de compartir en el frontend ni en el backend. Verificar en la app antes de entregar.
+- **RF-040 Compartir producto**: Sin endpoint ni componente de compartir; fuera de alcance, queda como deuda técnica.
 - **RF-047 Aplicar cupón de descuento**: Sin modelo de cupones ni endpoint. Fuera de alcance; deuda técnica.
 - **RF-048 Eliminar cupón de descuento**: Depende de RF-047, no implementado.
 - **RF-055 Solicitar devolución**: Sin modelo ni endpoint de devoluciones. Fuera de alcance; deuda técnica.

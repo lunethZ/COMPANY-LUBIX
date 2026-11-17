@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components -- los contextos exportan el provider y el hook a propósito */
 import { createContext, useContext, useState, useEffect, useCallback, useRef } from "react";
 import type { ReactNode } from "react";
 import { useAuth } from "./AuthContext";
@@ -19,7 +20,7 @@ function readLocal(): CartItem[] {
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map((rawItem: any) => {
+    return parsed.map((rawItem: Record<string, unknown>) => {
       const productId = String(rawItem.product_id ?? rawItem.id);
       const quantity = Math.max(1, Number(rawItem.quantity ?? 1));
       const unitPrice = Number(rawItem.unit_price ?? rawItem.price ?? 0);
@@ -83,7 +84,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const wasAuthed = useRef(isAuthenticated);
 
   const itemsRef = useRef(items);
-  itemsRef.current = items;
+  useEffect(() => {
+    itemsRef.current = items;
+  }, [items]);
 
   const applyLocal = useCallback((next: CartItem[]) => {
     setItems(next);

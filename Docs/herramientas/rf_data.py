@@ -40,7 +40,7 @@ RF = [
 ("RF-037","Ver productos nuevos","Catálogo",P,30,"Sin endpoint ni orden por fecha de creación; solo se listan productos en general."),
 ("RF-038","Agregar a favoritos","Catálogo",H,100,"`POST /favorites/{product_id}` (alterna) y `GET /favorites`."),
 ("RF-039","Eliminar de favoritos","Catálogo",H,100,"El mismo `POST /favorites/{product_id}` elimina si ya existe."),
-("RF-040","Compartir producto","Catálogo",N,0,"No se encontró código de compartir en el frontend ni en el backend. Verificar en la app antes de entregar."),
+("RF-040","Compartir producto","Catálogo",N,0,"Sin endpoint ni componente de compartir; fuera de alcance, queda como deuda técnica."),
 ("RF-041","Agregar al carrito","Carrito de Compras",H,100,"`POST /cart/items`."),
 ("RF-042","Ver carrito de compras","Carrito de Compras",H,100,"`GET /cart`."),
 ("RF-043","Modificar cantidad de productos en el carrito","Carrito de Compras",H,100,"`PATCH /cart/items/{product_id}`."),
