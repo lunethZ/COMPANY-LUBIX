@@ -5,9 +5,6 @@ import { http, HttpResponse } from 'msw';
 import { server } from '../mocks/server';
 import Login from './login';
 import { AuthProvider } from '../context/AuthProvider';
-import axios from 'axios';
-
-const BASE_URL = 'http://localhost:8002';
 
 describe('MSW - Integración API en Login y Handlers (Éxito y Error)', () => {
   it('intercepta POST /auth/login-user y completa el flujo en caso de éxito (200)', async () => {
@@ -58,23 +55,23 @@ describe('MSW - Integración API en Login y Handlers (Éxito y Error)', () => {
   });
 
   it('intercepta endpoints simulados de registro, productos, carrito y PQRS', async () => {
-    const regRes = await axios.post(`${BASE_URL}/auth/register-user`, { email: 'nuevo@lubix.com' });
+    const regRes = await fetch('http://localhost/auth/register-user', { method: 'POST' });
     expect(regRes.status).toBe(201);
 
-    const prodRes = await axios.get(`${BASE_URL}/products`);
+    const prodRes = await fetch('http://localhost/products');
     expect(prodRes.status).toBe(200);
-    expect(prodRes.data).toHaveLength(2);
+    expect(await prodRes.json()).toHaveLength(2);
 
-    const getCartRes = await axios.get(`${BASE_URL}/cart`);
+    const getCartRes = await fetch('http://localhost/cart');
     expect(getCartRes.status).toBe(200);
 
-    const postCartRes = await axios.post(`${BASE_URL}/cart/add`, { product_id: 1, quantity: 1 });
+    const postCartRes = await fetch('http://localhost/cart/add', { method: 'POST' });
     expect(postCartRes.status).toBe(200);
 
-    const getPqrsRes = await axios.get(`${BASE_URL}/pqrs`);
+    const getPqrsRes = await fetch('http://localhost/pqrs');
     expect(getPqrsRes.status).toBe(200);
 
-    const postPqrsRes = await axios.post(`${BASE_URL}/pqrs`, { asunto: 'Consulta', descripcion: 'Detalle' });
+    const postPqrsRes = await fetch('http://localhost/pqrs', { method: 'POST' });
     expect(postPqrsRes.status).toBe(201);
   });
 });
