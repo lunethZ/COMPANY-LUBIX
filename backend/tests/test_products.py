@@ -403,3 +403,33 @@ def test_company_profile_inexistente_devuelve_404(client, seed):
 
     assert response.status_code == 404
     assert response.json() == {"detail": "Empresa no encontrada"}
+
+def test_catalogs_excluye_catalogo_sin_productos_activos(client, seed):
+    company = seed.company()
+    visible = seed.catalog("Celulares")
+    sin_activos = seed.catalog("Sin activos")
+    seed.product(company, name="Celular activo", catalog=visible)
+    seed.product(
+        company,
+        name="Celular inactivo",
+        catalog=sin_activos,
+        status="inactive",
+    )
+
+    body = client.get("/products/catalogs").json()
+    nombres = [catalogo["name"] for catalogo in body]
+
+    assert "Celulares" in nombres
+    assert "Sin activos" not in nombres
+
+def test_review_con_body_invalido_devuelve_401_por_middleware(client, seed):
+    user = seed.user()
+
+    response = client.post(
+        "/products/00000000-0000-0000-0000-000000000000/reviews",
+        json={"rating": 99, "comment": "x"},
+        headers=seed.headers(user),
+    )
+
+    assert response.status_code == 401
+    assert response.json()["detail"] == "Token invalido"
