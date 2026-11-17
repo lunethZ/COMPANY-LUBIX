@@ -1,6 +1,6 @@
 ﻿<div align="center">
 
-<img src="docs/assets/lubix-banner.svg" alt="LUBIX - Plataforma Integral de Gestión Empresarial" width="100%" />
+<img src="docs/assets/lubix-banner.png" alt="LUBIX - Plataforma Integral de Gestión Empresarial" width="100%" />
 
 **Solución integral de gestión de usuarios, empresas y productos**
 
