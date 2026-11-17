@@ -28,6 +28,22 @@ jobs:
   backend:
     name: Backend (pytest y cobertura)
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: lubix_test
+          POSTGRES_PASSWORD: lubix_test
+          POSTGRES_DB: lubix_test
+        ports:
+          - 5435:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      REPOSITORY_TEST_DATABASE_URL: postgresql+psycopg2://lubix_test:lubix_test@localhost:5435/lubix_test
     defaults:
       run:
         working-directory: backend
@@ -39,5 +55,7 @@ jobs:
       - name: Instalar dependencias
         run: >
           pip install -r requirements.txt httpx==0.28.1 pytest pytest-cov
+      - name: Tests de repositorio contra PostgreSQL real
+        run: pytest tests/repositories/ -v
       - name: Pruebas con cobertura (umbral 80 %)
         run: pytest
