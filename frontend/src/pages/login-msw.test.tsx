@@ -7,7 +7,7 @@ import Login from './login';
 import { AuthProvider } from '../context/AuthProvider';
 
 describe('MSW - Integración API en Login (Éxito y Error)', () => {
-  it('intercepta POST /auth/login y completa el flujo en caso de éxito (200)', async () => {
+  it('intercepta POST /auth/login-user y completa el flujo en caso de éxito (200)', async () => {
     render(
       <MemoryRouter>
         <AuthProvider>
@@ -26,13 +26,13 @@ describe('MSW - Integración API en Login (Éxito y Error)', () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.queryByText(/credenciales inválidas|error al iniciar/i)).not.toBeInTheDocument();
+      expect(screen.queryByText(/Error de Inicio de Sesion/i)).not.toBeInTheDocument();
     });
   });
 
-  it('intercepta POST /auth/login y muestra error cuando la API responde 401', async () => {
+  it('intercepta POST /auth/login-user y muestra error cuando la API responde 401', async () => {
     server.use(
-      http.post('*/auth/login', () => {
+      http.post('*/auth/login*', () => {
         return HttpResponse.json(
           { detail: 'Credenciales inválidas' },
           { status: 401 }
@@ -58,7 +58,7 @@ describe('MSW - Integración API en Login (Éxito y Error)', () => {
     fireEvent.click(submitBtn);
 
     await waitFor(() => {
-      expect(screen.getByText(/credenciales inválidas|error|incorrect/i)).toBeInTheDocument();
+      expect(screen.getByText(/Credenciales inválidas/i)).toBeInTheDocument();
     });
   });
 });

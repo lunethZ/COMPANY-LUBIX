@@ -1,8 +1,8 @@
 ﻿import { http, HttpResponse } from 'msw';
 
 export const handlers = [
-  // Login - Caso de éxito por defecto (200)
-  http.post('*/auth/login', async () => {
+  // Login Usuario y Empresa - Caso de éxito por defecto (200)
+  http.post('*/auth/login*', async () => {
     return HttpResponse.json(
       {
         access_token: 'mock-jwt-token-lubix',
@@ -18,8 +18,8 @@ export const handlers = [
     );
   }),
 
-  // Registro - Caso de éxito (201)
-  http.post('*/auth/register', async () => {
+  // Registro Usuario y Empresa - Caso de éxito (201)
+  http.post('*/auth/register*', async () => {
     return HttpResponse.json(
       { message: 'Usuario registrado exitosamente' },
       { status: 201 }
