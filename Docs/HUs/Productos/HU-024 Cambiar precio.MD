@@ -8,7 +8,7 @@
 | Título | Cambiar precio de producto |
 | Módulo | Productos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-024 |
 
 ---

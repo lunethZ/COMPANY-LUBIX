@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import NavbarAuto from "../components/navbar-auto";
 import Footer from "../components/footer";
 import { useAuth } from "../context/AuthContext";
@@ -40,7 +40,7 @@ const Home: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
-  const { openLogin, openRegister } = useAuthModal();
+  const { openLogin } = useAuthModal();
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [cartMsg, setCartMsg] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -59,7 +59,7 @@ const Home: React.FC = () => {
   useEffect(() => {
     api.get("/products/search")
       .then((res) => {
-        const items = (res.data.products || []).map((p: any) => ({
+        const items = (res.data.products || []).map((p: { id: string; name: string; descripcion: string; price: number; images?: string[]; company_name?: string; avg_rating?: number; review_count?: number }) => ({
           id: p.id,
           nombre: p.name,
           desc: p.descripcion,
@@ -79,7 +79,7 @@ const Home: React.FC = () => {
     if (!isAuthenticated) return;
     api.get("/user/favorites")
       .then((res) => {
-        const ids = new Set<string>((res.data || []).map((f: any) => f.product?.id));
+        const ids = new Set<string>((res.data || []).map((f: { product?: { id?: string } }) => String(f.product?.id ?? "")));
         setFavorites(ids);
       })
       .catch(() => {});

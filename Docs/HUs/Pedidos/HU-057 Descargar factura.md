@@ -8,7 +8,7 @@
 | Título | Descargar factura |
 | Módulo | Pedidos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-057 |
 
 ---

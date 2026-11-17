@@ -8,7 +8,7 @@
 | Título | Confirmar recepción |
 | Módulo | Pedidos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-056 |
 
 ---

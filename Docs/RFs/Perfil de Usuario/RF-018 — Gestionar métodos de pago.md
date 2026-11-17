@@ -8,7 +8,7 @@
 | Nombre | Gestionar métodos de pago |
 | Módulo | Perfil de Usuario |
 | Prioridad | Alta |
-| Estado | Implementado |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

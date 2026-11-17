@@ -6,9 +6,6 @@ import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios';
 import { errorDetailMessage } from '../utils/errors';
-const formatCOP = (value: number) => {
-  return "$" + value.toLocaleString("es-CO", { maximumFractionDigits: 0 });
-};
 
 const resolveFileUrl = (path?: string | null) => {
   if (!path) return "";
@@ -71,8 +68,18 @@ interface Order {
   delivery_progress: number;
 }
 
+interface Address {
+  id: string;
+  label?: string | null;
+  address: string;
+  city: string;
+  department: string;
+  postal_code?: string | null;
+  is_default?: boolean;
+}
+
 export default function BuyerDashboard() {
-  const { user, logout, updateUser } = useAuth();
+  const { user, updateUser } = useAuth();
   const { addToCart: addCartItem } = useCart();
   const { theme } = useTheme();
   const isDark = theme === 'dark';
@@ -108,30 +115,22 @@ export default function BuyerDashboard() {
   const [selectedOrder, setSelectedOrder] = useState<string | null>(null);
   const [profileForm, setProfileForm] = useState({ name: "", phone: "" });
   const [passForm, setPassForm] = useState({ current: "", newPass: "" });
-  const [addresses, setAddresses] = useState<any[]>([]);
+  const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressForm, setAddressForm] = useState({ label: "", address: "", city: "", department: "", postal_code: "", is_default: false });
   const [profileMsg, setProfileMsg] = useState("");
   const [passMsg, setPassMsg] = useState("");
   const [addressMsg, setAddressMsg] = useState("");
 
-  useEffect(() => {
-    fetchUserData();
-  }, []);
-
-  useEffect(() => {
-    loadFavorites();
-  }, [activeTab]);
-
   const loadFavorites = async () => {
     try {
       const res = await api.get("/user/favorites");
-      const items = (res.data || []).map((f: any) => ({
+      const items = (res.data || []).map((f: { product: { id: string; name: string; descripcion: string; price: number; discount_enable?: boolean; discount_value?: number; images?: string[]; stock: number; company_name?: string } }) => ({
         id: f.product.id,
         nombre: f.product.name,
         desc: f.product.descripcion,
         precio: f.product.price,
         antes: null,
-        descuento: f.product.discount_enable && f.product.discount_value > 0 ? `-${f.product.discount_value}%` : null,
+        descuento: f.product.discount_enable && (f.product.discount_value ?? 0) > 0 ? `-${f.product.discount_value ?? 0}%` : null,
         imagen: resolveFileUrl(f.product.images?.[0]),
         imagenes: f.product.images?.length ? f.product.images.map(resolveFileUrl) : [],
         categoria: "General",
@@ -148,26 +147,15 @@ export default function BuyerDashboard() {
     }
   };
 
-  useEffect(() => {
-    loadOrders();
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (showProfileDrawer) {
-      loadAddresses();
-      setProfileForm({ name: userData.name, phone: userData.phone });
-    }
-  }, [showProfileDrawer]);
-
   const loadOrders = async () => {
     try {
       const res = await api.get("/user/orders");
       const data = res.data || [];
-      const list: Order[] = data.map((o: any) => ({
+      const list: Order[] = data.map((o: { id: string; created_at: string; status: string; items?: Array<{ id: string; name: string; price: number; quantity: number }>; subtotal: number; discount: number; shipping: number; total: number; payment_method: string; address: string; city: string; recipient: string; estimated_delivery?: string; delivery_progress?: number }) => ({
         id: o.id,
         fecha: o.created_at,
         estado: o.status,
-        items: (o.items || []).map((i: any) => ({
+        items: (o.items || []).map((i: { id: string; name: string; price: number; quantity: number }) => ({
           id: i.id,
           name: i.name,
           price: i.price,
@@ -215,8 +203,8 @@ export default function BuyerDashboard() {
       setOrders((prev) =>
         prev.map((o) => (o.id === orderId ? { ...o, estado: "cancelled", delivery_progress: 0 } : o))
       );
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || "No se pudo cancelar el pedido";
+    } catch (err) {
+      const msg = errorDetailMessage(err, "No se pudo cancelar el pedido");
       window.alert(msg);
     }
   };
@@ -245,7 +233,7 @@ export default function BuyerDashboard() {
       if (profileForm.name) {
         updateUser({ name: profileForm.name });
       }
-    } catch (err: any) {
+    } catch (err) {
       setProfileMsg(errorDetailMessage(err, "Error al actualizar el perfil"));
     }
   };
@@ -259,7 +247,7 @@ export default function BuyerDashboard() {
       });
       setPassMsg("Contraseña actualizada correctamente");
       setPassForm({ current: "", newPass: "" });
-    } catch (err: any) {
+    } catch (err) {
       setPassMsg(errorDetailMessage(err, "Error al cambiar la contraseña"));
     }
   };
@@ -282,10 +270,10 @@ export default function BuyerDashboard() {
       setAddressMsg("Dirección agregada correctamente");
       setAddressForm({ label: "", address: "", city: "", department: "", postal_code: "", is_default: false });
       await loadAddresses();
-    } catch (err: any) {
-      const detail = err?.response?.data?.detail;
+    } catch (err) {
+      const detail = (err as { response?: { data?: { detail?: unknown } } })?.response?.data?.detail;
       if (Array.isArray(detail)) {
-        setAddressMsg(detail.map((d:any)=> d.msg).join(", "));
+        setAddressMsg(detail.map((d: { msg?: string }) => d.msg).join(", "));
       } else {
         setAddressMsg(errorDetailMessage(err, "Error al agregar la dirección"));
       }
@@ -360,15 +348,15 @@ export default function BuyerDashboard() {
   </div>
   <div class="card">
     <h2>📍 Direcciones (${addresses.length})</h2>
-    ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map((a: any)=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
+    ${addresses.length ? `<table><tr><th>Etiqueta</th><th>Dirección</th><th>Ciudad</th><th>Principal</th></tr>` + addresses.map((a)=>`<tr><td>${a.label||''}</td><td>${a.address||''}</td><td>${a.city||''}</td><td>${a.is_default?'Sí':'No'}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay direcciones guardadas</p>`}
   </div>
   <div class="card">
     <h2>🛒 Pedidos (${orders.length})</h2>
-    ${orders.length ? orders.map((o: any)=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map((i: any)=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
+    ${orders.length ? orders.map((o)=>`<div style="border:1px solid #e2e8f0;border-radius:8px;padding:12px;margin-bottom:8px"><strong>#${String(o.id).slice(0,8)}</strong> - ${o.status} - $${(o.total||0).toLocaleString('es-CO')} <span class="muted">(${new Date(o.created_at).toLocaleDateString('es-CO')})</span><br><span class="muted">${(o.items||[]).map((i)=> i.name + ' x' + i.quantity).join(', ')}</span></div>`).join('') : `<p class="muted">No hay pedidos</p>`}
   </div>
   <div class="card">
     <h2>❤️ Favoritos (${favorites.length})</h2>
-    ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map((f: any)=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
+    ${favorites.length ? `<table><tr><th>Producto</th><th>Precio</th></tr>` + favorites.map((f)=>`<tr><td>${f.product?.name||f.product?.nombre||''}</td><td>$${(f.product?.price||0).toLocaleString('es-CO')}</td></tr>`).join('') + `</table>` : `<p class="muted">No hay favoritos</p>`}
   </div>
   <p class="muted" style="text-align:center;margin-top:24px">Documento generado por Lubix - Tus datos están protegidos</p>
 </body></html>`;
@@ -396,8 +384,8 @@ export default function BuyerDashboard() {
         description: "El usuario ha solicitado la inhabilitación de su cuenta.",
       });
       alert("Tu solicitud ha sido enviada correctamente. El administrador la revisará pronto.");
-    } catch (err: any) {
-      const msg = err?.response?.data?.detail || "Error al enviar la solicitud";
+    } catch (err) {
+      const msg = errorDetailMessage(err, "Error al enviar la solicitud");
       alert(msg);
     }
   };
@@ -435,6 +423,32 @@ export default function BuyerDashboard() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    (async () => {
+      await fetchUserData();
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      await loadFavorites();
+    })();
+  }, [activeTab]);
+
+  useEffect(() => {
+    (async () => {
+      await loadOrders();
+    })();
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (!showProfileDrawer) return;
+    (async () => {
+      setProfileForm({ name: userData.name, phone: userData.phone });
+      await loadAddresses();
+    })();
+  }, [showProfileDrawer]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

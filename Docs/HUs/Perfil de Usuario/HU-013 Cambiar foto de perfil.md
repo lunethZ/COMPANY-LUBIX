@@ -8,7 +8,7 @@
 | Título | Cambiar foto de perfil |
 | Módulo | Perfil de Usuario |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-013 |
 
 ---

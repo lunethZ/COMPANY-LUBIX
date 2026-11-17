@@ -8,7 +8,7 @@
 | Título | Ver historial |
 | Módulo | Pedidos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-052 |
 
 ---

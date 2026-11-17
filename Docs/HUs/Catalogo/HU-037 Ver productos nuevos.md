@@ -8,7 +8,7 @@
 | Título | Ver productos nuevos |
 | Módulo | Catálogo |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-037 |
 
 ---

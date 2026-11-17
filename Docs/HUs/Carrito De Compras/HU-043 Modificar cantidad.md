@@ -8,7 +8,7 @@
 | Título | Modificar cantidad |
 | Módulo | Carrito de Compras |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-043 |
 
 ---

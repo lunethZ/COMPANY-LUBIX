@@ -8,7 +8,7 @@
 | Título | Recuperar contraseña |
 | Módulo | Autenticación |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-003 |
 
 ---

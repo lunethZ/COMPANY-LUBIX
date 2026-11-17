@@ -8,7 +8,7 @@
 | Título | Vaciar carrito |
 | Módulo | Carrito de Compras |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-045 |
 
 ---

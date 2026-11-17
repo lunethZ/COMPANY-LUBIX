@@ -8,7 +8,7 @@
 | Título | Gestionar atributos |
 | Módulo | Productos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | No implementado |
 | RF asociados | RF-028 |
 
 ---

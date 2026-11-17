@@ -8,7 +8,7 @@
 | Título | Publicar o despublicar producto |
 | Módulo | Productos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-030 |
 
 ---

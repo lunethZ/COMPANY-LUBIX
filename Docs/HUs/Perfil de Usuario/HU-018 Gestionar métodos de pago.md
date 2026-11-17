@@ -8,7 +8,7 @@
 | Título | Gestionar métodos de pago |
 | Módulo | Perfil de Usuario |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | No implementado |
 | RF asociados | RF-018 |
 
 ---

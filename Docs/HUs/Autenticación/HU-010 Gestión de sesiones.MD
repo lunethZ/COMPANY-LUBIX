@@ -8,7 +8,7 @@
 | Título | Gestión de sesiones |
 | Módulo | Autenticación |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Parcial |
 | RF asociados | RF-010 |
 
 ---

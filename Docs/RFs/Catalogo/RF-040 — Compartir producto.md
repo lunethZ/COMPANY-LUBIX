@@ -8,7 +8,7 @@
 | Nombre | Compartir producto |
 | Módulo | Catálogo |
 | Prioridad | Baja |
-| Estado | Implementado |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

@@ -8,7 +8,7 @@
 | Nombre | Gestionar atributos de producto |
 | Módulo | Productos |
 | Prioridad | Media |
-| Estado | Implementado |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

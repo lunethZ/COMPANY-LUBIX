@@ -8,7 +8,7 @@
 | Título | Eliminar dirección |
 | Módulo | Perfil de Usuario |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-016 |
 
 ---

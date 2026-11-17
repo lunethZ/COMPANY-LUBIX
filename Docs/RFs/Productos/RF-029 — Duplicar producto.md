@@ -8,7 +8,7 @@
 | Nombre | Duplicar producto |
 | Módulo | Productos |
 | Prioridad | Baja |
-| Estado | Implementado |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

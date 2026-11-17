@@ -8,7 +8,7 @@
 | Título | Filtrar productos |
 | Módulo | Catálogo |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-032 |
 
 ---

@@ -8,7 +8,7 @@
 | Título | Eliminar producto |
 | Módulo | Productos |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-023 |
 
 ---
