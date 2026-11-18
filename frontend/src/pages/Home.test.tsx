@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import Home from './Home';
 import { renderWithProviders } from '../test/utils';
 
@@ -73,6 +73,37 @@ describe('Página de inicio', () => {
 
   it('cae al estado vacío si la consulta de productos falla', async () => {
     apiMocks.get.mockRejectedValue(new Error('network down'));
+    renderWithProviders(<Home />);
+
+    expect(
+      await screen.findByText('No hay productos disponibles'),
+    ).toBeInTheDocument();
+  });
+
+  it('usa valores por defecto y pide iniciar sesión al agregar sin cuenta', async () => {
+    apiMocks.get.mockResolvedValue({
+      data: {
+        products: [{
+          id: 'p2',
+          name: 'Producto Básico',
+          descripcion: 'Sin extras',
+          price: 1000,
+          images: [],
+        }],
+      },
+    });
+    renderWithProviders(<Home />);
+
+    const images = await screen.findAllByAltText('Producto Básico');
+    expect(images.some((img) => img.getAttribute('src') === '/placeholder.png')).toBe(true);
+    expect(screen.getAllByText('Tienda').length).toBeGreaterThan(0);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Agregar al carrito' }));
+    expect(screen.queryByText('Agregado al carrito')).not.toBeInTheDocument();
+  });
+
+  it('tolera una respuesta sin lista de productos', async () => {
+    apiMocks.get.mockResolvedValue({ data: {} });
     renderWithProviders(<Home />);
 
     expect(
