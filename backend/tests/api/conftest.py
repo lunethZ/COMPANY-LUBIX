@@ -26,6 +26,8 @@ print("[CONFTEST] Patching UUID bind processors...")
 original_bind_processor = UUID.bind_processor
 def patched_bind_processor(self, dialect):
     orig_proc = original_bind_processor(self, dialect)
+    if orig_proc is None:
+        return None
     def process(value):
         if value is None:
             return None
@@ -44,6 +46,8 @@ UUID.bind_processor = patched_bind_processor
 original_pg_bind_processor = PG_UUID.bind_processor
 def patched_pg_bind_processor(self, dialect):
     orig_proc = original_pg_bind_processor(self, dialect)
+    if orig_proc is None:
+        return None
     def process(value):
         if value is None:
             return None
