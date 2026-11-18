@@ -364,13 +364,13 @@ export default function SellerDashboard() {
   };
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       await fetchDashboardData();
     })();
   }, []);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       await fetchReviewsData();
     })();
   }, [activeTab]);
