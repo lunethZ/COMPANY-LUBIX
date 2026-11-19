@@ -1,52 +1,57 @@
 P4-S5 - Evidencia de seguridad (LUBIX) - Render + Neon
 =====================================================
 
-Estado: roles de Neon preparados; ejecucion pendiente en el proyecto.
-Fecha de ejecucion:
-Responsable:
-Proyecto de Neon / base:
-Rol que ejecuto el script:
+Fecha de ejecucion: 2026-11-18
+Responsable: Jose Andres Armenta Farias (josearmenta2163)
+Proyecto de Neon: LUBIX, rama production, base neondb
+Rol que ejecuto el script: neondb_owner (SQL Editor)
 
-Como completar esta evidencia
------------------------------
-1. Ejecutar scripts/seguridad/roles_postgresql_neon.sql en el editor SQL de Neon
-   (seccion 4 de Docs/Seguridad_Servidor.md).
-2. Pegar debajo las salidas indicadas, sin contrasenas.
-3. Adjuntar captura de Render con URL_DATABASE y DATABASE_URL_UNEPOOLED
-   definidas (sin mostrar valores) y del GET /health respondiendo 200.
-4. Adjuntar captura del despliegue donde se vea "alembic upgrade head" correcto.
+Estado: roles de minimo privilegio aplicados y verificados. El cambio de
+URL_DATABASE en Render queda PENDIENTE porque el servicio lubix-api pertenece a
+otra cuenta y no hay acceso al equipo de Render.
 
 A. Roles de PostgreSQL
 ----------------------
 A.1 Atributos (SELECT rolname, rolsuper, rolcreatedb, rolcreaterole,
-    rolcanlogin, rolconnlimit FROM pg_roles WHERE rolname IN
-    ('lubix_app','lubix_backup') ORDER BY rolname):
+    rolcanlogin, rolconnlimit FROM pg_roles):
 
-A.2 Membresias de neon_superuser (debe devolver 0 filas):
+rolname      | rolsuper | rolcreatedb | rolcreaterole | rolcanlogin | rolconnlimit
+lubix_app    | f        | f           | f             | t           | 20
+lubix_backup | f        | f           | f             | t           | 3
 
-A.3 Privilegios de lubix_app por tabla (information_schema.role_table_grants):
+A.2 Membresias de neon_superuser:
+0 filas.
 
-B. Verificaciones has_* (seccion 4.7 de Docs/Seguridad_Servidor.md)
--------------------------------------------------------------------
-has_schema_privilege('lubix_app','public','CREATE')            ->
-has_table_privilege('lubix_app','public.users','SELECT')       ->
-has_table_privilege('lubix_app','public.users','INSERT')       ->
-has_table_privilege('lubix_app','public.alembic_version','SELECT') ->
-has_table_privilege('lubix_backup','public.users','SELECT')    ->
-has_table_privilege('lubix_backup','public.users','DELETE')    ->
+A.3 Privilegios de lubix_app por tabla:
+DELETE, INSERT, SELECT, UPDATE en todas las tablas del esquema public.
+Sin privilegios sobre alembic_version (revocado por el script).
+
+B. Prueba de conexion real con lubix_app
+----------------------------------------
+Cadena pooled de Neon, driver pg (Node). Salida:
+
+OK    rol conectado = lubix_app
+OK    base = neondb
+OK    lectura de addresses: 0 filas
+OK    INSERT permitido en addresses
+OK    sin permiso CREATE en public
+OK    sin SELECT en alembic_version
+OK    DDL bloqueado (codigo 42501)
+
+RESULTADO: OK
 
 C. Aplicacion en Render
 -----------------------
-URL_DATABASE asignada (rol lubix_app, pooled):        SI / NO
-DATABASE_URL_UNPOOLED asignada (rol dueno, directa):  SI / NO
-GET https://lubix-api.onrender.com/health:            HTTP ____
-Migraciones en el arranque (alembic upgrade head):    OK / ERROR
+URL_DATABASE con rol lubix_app (pooled):       PENDIENTE (sin acceso al servicio)
+DATABASE_URL_UNPOOLED con rol dueno (directa): sin cambios
+GET https://lubix-api.onrender.com/health:     200 (el servicio no se modifico)
+GET /health/database con lubix_app:            pendiente del cambio anterior
 
 D. Resultado global
 -------------------
-Rol minimo aplicado:        SI / NO
-Matriz de roles revisada:   SI / NO
-Observaciones:
+Rol minimo aplicado y verificado: SI
+Matriz de usuarios y roles revisada: SI
+Bloqueo: el dueno del servicio lubix-api debe cambiar URL_DATABASE a la cadena
+pooled de lubix_app, o invitar al equipo de Render para hacerlo.
 
-No incluir en este archivo contrasenas, cadenas de conexion completas ni el
-contenido de .env.
+No se incluyen contrasenas ni cadenas de conexion completas.

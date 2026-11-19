@@ -10,7 +10,7 @@
 | Sistema | LUBIX — Plataforma de Gestión Empresarial |
 | Repositorio | https://github.com/lunethZ/COMPANY-LUBIX.git |
 | Entorno actual | Render (Oregon) + Neon (PostgreSQL gestionado) |
-| Versión del documento | 1.1.0 |
+| Versión del documento | 1.2.0 |
 | Fecha | 2026-11-18 |
 | Autor | Equipo LUBIX |
 | Evidencia | [`Docs/evidencias/p4-s5-seguridad.txt`](./evidencias/p4-s5-seguridad.txt) |
@@ -43,14 +43,19 @@ Por eso este documento separa dos cosas:
 | Firewall perimetral | Render / Neon (gestionado) | No configurable por el equipo; no aplica UFW |
 | Acceso administrativo | Paneles de Render y Neon | MFA de la cuenta; no hay SSH de host |
 | Protección de fuerza bruta (SSH) | VPS | No aplica en Render (anexo A) |
-| Roles de PostgreSQL | Neon | **Preparado**; ejecución pendiente (sección 4) |
+| Roles de PostgreSQL | Neon | **Aplicado** el 2026-11-18 y verificado (sección 4) |
 | Matriz de usuarios y roles | Aplicación | **Documentada** (sección 5) |
 | Secretos | Variables de entorno de Render (`sync: false`) | Verificado: no hay credenciales en el repo |
 | Puertos de base de datos | Neon | No expuestos; solo TLS público del endpoint |
 
-"Preparado" significa que el script y el procedimiento están listos y son
-idempotentes, pero **no se declaran aplicados** hasta ejecutar el script en el
-proyecto de Neon y guardar la evidencia.
+Los roles se aplicaron en la rama `production` de Neon el 2026-11-18. La
+verificación se hizo con una conexión real como `lubix_app`: lectura e `INSERT`
+permitidos; `CREATE`, DDL y acceso a `alembic_version` bloqueados.
+
+La API todavía se conecta con el rol dueño: el cambio de `URL_DATABASE` en
+Render está pendiente porque el servicio `lubix-api` pertenece a otra cuenta y
+hace falta el dueño del servicio o una invitación al equipo. Este documento no
+declara ese cambio como aplicado.
 
 ---
 
@@ -134,6 +139,13 @@ en este documento.
    privilegios de `lubix_app` por tabla.
 6. Guardar esa salida como evidencia (sección 7).
 
+> **Contraseñas e historial.** El editor SQL conserva las consultas ejecutadas.
+> Para que la contraseña definitiva no quede en ese historial, se usaron
+> contraseñas temporales en el script y, al terminar, se restablecieron en
+> **Postgres database → Roles → Reset password**. Las temporales dejan de ser
+> válidas en ese momento. Con `psql` local ese riesgo no existe y se puede usar
+> la contraseña definitiva directamente.
+
 > Si `lubix_app` o `lubix_backup` se crearon antes desde la consola de Neon,
 > heredaron `neon_superuser`. El script intenta retirarlo; si no tiene permiso,
 > muestra un `WARNING`: en ese caso se elimina el rol y se vuelve a crear con el
@@ -188,9 +200,16 @@ DATABASE_URL_UNPOOLED=postgresql+psycopg2://ROL_DUENO:CLAVE_OWNER@ep-XXXX.REGION
    Mantener `DATABASE_URL_UNPOOLED` con el rol dueño.
 4. Redesplegar `lubix-api` (Manual Deploy o push a `main`, según `autoDeploy`).
    `start.sh` ejecuta `alembic upgrade head` con el rol dueño.
-5. Volver a ejecutar el script. Esto revoca `alembic_version` si la tabla ya
-   existía y recalcula privilegios sobre las tablas del primer despliegue.
+5. Volver a ejecutar el script **solo con las contraseñas vigentes** (nunca con
+   un archivo que contenga contraseñas temporales ya rotadas). Esto revoca
+   `alembic_version` si la tabla ya existía y recalcula privilegios sobre las
+   tablas del primer despliegue.
 6. Probar `GET /health` y un endpoint de lectura de la aplicación.
+
+> En el despliegue actual, los pasos 3 a 6 están pendientes: el servicio
+> `lubix-api` de Render pertenece a otra cuenta. Los roles ya están aplicados y
+> verificados; falta que el dueño del servicio actualice `URL_DATABASE` con la
+> cadena pooled de `lubix_app`.
 
 > Si se cambia `URL_DATABASE` antes de crear los roles, Render fallará al
 > conectar. Respetar el orden.
@@ -287,14 +306,14 @@ Para completarla:
 
 | Verificación | Resultado esperado | Obtenido (fecha) |
 |--------------|--------------------|------------------|
-| `lubix_app` sin `neon_superuser` | 0 filas | |
-| `lubix_app` crea tabla | `false` | |
-| `lubix_app` lee/escribe `users` | `true` / `true` | |
-| `lubix_app` lee `alembic_version` | `false` | |
-| `lubix_backup` lee `users` | `true` | |
-| `lubix_backup` borra en `users` | `false` | |
-| API con `URL_DATABASE` de `lubix_app` | `/health` 200 y lectura correcta | |
-| Migraciones con rol dueño | `alembic upgrade head` sin errores | |
+| `lubix_app` sin `neon_superuser` | 0 filas | 0 filas (2026-11-18) |
+| `lubix_app` crea tabla | `false` | `false`, error `42501` (2026-11-18) |
+| `lubix_app` lee/escribe una tabla | `true` / `true` | `true` / `true` en `addresses` (2026-11-18) |
+| `lubix_app` lee `alembic_version` | `false` | `false` (2026-11-18) |
+| `lubix_backup` lee tablas | `true` | Otorgado por el script; verificación directa pendiente |
+| `lubix_backup` borra en tablas | `false` | Sin `DELETE` por diseño |
+| API con `URL_DATABASE` de `lubix_app` | `/health` 200 y lectura correcta | **Pendiente**: el servicio Render pertenece a otra cuenta |
+| Migraciones con rol dueño | `alembic upgrade head` sin errores | Sin cambios; sigue usando `DATABASE_URL_UNPOOLED` |
 
 ---
 
