@@ -1,0 +1,52 @@
+P4-S5 - Evidencia de seguridad (LUBIX) - Render + Neon
+=====================================================
+
+Estado: roles de Neon preparados; ejecucion pendiente en el proyecto.
+Fecha de ejecucion:
+Responsable:
+Proyecto de Neon / base:
+Rol que ejecuto el script:
+
+Como completar esta evidencia
+-----------------------------
+1. Ejecutar scripts/seguridad/roles_postgresql_neon.sql en el editor SQL de Neon
+   (seccion 4 de Docs/Seguridad_Servidor.md).
+2. Pegar debajo las salidas indicadas, sin contrasenas.
+3. Adjuntar captura de Render con URL_DATABASE y DATABASE_URL_UNEPOOLED
+   definidas (sin mostrar valores) y del GET /health respondiendo 200.
+4. Adjuntar captura del despliegue donde se vea "alembic upgrade head" correcto.
+
+A. Roles de PostgreSQL
+----------------------
+A.1 Atributos (SELECT rolname, rolsuper, rolcreatedb, rolcreaterole,
+    rolcanlogin, rolconnlimit FROM pg_roles WHERE rolname IN
+    ('lubix_app','lubix_backup') ORDER BY rolname):
+
+A.2 Membresias de neon_superuser (debe devolver 0 filas):
+
+A.3 Privilegios de lubix_app por tabla (information_schema.role_table_grants):
+
+B. Verificaciones has_* (seccion 4.7 de Docs/Seguridad_Servidor.md)
+-------------------------------------------------------------------
+has_schema_privilege('lubix_app','public','CREATE')            ->
+has_table_privilege('lubix_app','public.users','SELECT')       ->
+has_table_privilege('lubix_app','public.users','INSERT')       ->
+has_table_privilege('lubix_app','public.alembic_version','SELECT') ->
+has_table_privilege('lubix_backup','public.users','SELECT')    ->
+has_table_privilege('lubix_backup','public.users','DELETE')    ->
+
+C. Aplicacion en Render
+-----------------------
+URL_DATABASE asignada (rol lubix_app, pooled):        SI / NO
+DATABASE_URL_UNPOOLED asignada (rol dueno, directa):  SI / NO
+GET https://lubix-api.onrender.com/health:            HTTP ____
+Migraciones en el arranque (alembic upgrade head):    OK / ERROR
+
+D. Resultado global
+-------------------
+Rol minimo aplicado:        SI / NO
+Matriz de roles revisada:   SI / NO
+Observaciones:
+
+No incluir en este archivo contrasenas, cadenas de conexion completas ni el
+contenido de .env.
