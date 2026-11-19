@@ -179,4 +179,167 @@ describe('Panel de administración', () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it('muestra los estados vacíos de cada pestaña', async () => {
+    seedAdmin();
+    apiMocks.get.mockImplementation((url: string) => {
+      if (url === '/admin/dashboard/me') {
+        return Promise.resolve({
+          data: {
+            totalUsers: 0,
+            totalCompanies: 0,
+            pendingCompanies: 0,
+            activeUsers: 0,
+            inactiveUsers: 0,
+          },
+        });
+      }
+      if (url === '/cart') return Promise.resolve({ data: { items: [] } });
+      return Promise.resolve({ data: [] });
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<DashboardAdminPage />);
+
+    await screen.findByRole('heading', { name: 'Panel de Administración' });
+    expect(
+      screen.getByText('No hay empresas pendientes de validación'),
+    ).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Empresas (0)' }));
+    expect(screen.getByText('No hay empresas registradas')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Usuarios (0)' }));
+    expect(screen.getByText('No hay usuarios registrados')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'PQRS (0)' }));
+    expect(screen.getByText('No hay PQRS registradas')).toBeInTheDocument();
+  });
+
+  it('inhabilitar un usuario requiere confirmación y recarga los datos', async () => {
+    seedAdmin();
+    mockDatos();
+    apiMocks.patch.mockResolvedValue({ data: {} });
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const user = userEvent.setup();
+    renderWithProviders(<DashboardAdminPage />);
+
+    await screen.findByRole('heading', { name: 'Panel de Administración' });
+    await user.click(screen.getByRole('button', { name: 'Usuarios (1)' }));
+
+    const llamadasIniciales = apiMocks.get.mock.calls.length;
+    await user.click(screen.getByRole('button', { name: 'Inhabilitar' }));
+
+    expect(confirmar).toHaveBeenCalledWith(
+      expect.stringContaining('Inhabilitar al usuario "Luis Pérez"'),
+    );
+    await waitFor(() => {
+      expect(apiMocks.patch).toHaveBeenCalledWith(
+        '/admin/users/u1/toggle-status',
+      );
+    });
+    await waitFor(() => {
+      expect(apiMocks.get.mock.calls.length).toBeGreaterThan(llamadasIniciales);
+    });
+  });
+
+  it('no cambia el estado del usuario si se cancela la confirmación', async () => {
+    seedAdmin();
+    mockDatos();
+    vi.spyOn(window, 'confirm').mockReturnValue(false);
+    const user = userEvent.setup();
+    renderWithProviders(<DashboardAdminPage />);
+
+    await screen.findByRole('heading', { name: 'Panel de Administración' });
+    await user.click(screen.getByRole('button', { name: 'Usuarios (1)' }));
+    await user.click(screen.getByRole('button', { name: 'Inhabilitar' }));
+
+    expect(apiMocks.patch).not.toHaveBeenCalled();
+  });
+
+  it('inhabilitar una empresa requiere confirmación y recarga los datos', async () => {
+    seedAdmin();
+    mockDatos();
+    apiMocks.patch.mockResolvedValue({ data: {} });
+    const confirmar = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const user = userEvent.setup();
+    renderWithProviders(<DashboardAdminPage />);
+
+    await screen.findByRole('heading', { name: 'Panel de Administración' });
+    await user.click(screen.getByRole('button', { name: 'Empresas (1)' }));
+    await user.click(screen.getByRole('button', { name: 'Inhabilitar' }));
+
+    expect(confirmar).toHaveBeenCalledWith(
+      expect.stringContaining('Inhabilitar la empresa "TechStore"'),
+    );
+    await waitFor(() => {
+      expect(apiMocks.patch).toHaveBeenCalledWith(
+        '/admin/companies/c1/toggle-status',
+      );
+    });
+  });
+
+  it('marca una PQRS como resuelta y recarga los datos', async () => {
+    seedAdmin();
+    mockDatos();
+    apiMocks.patch.mockResolvedValue({ data: {} });
+    const user = userEvent.setup();
+    renderWithProviders(<DashboardAdminPage />);
+
+    await screen.findByRole('heading', { name: 'Panel de Administración' });
+    await user.click(screen.getByRole('button', { name: 'PQRS (1)' }));
+    await user.click(screen.getByRole('button', { name: 'Marcar resuelta' }));
+
+    await waitFor(() => {
+      expect(apiMocks.patch).toHaveBeenCalledWith('/admin/pqrs/pq1/status');
+    });
+  });
+
+  it('muestra un error si falla el cambio de estado de un usuario', async () => {
+    seedAdmin();
+    mockDatos();
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    apiMocks.patch.mockRejectedValue({
+      response: { data: { detail: 'El usuario no existe' } },
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<DashboardAdminPage />);
+
+    await screen.findByRole('heading', { name: 'Panel de Administración' });
+    await user.click(screen.getByRole('button', { name: 'Usuarios (1)' }));
+    await user.click(screen.getByRole('button', { name: 'Inhabilitar' }));
+
+    expect(await screen.findByText('El usuario no existe')).toBeInTheDocument();
+  });
+
+  it('muestra el estado de empresa validada y protege al usuario admin', async () => {
+    seedAdmin();
+    apiMocks.get.mockImplementation((url: string) => {
+      if (url === '/admin/dashboard/me') return Promise.resolve({ data: stats });
+      if (url === '/admin/companies') {
+        return Promise.resolve({
+          data: [{ ...company, verified: true }],
+        });
+      }
+      if (url === '/admin/users') {
+        return Promise.resolve({
+          data: [{ ...usuario, role: 'admin' }],
+        });
+      }
+      if (url === '/admin/pqrs') return Promise.resolve({ data: [] });
+      if (url === '/cart') return Promise.resolve({ data: { items: [] } });
+      return Promise.resolve({ data: [] });
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<DashboardAdminPage />);
+
+    await screen.findByRole('heading', { name: 'Panel de Administración' });
+    await user.click(screen.getByRole('button', { name: 'Empresas (1)' }));
+    expect(screen.getByText('Validada')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'Usuarios (1)' }));
+    expect(screen.getByText('Admin')).toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Inhabilitar' }),
+    ).not.toBeInTheDocument();
+  });
 });
