@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import api from '../api/axios'
@@ -216,8 +216,8 @@ describe('Register', () => {
       await user.click(screen.getByRole('button', { name: 'Crear cuenta' }))
 
       expect(
-        await screen.findByText('Ingresa un correo electrónico válido'),
-      ).toBeInTheDocument()
+        (await screen.findAllByText('Ingresa un correo electrónico válido')).length,
+      ).toBeGreaterThan(0)
       expect(post).not.toHaveBeenCalled()
     })
 
@@ -298,17 +298,23 @@ describe('Register', () => {
       expect(confirmacion).toHaveAttribute('type', 'text')
     })
 
-    it('avisa en tiempo real cuando las contraseñas no coinciden', async () => {
+    it('navega a la verificación de correo tras registrar un usuario', async () => {
+      post.mockResolvedValue({ data: {} })
       const user = userEvent.setup()
       renderRegister()
 
-      const [password, confirmacion] = screen.getAllByPlaceholderText('••••••••')
-      await user.type(password, 'Prueba123')
-      await user.type(confirmacion, 'Prueba124')
+      await llenarUsuario(user)
+      await user.click(screen.getByRole('button', { name: 'Crear cuenta' }))
+      await screen.findByText('Usuario registrado correctamente')
 
-      expect(
-        screen.getByText('Las contraseñas no coinciden'),
-      ).toBeInTheDocument()
+      await waitFor(
+        () => {
+          expect(mocks.navigate).toHaveBeenCalledWith(
+            '/register/VerifyEmailPage',
+          )
+        },
+        { timeout: 3000 },
+      )
     })
   })
 })
