@@ -39,6 +39,9 @@ playwright-report/
 *.log
 npm-debug.log*
 
+# Respaldos locales (nunca versionar)
+backups/
+
 # Editors and operating-system files
 .vscode/*
 !.vscode/extensions.json
