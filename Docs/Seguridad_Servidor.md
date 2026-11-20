@@ -10,8 +10,8 @@
 | Sistema | LUBIX — Plataforma de Gestión Empresarial |
 | Repositorio | https://github.com/lunethZ/COMPANY-LUBIX.git |
 | Entorno actual | Render (Oregon) + Neon (PostgreSQL gestionado) |
-| Versión del documento | 1.2.0 |
-| Fecha | 2026-11-18 |
+| Versión del documento | 1.3.0 |
+| Fecha | 2026-11-20 |
 | Autor | Equipo LUBIX |
 | Evidencia | [`Docs/evidencias/p4-s5-seguridad.txt`](./evidencias/p4-s5-seguridad.txt) |
 
@@ -52,10 +52,11 @@ Los roles se aplicaron en la rama `production` de Neon el 2026-11-18. La
 verificación se hizo con una conexión real como `lubix_app`: lectura e `INSERT`
 permitidos; `CREATE`, DDL y acceso a `alembic_version` bloqueados.
 
-La API todavía se conecta con el rol dueño: el cambio de `URL_DATABASE` en
-Render está pendiente porque el servicio `lubix-api` pertenece a otra cuenta y
-hace falta el dueño del servicio o una invitación al equipo. Este documento no
-declara ese cambio como aplicado.
+La API ya se conecta con `lubix_app`: el dueño del servicio `lubix-api` cambió
+`URL_DATABASE` a la cadena pooled el 2026-11-20. La conexión se comprobó en
+`pg_stat_activity` de Neon, donde la sesión del pooler aparece con
+`usename = lubix_app` (sección 7). El rol dueño queda reservado a las
+migraciones mediante `DATABASE_URL_UNPOOLED`.
 
 ---
 
@@ -206,10 +207,12 @@ DATABASE_URL_UNPOOLED=postgresql+psycopg2://ROL_DUENO:CLAVE_OWNER@ep-XXXX.REGION
    tablas del primer despliegue.
 6. Probar `GET /health` y un endpoint de lectura de la aplicación.
 
-> En el despliegue actual, los pasos 3 a 6 están pendientes: el servicio
-> `lubix-api` de Render pertenece a otra cuenta. Los roles ya están aplicados y
-> verificados; falta que el dueño del servicio actualice `URL_DATABASE` con la
-> cadena pooled de `lubix_app`.
+> Estado al 2026-11-20: los pasos 3 y 6 están aplicados y verificados. El dueño
+> del servicio `lubix-api` cambió `URL_DATABASE` a la cadena pooled de
+> `lubix_app`; `/health` y `/health/database` responden 200 y la sesión del
+> pooler aparece como `lubix_app` en `pg_stat_activity`. El paso 5 es
+> mantenimiento: se repite cada vez que se ejecuta el script con las contraseñas
+> vigentes, nunca con contraseñas temporales ya rotadas.
 
 > Si se cambia `URL_DATABASE` antes de crear los roles, Render fallará al
 > conectar. Respetar el orden.
@@ -247,6 +250,20 @@ SELECT has_table_privilege('lubix_backup', 'public.users', 'SELECT') AS backup_l
 
 Si `users` todavía no existe (primer despliegue), usar cualquier tabla listada
 en `pg_tables` con `schemaname = 'public'`.
+
+Para confirmar qué rol usa la API en producción, llamar a `/health/database` y
+ejecutar de inmediato en el editor SQL (la conexión del pooler se cierra cuando
+el cómputo de Neon entra en `Idle`):
+
+```sql
+SELECT usename, application_name, state, backend_start
+FROM pg_stat_activity
+WHERE datname = 'neondb'
+  AND application_name <> 'neon-internal-sql-editor'
+ORDER BY backend_start DESC;
+```
+
+La fila con `application_name = pgbouncer` debe mostrar `usename = lubix_app`.
 
 ---
 
@@ -312,7 +329,7 @@ Para completarla:
 | `lubix_app` lee `alembic_version` | `false` | `false` (2026-11-18) |
 | `lubix_backup` lee tablas | `true` | Otorgado por el script; verificación directa pendiente |
 | `lubix_backup` borra en tablas | `false` | Sin `DELETE` por diseño |
-| API con `URL_DATABASE` de `lubix_app` | `/health` 200 y lectura correcta | **Pendiente**: el servicio Render pertenece a otra cuenta |
+| API con `URL_DATABASE` de `lubix_app` | `/health` 200 y lectura correcta | `/health` y `/health/database` 200; pooler con `usename = lubix_app` (2026-11-20) |
 | Migraciones con rol dueño | `alembic upgrade head` sin errores | Sin cambios; sigue usando `DATABASE_URL_UNPOOLED` |
 
 ---
