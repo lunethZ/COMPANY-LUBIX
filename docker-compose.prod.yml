@@ -1,0 +1,29 @@
+# Perfil de produccion para P4-S5: cierra la superficie publicada por Docker.
+# Los puertos quedan solo en 127.0.0.1; el acceso remoto se hace por tunel SSH
+# o por Caddy (P4-S3), que es el unico que escucha en 80/443.
+#
+# Uso:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+#
+# Requiere Docker Compose >= 2.24 (etiqueta !override).
+services:
+  postgres:
+    ports: !override
+      - "127.0.0.1:5435:5432"
+
+  minio:
+    ports: !override
+      - "127.0.0.1:9100:9000"
+      - "127.0.0.1:9101:9001"
+
+  backend:
+    ports: !override
+      - "127.0.0.1:8002:8000"
+
+  frontend:
+    ports: !override
+      - "127.0.0.1:5173:5173"
+
+  mobile:
+    ports: !override
+      - "127.0.0.1:8081:8081"
