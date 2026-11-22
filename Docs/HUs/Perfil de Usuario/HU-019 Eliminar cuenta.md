@@ -8,7 +8,7 @@
 | Título | Eliminar cuenta |
 | Módulo | Perfil de Usuario |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-019 |
 
 ---

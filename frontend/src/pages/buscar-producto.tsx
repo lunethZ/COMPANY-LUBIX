@@ -5,6 +5,7 @@ import NavbarUsuario from "../components/navbaruser";
 import NavbarEmpresa from "../components/navbar-empresa";
 import Footer from "../components/footer";
 import api from "../api/axios";
+import { API_BASE_URL } from "../api/config";
 import { useAuth } from "../context/AuthContext";
 import {
   MagnifyingGlassIcon,
@@ -158,7 +159,7 @@ function BuscarProducto() {
   const resolveImage = (img?: string) => {
     if (!img || img === "/placeholder.png") return "/placeholder.png";
     if (img.startsWith("http://") || img.startsWith("https://")) return img;
-    const base = (import.meta.env.VITE_API_URL || "http://localhost:8002").replace(/\/$/, "");
+    const base = API_BASE_URL;
     const path = img.startsWith("/files") ? img : img.startsWith("/") ? `/files${img}` : `/files/${img}`;
     // Si ya es /files/products/... lo deja, si es products/... lo convierte
     if (path.startsWith("/files/files")) return `${base}${path.replace("/files/files", "/files")}`;

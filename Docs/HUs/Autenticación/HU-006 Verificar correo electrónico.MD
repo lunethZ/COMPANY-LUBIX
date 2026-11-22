@@ -8,7 +8,7 @@
 | Título | Verificar correo electrónico |
 | Módulo | Autenticación |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-006 |
 
 ---

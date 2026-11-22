@@ -1,7 +1,8 @@
 import axios from "axios";
+import { API_BASE_URL } from "./config";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8002",
+  baseURL: API_BASE_URL,
 });
 
 // Interceptor de request: añade el access token si existe

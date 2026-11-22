@@ -8,7 +8,7 @@
 | Título | Editar producto |
 | Módulo | Productos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-022 |
 
 ---

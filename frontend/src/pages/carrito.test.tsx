@@ -3,7 +3,13 @@ import { fireEvent, screen } from '@testing-library/react';
 import { Route, Routes } from 'react-router-dom';
 import userEvent from '@testing-library/user-event';
 import CartPage from './carrito';
+import { useAuthModal } from '../context/AuthModalContext';
 import { renderWithProviders } from '../test/utils';
+
+function AuthModalProbe() {
+  const { isOpen, initialTab } = useAuthModal();
+  return <span>{isOpen ? `Modal abierto: ${initialTab}` : 'Modal cerrado'}</span>;
+}
 
 // Se dobla el cliente axios: ninguna prueba debe tocar la red.
 const apiMocks = vi.hoisted(() => ({
@@ -93,6 +99,66 @@ describe('Página del carrito', () => {
     fireEvent.click(removeButton);
 
     expect(await screen.findByText('Tu carrito está vacío')).toBeInTheDocument();
+  });
+
+  it('muestra la imagen del producto cuando está disponible', async () => {
+    localStorage.setItem(
+      'cart',
+      JSON.stringify([{ ...cartItem, image: 'https://cdn.test/mouse.png' }]),
+    );
+    renderWithProviders(<CartPage />);
+
+    const image = await screen.findByAltText('Mouse Gamer');
+    expect(image).toHaveAttribute('src', 'https://cdn.test/mouse.png');
+  });
+
+  it('quita el producto al decrementar la última unidad y usa el singular', async () => {
+    localStorage.setItem(
+      'cart',
+      JSON.stringify([{ ...cartItem, quantity: 1, line_total: 85000 }]),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<CartPage />);
+
+    expect(await screen.findByText(/Total \(1 artículo\)/)).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: '-' }));
+
+    expect(await screen.findByText('Tu carrito está vacío')).toBeInTheDocument();
+  });
+
+  it.each([
+    ['admin', '/dashboard-admin'],
+    ['empresa', '/home-empresa'],
+    ['user', '/home-usuario'],
+  ])('el enlace del carrito vacío lleva al inicio de %s', async (role, route) => {
+    localStorage.setItem('access_token', 'token');
+    localStorage.setItem(
+      'user',
+      JSON.stringify({ id: 'u1', name: 'Ana', email: 'ana@x.com', role_id: role }),
+    );
+    apiMocks.get.mockResolvedValue({ data: { items: [] } });
+
+    renderWithProviders(<CartPage />);
+
+    const link = await screen.findByRole('link', { name: 'Ver productos' });
+    expect(link).toHaveAttribute('href', route);
+  });
+
+  it('sin sesión, "Proceder al pago" abre el modal de login', async () => {
+    seedCart();
+    const user = userEvent.setup();
+    renderWithProviders(
+      <>
+        <CartPage />
+        <AuthModalProbe />
+      </>,
+    );
+
+    await screen.findByText('Mouse Gamer');
+    expect(screen.getByText('Modal cerrado')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'Proceder al pago' }));
+
+    expect(screen.getByText('Modal abierto: login')).toBeInTheDocument();
   });
 
   it('con sesión, "Proceder al pago" navega a la página de pago', async () => {

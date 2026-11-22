@@ -8,7 +8,7 @@
 | Título | Agregar productos al carrito |
 | Módulo | Carrito |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-041 |
 
 ---

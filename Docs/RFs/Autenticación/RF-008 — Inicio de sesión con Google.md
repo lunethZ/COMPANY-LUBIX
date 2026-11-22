@@ -8,7 +8,7 @@
 | Nombre | Login con Google |
 | Módulo | Autenticación |
 | Prioridad | Media |
-| Estado | Pendiente |
+| Estado | No implementado |
 | Fecha | Febrero 2026 |
 
 ---

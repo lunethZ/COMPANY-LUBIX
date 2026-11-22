@@ -38,9 +38,9 @@ playwright-report/
 *.sqlite3
 *.log
 npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-pnpm-debug.log*
+
+# Respaldos locales (nunca versionar)
+backups/
 
 # Editors and operating-system files
 .vscode/*

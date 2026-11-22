@@ -8,7 +8,7 @@
 | Título | Crear reseña de producto |
 | Módulo | Catálogo |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | Implementado |
 | RF asociados | RF-068 |
 
 ---

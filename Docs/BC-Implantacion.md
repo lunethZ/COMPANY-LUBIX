@@ -84,9 +84,10 @@
 > Políticas, herramientas y procedimientos de backup y restauración.
 
 > La versión inicial del plan de respaldo se documenta en un archivo independiente:
-> [`Docs/Respaldo_v0.md`](./Respaldo_v0.md).
+> [`Docs/Respaldo_v0.md`](./Respaldo_v0.md). La versión operativa con cifrado, script y
+> prueba de restauración está en [`Docs/Respaldo_v1_Operativo.md`](./Respaldo_v1_Operativo.md).
 
-<!-- Ver Docs/Respaldo_v0.md -->
+<!-- Ver Docs/Respaldo_v1_Operativo.md y scripts/pg_backup.py -->
 
 ### 3.1 Alcance de los respaldos (base de datos, archivos, configuración)
 <!-- TODO -->

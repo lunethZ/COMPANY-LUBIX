@@ -8,7 +8,7 @@
 | Nombre | Configurar preferencias |
 | Módulo | Perfil de Usuario |
 | Prioridad | Baja |
-| Estado | Implementado |
+| Estado | Parcial |
 | Fecha | Febrero 2026 |
 
 ---

@@ -8,7 +8,7 @@
 | Título | Duplicar producto |
 | Módulo | Productos |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | No implementado |
 | RF asociados | RF-029 |
 
 ---

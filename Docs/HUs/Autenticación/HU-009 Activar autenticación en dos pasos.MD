@@ -8,7 +8,7 @@
 | Título | Activar autenticación en dos pasos |
 | Módulo | Autenticación |
 | Prioridad | Alta |
-| Estado | Pendiente |
+| Estado | No implementado |
 | RF asociados | RF-009 |
 
 ---

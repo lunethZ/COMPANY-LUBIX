@@ -8,7 +8,7 @@
 | Nombre | Gestionar inventario |
 | Módulo | Productos |
 | Prioridad | Alta |
-| Estado | Implementado |
+| Estado | Parcial |
 | Fecha | Febrero 2026 |
 
 ---

@@ -8,7 +8,7 @@
 | Nombre | Proceder al pago |
 | Módulo | Carrito de Compras |
 | Prioridad | Alta |
-| Estado | Implementado |
+| Estado | Parcial |
 | Fecha | Febrero 2026 |
 
 ---
