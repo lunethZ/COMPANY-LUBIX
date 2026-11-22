@@ -5,7 +5,7 @@ from decimal import Decimal
 
 DATABASE_URL = os.getenv(
     "REPOSITORY_TEST_DATABASE_URL",
-    "postgresql+psycopg2://lubix_test:lubix_test@localhost:5435/lubix_test",
+    "postgresql+psycopg2://lubix_test:lubix_test@localhost:5433/lubix_test",
 )
 os.environ.setdefault("URL_DATABASE", DATABASE_URL)
 os.environ.setdefault("SECRET_KEY", "clave-solo-para-tests-de-repositorio")
