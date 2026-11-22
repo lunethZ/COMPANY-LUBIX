@@ -26,6 +26,10 @@ from sqlalchemy.orm import Session
 
 from app.database.Connection import Base, get_db
 from app.main import app as fastapi_app
+from app.models.ModelCompany import Company
+from app.models.ModelRole import Role
+from app.models.ModelUser import Users
+from app.services.authentication.JWTService import create_access_token
 
 BACKEND_DIR = Path(__file__).resolve().parents[2]
 
@@ -172,3 +176,49 @@ def clean_database(pg_engine):
                 text(f"TRUNCATE {', '.join(tables)} RESTART IDENTITY CASCADE")
             )
     yield
+
+
+@pytest.fixture()
+def rol_user(db_session):
+    role = Role(name="user")
+    db_session.add(role)
+    db_session.commit()
+    return role
+
+
+@pytest.fixture()
+def empresa(db_session):
+    role = Role(name="company")
+    db_session.add(role)
+    db_session.flush()
+
+    user = Users(
+        fullName="Dueño Empresa",
+        email="empresa-postgres@lubix.com",
+        hashed_password="hash-de-prueba",
+        tell="3001234567",
+        verified=True,
+        isActive=True,
+        role_id=role.id,
+    )
+    db_session.add(user)
+    db_session.flush()
+
+    company = Company(
+        nameCompany="Empresa Postgres",
+        addressCompany="Calle 1 # 2-3",
+        CompanyNIT="900123456",
+        CompanyNITDV="1",
+        user_id=user.id,
+    )
+    db_session.add(company)
+    db_session.commit()
+
+    return user, company
+
+
+@pytest.fixture()
+def headers_empresa(empresa):
+    user, _ = empresa
+    token = create_access_token(str(user.id), "company")
+    return {"Authorization": f"Bearer {token}"}
