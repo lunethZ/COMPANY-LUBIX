@@ -218,7 +218,7 @@ test("recorrido completo: home de usuario, detalle de producto, carrito y pago",
   await page.getByRole("button", { name: "Ver detalle" }).first().click();
   await page.waitForURL("**/producto/p1");
   await expect(
-    page.getByRole("heading", { name: "Portátil Lubix Pro" }),
+    page.getByRole("heading", { level: 1, name: "Portátil Lubix Pro" }),
   ).toBeVisible();
 
   // 3. Agregar al carrito desde el detalle.
