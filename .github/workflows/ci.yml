@@ -85,7 +85,7 @@ jobs:
         run: python scripts/init_test_db.py
       - name: Tests de repositorio contra PostgreSQL real
         run: pytest tests/repositories/ -v --no-cov
-      - name: Pruebas con cobertura (umbral 75 %)
+      - name: Pruebas con cobertura (umbral 80 %)
         run: pytest --junitxml=test-results.xml
       - name: Verificar las pruebas de integración PostgreSQL
         run: |

@@ -68,7 +68,7 @@ pip install pytest pytest-cov httpx
 pytest
 ```
 
-La suite completa requiere una cobertura mínima del 75 % y debe terminar con código de salida `0`.
+La suite completa requiere una cobertura mínima del 80 % y debe terminar con código de salida `0`.
 
 ---
 
@@ -609,7 +609,7 @@ print(quote_plus("P@ss#1"))
 
 ## 11. CI e imágenes GHCR
 
-El flujo [CI](../.github/workflows/ci.yml) ejecuta las pruebas de frontend, E2E y backend, y comprueba la compilación del frontend utilizada por Render. El backend usa PostgreSQL 16 en el puerto 5435, aplica primero las migraciones y verifica que las pruebas de integración de PostgreSQL no se omitan. La ejecución individual de repositorios usa `--no-cov`; la suite completa vuelve a incluirlas y mantiene el mínimo del 75 %. El flujo de SonarCloud usa una base aislada con la misma configuración y el mismo orden de migraciones.
+El flujo [CI](../.github/workflows/ci.yml) ejecuta las pruebas de frontend, E2E y backend, y comprueba la compilación del frontend utilizada por Render. El backend usa PostgreSQL 16 en el puerto 5435, aplica primero las migraciones y verifica que las pruebas de integración de PostgreSQL no se omitan. La ejecución individual de repositorios usa `--no-cov`; la suite completa vuelve a incluirlas y mantiene el mínimo del 80 %. El flujo de SonarCloud usa una base aislada con la misma configuración y el mismo orden de migraciones.
 
 En cada pull request se comprueba que ambas imágenes existentes se construyen, sin publicarlas. En un push a `main`, si las tres tareas de CI pasan, se publican `ghcr.io/<propietario>/<repositorio>-backend:sha-<commit>` y `ghcr.io/<propietario>/<repositorio>-frontend:sha-<commit>`. El nombre del repositorio se convierte a minúsculas. Para GHCR se utiliza el `GITHUB_TOKEN` de Actions, con `contents: read` y `packages: write` solo en el trabajo de publicación; no se requiere un token personal ni un secreto adicional. La configuración de la organización y del repositorio debe permitir la creación y escritura de paquetes.
 

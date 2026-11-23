@@ -99,11 +99,11 @@ En `docker-compose.yml` hay un bloque comentado `uptime-kuma`. Para usarlo:
 
 ## Umbral de cobertura
 
-El umbral obligatorio del backend es **75 %** y está definido en:
+El umbral obligatorio del backend es **80 %** y está definido en:
 
-- `backend/pytest.ini` (`--cov-fail-under=75`).
-- `backend/pyproject.toml` (`fail_under = 75`).
-- `.github/workflows/sonarcloud.yml` (`--cov-fail-under=75`).
+- `backend/pytest.ini` (`--cov-fail-under=80`).
+- `backend/pyproject.toml` (`fail_under = 80`).
+- `.github/workflows/sonarcloud.yml` (`--cov-fail-under=80`).
 
 La medición local tras S6 fue **80.98 %** ejecutando la suite sin los tests de
 repositorio (PostgreSQL de prueba no disponible) y **84.16 %** con la suite

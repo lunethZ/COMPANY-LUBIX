@@ -37,19 +37,19 @@ Definir la estrategia, niveles de prueba, herramientas, criterios de aceptación
 |----------------------|-------------------------------|------------------------------------|--------|
 | **Suite backend (`pytest`)** | **528 pruebas aprobadas** | 13 pruebas | Actualizado |
 | **Cobertura global backend (`app/`)** | **~89 %** | 22 % | Supera umbral |
-| **Umbral mínimo exigido (`fail_under`)** | **75 %** | 50 % | Cumple |
+| **Umbral mínimo exigido (`fail_under`)** | **80 %** | 50 % | Cumple |
 | **Quality Gate (SonarQube Cloud)** | **>= 80 % en código nuevo** | — | Activo en CI |
 
 ## 6. Criterios de aceptación y umbrales de calidad
 
-- **Umbral de cobertura backend:** Configurado en **75 %** (`fail_under = 75` en `backend/pyproject.toml` y `--cov-fail-under=75` en `backend/pytest.ini`). Todo Pull Request que descienda por debajo de este porcentaje falla automáticamente en CI.
+- **Umbral de cobertura backend:** Configurado en **80 %** (`fail_under = 80` en `backend/pyproject.toml` y `--cov-fail-under=80` en `backend/pytest.ini`). Todo Pull Request que descienda por debajo de este porcentaje falla automáticamente en CI.
 - **Umbral de cobertura frontend:** Cobertura global mínima de **80 % de líneas** mediante los `thresholds` de Vitest en `frontend/vite.config.ts`, con exigencias específicas por página en las vistas críticas.
 - **Cero fallos en suite:** El 100 % de las **528 pruebas** deben aprobar antes de fusionar cambios en `Develop` o `main`.
 - **Estándar SonarCloud:** Cobertura mínima del **80 %** sobre código nuevo y cero vulnerabilidades críticas bloqueantes.
 
 ## 7. Mantenimiento y próximos pasos
 
-- Mantener la cobertura del backend por encima del umbral obligatorio del **75 %** (actualmente en **~89 %**) ante cada nuevo endpoint o regla de negocio.
+- Mantener la cobertura del backend por encima del umbral obligatorio del **80 %** (actualmente en **~89 %**) ante cada nuevo endpoint o regla de negocio.
 - Ampliar la cobertura de pruebas end-to-end y de componentes en el frontend (`Vitest`).
 - Incorporar pruebas unitarias para el módulo de compartir producto (`RF-040`) cuando salga de deuda técnica e ingrese al alcance funcional.
 - Dar seguimiento a las métricas por característica de calidad (ISO/IEC 25010) en el documento complementario `Docs/Plan_QA_ISO25010.md`.

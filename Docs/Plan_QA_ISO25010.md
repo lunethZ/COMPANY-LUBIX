@@ -29,7 +29,7 @@ El plan cubre el backend (FastAPI / Python), el frontend web (React / TypeScript
 
 | Objetivo | Meta | Estado (2026-11-20) |
 |---|---|---|
-| Cobertura del backend | ≥ 75 % | Cumple (~89 %) |
+| Cobertura del backend | ≥ 80 % | Cumple (~89 %) |
 | Pruebas del backend aprobadas | 100 % de la suite | Cumple (528/528) |
 | Cobertura global del frontend (líneas) | ≥ 80 % | Umbral configurado en Vitest y aplicado en CI |
 | Cobertura de código nuevo en SonarQube Cloud | ≥ 80 % | Activo en CI |
@@ -41,7 +41,7 @@ El plan cubre el backend (FastAPI / Python), el frontend web (React / TypeScript
 
 | ID | Métrica | Fórmula | Herramienta / fuente | Meta | Último resultado | Fecha |
 |---|---|---|---|---|---|---|
-| M-01 | Cobertura backend (`app/`) | líneas cubiertas ÷ líneas ejecutables × 100 | `coverage.py` vía `pytest --cov=app` | ≥ 75 % | ~89 % | 2026-11-16 |
+| M-01 | Cobertura backend (`app/`) | líneas cubiertas ÷ líneas ejecutables × 100 | `coverage.py` vía `pytest --cov=app` | ≥ 80 % | ~89 % | 2026-11-16 |
 | M-02 | Tasa de éxito backend | pruebas aprobadas ÷ pruebas ejecutadas × 100 | `pytest` | 100 % | 528/528 (100 %) | 2026-11-16 |
 | M-03 | Cobertura frontend | líneas cubiertas ÷ líneas × 100 | Vitest (v8) + `thresholds` | ≥ 80 % global; ≥ 40 % por página crítica | Reportada en CI y Sonar | 2026-11-20 |
 | M-04 | Cobertura de código nuevo | líneas nuevas cubiertas ÷ líneas nuevas × 100 | SonarQube Cloud | ≥ 80 % | Quality Gate activo | 2026-11-20 |
@@ -75,7 +75,7 @@ El plan cubre el backend (FastAPI / Python), el frontend web (React / TypeScript
 
 **Salida (para fusionar a `Develop` o `main`):**
 
-1. `pytest` completo en verde y cobertura ≥ 75 %.
+1. `pytest` completo en verde y cobertura ≥ 80 %.
 2. `npm run test:coverage` en verde con los umbrales de Vitest.
 3. `npm run lint` sin errores.
 4. Quality Gate de SonarQube Cloud aprobado (≥ 80 % en código nuevo, sin vulnerabilidades críticas).
@@ -86,7 +86,7 @@ El plan cubre el backend (FastAPI / Python), el frontend web (React / TypeScript
 | Medición | Hallazgo | Decisión |
 |---|---|---|
 | Cobertura backend 22 % (2026-10-18) | Suite insuficiente para el tamaño del backend | Se fijó umbral inicial de 50 % y se priorizaron pruebas de servicios |
-| Cobertura backend ~89 % y 528 pruebas (2026-11-16) | La meta inicial quedó corta | Se elevó el umbral obligatorio de 50 % a **80 %** y se unificaron las suites; S6 lo estandariza en **75 %** |
+| Cobertura backend ~89 % y 528 pruebas (2026-11-16) | La meta inicial quedó corta | Se elevó el umbral obligatorio de 50 % a **80 %** y se unificaron las suites; S6 lo mantiene en **80 %** |
 | Brechas de cobertura en páginas del frontend | Cobertura global no garantizaba vistas críticas | Se añadieron umbrales por página (40 %) en `vite.config.ts` para las vistas de mayor riesgo |
 | Revisión ISO 25010 (2026-10-05): ASISTENCIA AL USUARIO sin FAQ | El usuario dependía de soporte externo para dudas básicas | Se creó la sección **1.1.10 Preguntas frecuentes** dentro del manual (2026-11-20) |
 | Campaña de capturas reales (2026-11-19/20) | El catálogo se queda cargando para sesiones que no son de empresa | Se registró como defecto P2, se documentó la conducta en la FAQ y se añadió a la lista de casos E2E |
