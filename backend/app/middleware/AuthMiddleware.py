@@ -88,6 +88,49 @@ def _cors_response(status_code: int, detail: str, request: Request | None = None
         headers=headers,
     )
 
+
+def _authenticate(request: Request):
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return None, _cors_response(401, "Token requerido", request)
+
+    try:
+        scheme, token = auth_header.split()
+    except ValueError:
+        return None, _cors_response(401, "Token invalido", request)
+
+    if scheme.lower() != "bearer":
+        return None, _cors_response(401, "Formato de autorizacion invalido", request)
+
+    try:
+        payload = verify_token(token)
+    except Exception as exc:
+        print("Auth Error", exc)
+        return None, _cors_response(401, "Token invalido", request)
+
+    if not isinstance(payload, dict) or payload is None:
+        return None, _cors_response(401, "Token invalido", request)
+
+    if payload.get("type") != "access":
+        return None, _cors_response(401, "Access token requerido", request)
+
+    user_id = payload.get("sub")
+    if not user_id:
+        return None, _cors_response(401, "Token invalido", request)
+
+    request.state.user_id = user_id
+    request.state.role = payload.get("role")
+    return payload, None
+
+
+async def _call_next_safely(request: Request, call_next):
+    try:
+        return await call_next(request)
+    except Exception as exc:
+        print("Auth Error", exc)
+        return _cors_response(401, "Token invalido", request)
+
+
 async def auth_middleware(request: Request, call_next):
 
     if request.method == "OPTIONS":
@@ -104,76 +147,27 @@ async def auth_middleware(request: Request, call_next):
     if path.startswith("/products/"):
         if request.method == "GET":
             return await call_next(request)
-        else:
-            auth_header = request.headers.get("Authorization")
-            if not auth_header:
-                return _cors_response(401, "Token requerido", request)
-            try:
-                scheme, token = auth_header.split()
-                if scheme.lower() != "bearer":
-                    return _cors_response(401, "Formato de autorizacion invalido", request)
-                payload = verify_token(token)
-                if not isinstance(payload, dict) or payload is None:
-                    return _cors_response(401, "Token invalido", request)
-                if payload.get("type") != "access":
-                    return _cors_response(401, "Access token requerido", request)
-                user_id = payload.get("sub")
-                role = payload.get("role")
-                if not user_id:
-                    return _cors_response(401, "Token invalido", request)
-                request.state.user_id = user_id
-                request.state.role = role
-                if role != "user":
-                    return _cors_response(403, "Solo usuarios pueden crear reseñas", request)
-                return await call_next(request)
-            except Exception as e:
-                return _cors_response(401, "Token invalido", request)
-    
-    auth_header = request.headers.get("Authorization")
 
-    if not auth_header:
-        return _cors_response(401, "Token requerido", request)
-    
-    try:
-        scheme, token = auth_header.split()
+        payload, error = _authenticate(request)
+        if error is not None:
+            return error
 
-        if scheme.lower() != "bearer":
-            return _cors_response(401, "Formato de autorizacion invalido", request)
-        
-        payload = verify_token(token)
+        if payload.get("role") != "user":
+            return _cors_response(403, "Solo usuarios pueden crear reseñas", request)
+        return await _call_next_safely(request, call_next)
 
-        if not isinstance(payload, dict) or payload is None:
-            return _cors_response(401, "Token invalido", request)
+    payload, error = _authenticate(request)
+    if error is not None:
+        return error
 
-        if payload.get("type") != "access":
-            return _cors_response(401, "Access token requerido", request)
-        
-        user_id = payload.get("sub")
-        role = payload.get("role")
+    role = payload.get("role")
+    if role == "admin":
+        return await _call_next_safely(request, call_next)
 
-        if not user_id:
-            return _cors_response(401, "Token invalido", request)
-        
-        request.state.user_id = user_id
-        request.state.role = role
+    allowed_routers = ROLES_PERMISSIONS_ROUTERS.get(role, [])
+    has_permission = any(path.startswith(route) for route in allowed_routers)
 
-        if role == "admin":
-            return await call_next(request)
-        
-        
-        allowed_routers = ROLES_PERMISSIONS_ROUTERS.get(role, [])
+    if not has_permission:
+        return _cors_response(401, "no tienes permiso para acceder a este recurso", request)
 
-        has_permission = any(
-            path.startswith(route)
-            for route in allowed_routers
-        )
-
-        if not has_permission:
-            return _cors_response(401, "no tienes permiso para acceder a este recurso", request)
-        
-        
-        return await call_next(request)
-    
-    except Exception as e:
-        print("Auth Error", e)
-        return _cors_response(401, "Token invalido", request)
+    return await _call_next_safely(request, call_next)
