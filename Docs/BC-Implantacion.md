@@ -280,5 +280,20 @@ Toda actualización entra por PR a `Develop`, con CI en verde y al menos una rev
 | A-04 | PQRS y validaciones | `backend/tests/test_pqrs.py`, `backend/tests/test_pqrs_validation.py` | PASS |
 | A-05 | Healthcheck y respuesta de base de datos | `backend/tests/test_health.py`, `/health`, `/health/database` | PASS |
 
-**Simulacro Docker con tercero:** pendiente de ejecución por un compañero que clone el repo en limpio y levante el proyecto sin pasos ocultos.
-**Acta de cierre/capacitación:** pendiente de firma una vez cerrado el simulacro y la alerta externa.
+### 8.1 Simulacro de implantación
+
+Pendiente de ejecución por un compañero distinto al autor. Checklist: clonar `https://github.com/lunethZ/COMPANY-LUBIX.git` en limpio, copiar `.env.example`, levantar `docker compose up -d`, ejecutar `alembic upgrade head`, verificar `/health`, `/health/database` y frontend, ejecutar `python scripts/pg_backup.py verify`, y adjuntar salida o captura. No se pudo completar desde la máquina de edición porque Docker daemon no está disponible.
+
+### 8.2 Acta de seguimiento y cierre
+
+| Campo | Valor |
+|---|---|
+| Fecha | 2026-11-22 |
+| Modalidad | Remota / seguimiento en GitHub |
+| Responsable de implantación | @nacoooobit |
+| Participantes | @nacoooobit · @lunethZ · @WinStormX · @juanpineda (revisión pendiente) |
+| Temas tratados | Despliegue en Render, respaldo y restauración, CI/Sonar, RNFs y acciones correctivas |
+| Evidencias revisadas | CI 45089479684; `/health`, `/health/database`, `/health/internet`; [`Prueba_Restauracion_2026-11-19.md`](./Evidencias/Prueba_Restauracion_2026-11-19.md); [`p4-s5-seguridad.txt`](./Evidencias/p4-s5-seguridad.txt) |
+| Acuerdos | Revisar y fusionar PR #81, #82, #83 y #85; activar protección de `main`; configurar Healthchecks.io cuando se entregue el ping URL; corregir issue #84 |
+| Observaciones | RNF-001 no cumple p95 < 200 ms en Render (p95 medido 0.545538 s). RNF-009 quedó con hallazgos de error 401/500, registrados en issue #84. |
+| Firmas | Pendiente de @lunethZ y @juanpineda tras aprobación de PRs y simulacro |
