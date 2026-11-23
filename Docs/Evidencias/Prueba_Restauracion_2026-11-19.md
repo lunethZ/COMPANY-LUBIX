@@ -61,11 +61,11 @@ Para cerrar la evidencia "en otra máquina":
 
 | Campo | Valor |
 |-------|-------|
-| Fecha y hora (UTC) | |
-| Equipo / hostname | |
-| Responsable | |
-| Respaldo probado | |
-| Resultado (`PASS`/`FAIL`) | |
-| Validaciones correctas | |
-| Ruta del reporte | |
-| Observaciones | |
+| Fecha y hora (UTC) | 2026-11-19T16:21:13Z |
+| Equipo / hostname | Contenedor Docker desechable `postgres:16` (PostgreSQL 16.14) levantado por `scripts/pg_backup.py verify` |
+| Responsable | @WinStormX |
+| Respaldo probado | `lubix_db_20261119T161808Z.dump.gpg` |
+| Resultado (`PASS`/`FAIL`) | PASS |
+| Validaciones correctas | 19/19 |
+| Ruta del reporte | `backups/reports/restore-test_20261119T162113Z.json` y `.md` |
+| Observaciones | Ejecutado en PostgreSQL aislado y desechable sin acceso a la base de origen. Queda pendiente repetir la verificación en otra máquina o base Neon y adjuntar el nuevo reporte para cerrar la evidencia formal. |
