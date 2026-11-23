@@ -1,12 +1,23 @@
 from sqlalchemy import text
 from app.database.Connection import engine
 
-## Testeo de conexion de base de datos desde el backend
-def db_test():
+
+def _probe_database() -> tuple[bool, str]:
     try:
         with engine.connect() as connection:
             connection.execute(text("SELECT 1"))
-            return {"Base de datos": "OK"}
-    except Exception as e:
-        return {"Base de datos": "ERROR", "detail": str(e)}
-    
+        return True, ""
+    except Exception as exc:
+        return False, str(exc)
+
+
+def database_is_available() -> bool:
+    available, _ = _probe_database()
+    return available
+
+
+def db_test():
+    available, detail = _probe_database()
+    if available:
+        return {"Base de datos": "OK"}
+    return {"Base de datos": "ERROR", "detail": detail}
