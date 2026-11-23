@@ -1,4 +1,39 @@
-"""Tests del router de salud: /health/database e /health/internet."""
+"""Tests del router de salud: /health, /health/database e /health/internet."""
+
+from app.Config import config
+
+
+def test_health_responde_200_cuando_la_bd_esta_disponible(client):
+    response = client.get("/health")
+
+    assert response.status_code == 200
+    assert response.json() == {
+        "status": "ok",
+        "service": "lubix-api",
+        "environment": config.ENVIRONMENT,
+        "database": "ok",
+    }
+
+
+def test_health_responde_503_cuando_la_bd_falla(client, monkeypatch):
+    monkeypatch.setattr("app.routers.HealthRouter.database_is_available", lambda: False)
+
+    response = client.get("/health")
+
+    assert response.status_code == 503
+    assert response.json() == {
+        "status": "unavailable",
+        "service": "lubix-api",
+        "environment": config.ENVIRONMENT,
+        "database": "error",
+    }
+
+
+def test_health_con_barra_final_es_publico(client):
+    response = client.get("/health/", follow_redirects=True)
+
+    assert response.status_code == 200
+    assert response.json()["status"] == "ok"
 
 
 def test_health_database_responde_200_y_expone_su_estado(client):

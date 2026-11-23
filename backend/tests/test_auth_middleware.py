@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 
 from app.Config import config
+from app.middleware import CorsMiddleware
 from app.services.authentication.JWTService import create_refresh_token
 
 PROTECTED = "/user/dashboard/me"
@@ -131,3 +132,30 @@ def test_preflight_cors_no_requiere_token(client, seed):
 
     assert response.status_code in (200, 204)
     assert response.headers.get("access-control-allow-origin")
+
+
+def test_respuesta_401_refleja_origen_permitido(client, monkeypatch):
+    monkeypatch.setattr(
+        CorsMiddleware.config,
+        "CORS_ORIGINS",
+        "https://monitor.example.com",
+    )
+
+    response = client.get(
+        PROTECTED,
+        headers={"Origin": "https://monitor.example.com"},
+    )
+
+    assert response.status_code == 401
+    assert response.headers["access-control-allow-origin"] == "https://monitor.example.com"
+    assert response.headers["access-control-allow-credentials"] == "true"
+
+
+def test_respuesta_401_no_devuelve_wildcard_con_credenciales(client):
+    response = client.get(
+        PROTECTED,
+        headers={"Origin": "https://origen-no-permitido.example"},
+    )
+
+    assert response.status_code == 401
+    assert response.headers.get("access-control-allow-origin") != "*"
