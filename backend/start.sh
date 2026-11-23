@@ -5,6 +5,11 @@ PORT="${PORT:-8000}"
 MAX_RETRIES="${DB_MIGRATION_RETRIES:-10}"
 RETRY_DELAY="${DB_MIGRATION_RETRY_DELAY:-3}"
 
+if [ -z "${URL_DATABASE:-${DATABASE_URL:-}}" ]; then
+  echo "ERROR: define URL_DATABASE o DATABASE_URL antes de arrancar." >&2
+  exit 1
+fi
+
 echo "Running database migrations (alembic upgrade head)..."
 
 attempt=1
