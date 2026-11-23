@@ -164,5 +164,177 @@ describe('Login', () => {
         expect.objectContaining({ role_id: 'empresa' })
       )
     })
+
+    it('inicia sesión como administrador y guarda el rol', async () => {
+      post.mockResolvedValue(respuestaLogin('admin'))
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      await screen.findByText('¡Bienvenido Ana!')
+      expect(mocks.login).toHaveBeenCalledWith(
+        'token-abc',
+        expect.objectContaining({ role_id: 'admin' })
+      )
+    })
+  })
+
+  describe('validaciones y errores del servidor', () => {
+    it('rechaza un correo con formato inválido sin llamar a la API', async () => {
+      const user = userEvent.setup()
+      renderLogin()
+
+      await user.type(screen.getByPlaceholderText('tu@email.com'), 'ana@example')
+      await user.type(screen.getByPlaceholderText('••••••••'), 'Prueba123')
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText('Ingresa un correo electrónico válido')
+      ).toBeInTheDocument()
+      expect(post).not.toHaveBeenCalled()
+    })
+
+    it('avisa cuando la cuenta no está verificada', async () => {
+      post.mockResolvedValue({
+        data: { message: 'Tu correo no ha sido verificado' },
+      })
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText('Tu correo no ha sido verificado')
+      ).toBeInTheDocument()
+      expect(mocks.login).not.toHaveBeenCalled()
+    })
+
+    it('indica que la cuenta es de empresa si se intentó como usuario', async () => {
+      post.mockResolvedValue(respuestaLogin('company'))
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText(
+          "Esta cuenta es de tipo empresa. Selecciona 'Empresa' para iniciar sesión."
+        )
+      ).toBeInTheDocument()
+      expect(mocks.login).not.toHaveBeenCalled()
+    })
+
+    it('indica que la cuenta es de usuario si se intentó como empresa', async () => {
+      post.mockResolvedValue(respuestaLogin('user'))
+      const user = userEvent.setup()
+      renderLogin()
+
+      await user.click(screen.getByRole('button', { name: 'Empresa' }))
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText(
+          "Esta cuenta es de tipo usuario. Selecciona 'Usuario' para iniciar sesión."
+        )
+      ).toBeInTheDocument()
+      expect(mocks.login).not.toHaveBeenCalled()
+    })
+
+    it('traduce el error 400 de credenciales incorrectas', async () => {
+      post.mockRejectedValue({
+        isAxiosError: true,
+        response: { status: 400, data: { detail: 'Correo o contraseña incorrectos' } },
+      })
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText(
+          'El correo o la contraseña son incorrectos. Verifica tus datos.'
+        )
+      ).toBeInTheDocument()
+    })
+
+    it('traduce el error 403 según el tipo de cuenta', async () => {
+      post.mockRejectedValue({
+        isAxiosError: true,
+        response: { status: 403, data: { detail: 'Esta cuenta es de empresa' } },
+      })
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText(
+          'Esta cuenta es de tipo empresa. Cambia a la pestaña de Empresa para iniciar sesión.'
+        )
+      ).toBeInTheDocument()
+    })
+
+    it('muestra un mensaje genérico ante un error 500', async () => {
+      post.mockRejectedValue({
+        isAxiosError: true,
+        response: { status: 500, data: { detail: 'boom' } },
+      })
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText('Error del servidor. Intenta de nuevo más tarde.')
+      ).toBeInTheDocument()
+    })
+
+    it('avisa de un error de conexión cuando no hay respuesta HTTP', async () => {
+      post.mockRejectedValue(new Error('network'))
+      const user = userEvent.setup()
+      renderLogin()
+
+      await llenarCredenciales(user)
+      await user.click(screen.getByRole('button', { name: 'Iniciar Sesión' }))
+
+      expect(
+        await screen.findByText(
+          'Error de conexión. Verifica tu internet e intenta de nuevo.'
+        )
+      ).toBeInTheDocument()
+    })
+  })
+
+  describe('controles de la interfaz', () => {
+    it('alterna la visibilidad de la contraseña', async () => {
+      const user = userEvent.setup()
+      renderLogin()
+
+      const input = screen.getByPlaceholderText('••••••••')
+      expect(input).toHaveAttribute('type', 'password')
+
+      const boton = input.parentElement?.querySelector('button') as HTMLElement
+      await user.click(boton)
+      expect(input).toHaveAttribute('type', 'text')
+
+      await user.click(boton)
+      expect(input).toHaveAttribute('type', 'password')
+    })
+
+    it('vuelve al inicio con el botón Volver', async () => {
+      const user = userEvent.setup()
+      renderLogin()
+
+      await user.click(screen.getByRole('button', { name: 'Volver al inicio' }))
+      expect(mocks.navigate).toHaveBeenCalledWith('/')
+    })
   })
 })

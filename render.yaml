@@ -36,6 +36,8 @@ services:
         value: "300"
       - key: DB_MIGRATION_RETRIES
         value: "10"
+      - key: DB_MIGRATION_RETRY_DELAY
+        value: "3"
       - key: SECRET_KEY
         generateValue: true
       - key: ALGORITHM
@@ -82,6 +84,8 @@ services:
     buildCommand: npm ci && npm run build
     staticPublishPath: dist
     envVars:
+      - key: NODE_VERSION
+        value: "22"
       - key: VITE_API_URL
         value: https://lubix-api.onrender.com
     routes:

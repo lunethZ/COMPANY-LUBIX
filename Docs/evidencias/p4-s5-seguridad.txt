@@ -1,0 +1,70 @@
+P4-S5 - Evidencia de seguridad (LUBIX) - Render + Neon
+=====================================================
+
+Fecha de ejecucion de los roles: 2026-11-18
+Fecha del cambio en Render: 2026-11-20 (lo aplico el dueno del servicio)
+Responsable: Jose Andres Armenta Farias (josearmenta2163)
+Proyecto de Neon: LUBIX, rama production, base neondb
+Rol que ejecuto el script: neondb_owner (SQL Editor)
+
+Estado: roles de minimo privilegio aplicados y verificados, y la API de Render
+ya se conecta con lubix_app. Actividad completa del lado de base de datos.
+
+A. Roles de PostgreSQL
+----------------------
+A.1 Atributos (SELECT rolname, rolsuper, rolcreatedb, rolcreaterole,
+    rolcanlogin, rolconnlimit FROM pg_roles):
+
+rolname      | rolsuper | rolcreatedb | rolcreaterole | rolcanlogin | rolconnlimit
+lubix_app    | f        | f           | f             | t           | 20
+lubix_backup | f        | f           | f             | t           | 3
+
+A.2 Membresias de neon_superuser:
+0 filas.
+
+A.3 Privilegios de lubix_app por tabla:
+DELETE, INSERT, SELECT, UPDATE en todas las tablas del esquema public.
+Sin privilegios sobre alembic_version (revocado por el script).
+
+B. Prueba de conexion real con lubix_app
+----------------------------------------
+Cadena pooled de Neon, driver pg (Node). Salida:
+
+OK    rol conectado = lubix_app
+OK    base = neondb
+OK    lectura de addresses: 0 filas
+OK    INSERT permitido en addresses
+OK    sin permiso CREATE en public
+OK    sin SELECT en alembic_version
+OK    DDL bloqueado (codigo 42501)
+
+RESULTADO: OK
+
+C. Aplicacion en Render
+-----------------------
+Fecha del cambio: 2026-11-20. Lo aplico el dueno del servicio lubix-api.
+URL_DATABASE con rol lubix_app (pooled):       APLICADO
+DATABASE_URL_UNPOOLED con rol dueno (directa): sin cambios
+GET https://lubix-api.onrender.com/health:     200
+GET https://lubix-api.onrender.com/health/database:
+                                               200 {"Base de datos":"OK"}
+
+C.1 Prueba de que la API usa lubix_app
+Tras llamar a /health/database, la consulta
+SELECT usename, application_name, state, backend_start FROM pg_stat_activity
+WHERE datname = 'neondb' AND application_name <> 'neon-internal-sql-editor'
+devolvio una sola sesion de la aplicacion:
+
+usename   | application_name | state | backend_start
+lubix_app | pgbouncer        | idle  | 2026-11-20 02:28:04 UTC
+
+No queda ninguna conexion de la aplicacion con el rol dueno: ese rol solo se
+usa en las migraciones (DATABASE_URL_UNPOOLED).
+
+D. Resultado global
+-------------------
+Rol minimo aplicado y verificado: SI
+API de produccion conectada como lubix_app: SI
+Matriz de usuarios y roles revisada: SI
+
+No se incluyen contrasenas ni cadenas de conexion completas.

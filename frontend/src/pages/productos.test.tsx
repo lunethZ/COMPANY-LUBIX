@@ -160,4 +160,99 @@ describe('Página de catálogo de productos', () => {
       await screen.findByText('No tienes productos aún. Crea uno desde el dashboard.'),
     ).toBeInTheDocument();
   });
+
+  it('indica cuando el buscador no encuentra coincidencias', async () => {
+    mockCatalogo([baseProduct, segundoProducto]);
+    const user = userEvent.setup();
+    renderWithProviders(<ProductosPage />);
+
+    await screen.findByText('Mouse Gamer');
+    await user.type(
+      screen.getByPlaceholderText('Buscar producto por nombre o descripción...'),
+      'impresora',
+    );
+
+    expect(
+      screen.getByText('No se encontraron productos coincidentes.'),
+    ).toBeInTheDocument();
+    expect(screen.queryByText('Mouse Gamer')).not.toBeInTheDocument();
+  });
+
+  it('filtra también por descripción', async () => {
+    mockCatalogo([baseProduct, segundoProducto]);
+    const user = userEvent.setup();
+    renderWithProviders(<ProductosPage />);
+
+    await screen.findByText('Mouse Gamer');
+    await user.type(
+      screen.getByPlaceholderText('Buscar producto por nombre o descripción...'),
+      'switches',
+    );
+
+    expect(screen.getByText('Teclado Mecánico')).toBeInTheDocument();
+    expect(screen.queryByText('Mouse Gamer')).not.toBeInTheDocument();
+  });
+
+  it('usa los datos del listado si falla la carga del detalle', async () => {
+    apiMocks.get.mockImplementation((url: string) => {
+      if (url === '/company/products') {
+        return Promise.resolve({ data: [baseProduct] });
+      }
+      if (url === '/products/p1') {
+        return Promise.reject(new Error('detalle no disponible'));
+      }
+      if (url === '/products/p1/reviews') {
+        return Promise.resolve({ data: [] });
+      }
+      return Promise.resolve({ data: [] });
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<ProductosPage />);
+
+    await screen.findByText('Mouse Gamer');
+    await user.click(screen.getByRole('button', { name: 'Ver reseñas' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Mouse Gamer' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Sin calificación', { exact: false })).toBeInTheDocument();
+    expect(
+      screen.getByText('Este producto aún no tiene reseñas.'),
+    ).toBeInTheDocument();
+  });
+
+  it('muestra reseñas sin título y con conteo singular', async () => {
+    apiMocks.get.mockImplementation((url: string) => {
+      if (url === '/company/products') {
+        return Promise.resolve({ data: [baseProduct] });
+      }
+      if (url === '/products/p1') {
+        return Promise.resolve({
+          data: {
+            ...baseProduct,
+            avg_rating: 0,
+            review_count: 1,
+          },
+        });
+      }
+      if (url === '/products/p1/reviews') {
+        return Promise.resolve({
+          data: [{ ...review, title: null, rating: 4 }],
+        });
+      }
+      return Promise.resolve({ data: [] });
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<ProductosPage />);
+
+    await screen.findByText('Mouse Gamer');
+    await user.click(screen.getByRole('button', { name: 'Ver reseñas' }));
+
+    expect(
+      await screen.findByRole('heading', { name: 'Reseñas de Clientes' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Sin calificación', { exact: false })).toBeInTheDocument();
+    expect(screen.getByText('1 reseña')).toBeInTheDocument();
+    expect(screen.getByText(/Muy buen producto/)).toBeInTheDocument();
+  });
 });

@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.database.Connection import SessionLocal
@@ -17,13 +19,21 @@ from app.middleware.CorsMiddleware import setup_cors
 from app.utils.seed import run_seed
 from app.Config import config
 
+logger = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(app):
-    db = SessionLocal()
     if config.RUN_SEED:
-        run_seed(db)
-    db.close()
+        database = None
+        try:
+            database = SessionLocal()
+            run_seed(database)
+        except Exception:
+            logger.exception("No se pudo ejecutar el seed inicial; el servicio continuará disponible")
+        finally:
+            if database is not None:
+                database.close()
     yield
 
 app = FastAPI(lifespan=lifespan)

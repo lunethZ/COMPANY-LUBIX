@@ -18,6 +18,7 @@ Esta guía explica cómo publicar el **backend de LUBIX** en **Render** usando u
 8. [Solución de problemas](#8-solución-de-problemas)
 9. [Checklist de seguridad y operación](#9-checklist-de-seguridad-y-operación)
 10. [Referencias de archivos](#10-referencias-de-archivos)
+11. [CI e imágenes GHCR](#11-ci-e-imágenes-ghcr)
 
 ---
 
@@ -56,7 +57,7 @@ El archivo [`render.yaml`](../render.yaml) de la raíz contiene la definición d
 | `psql` (opcional) | Para inspeccionar la base de datos |
 | `curl` | Para las verificaciones posteriores |
 
-Comprobación local del backend:
+Comprobación local del backend (requiere la base de pruebas indicada en la sección 11):
 
 ```bash
 cd backend
@@ -67,7 +68,7 @@ pip install pytest pytest-cov httpx
 pytest
 ```
 
-La suite debe terminar con `Required test coverage of 50% reached` y código de salida `0`.
+La suite completa requiere una cobertura mínima del 80 % y debe terminar con código de salida `0`.
 
 ---
 
@@ -603,3 +604,49 @@ print(quote_plus("P@ss#1"))
 - [`backend/app/Config.py`](../backend/app/Config.py)
 - [`.env.example`](../.env.example)
 - [`Docs/Estrategia_Hosting_y_Dominio.md`](Estrategia_Hosting_y_Dominio.md)
+
+---
+
+## 11. CI e imágenes GHCR
+
+El flujo [CI](../.github/workflows/ci.yml) ejecuta las pruebas de frontend, E2E y backend, y comprueba la compilación del frontend utilizada por Render. El backend usa PostgreSQL 16 en el puerto 5435, aplica primero las migraciones y verifica que las pruebas de integración de PostgreSQL no se omitan. La ejecución individual de repositorios usa `--no-cov`; la suite completa vuelve a incluirlas y mantiene el mínimo del 80 %. El flujo de SonarCloud usa una base aislada con la misma configuración y el mismo orden de migraciones.
+
+En cada pull request se comprueba que ambas imágenes existentes se construyen, sin publicarlas. En un push a `main`, si las tres tareas de CI pasan, se publican `ghcr.io/<propietario>/<repositorio>-backend:sha-<commit>` y `ghcr.io/<propietario>/<repositorio>-frontend:sha-<commit>`. El nombre del repositorio se convierte a minúsculas. Para GHCR se utiliza el `GITHUB_TOKEN` de Actions, con `contents: read` y `packages: write` solo en el trabajo de publicación; no se requiere un token personal ni un secreto adicional. La configuración de la organización y del repositorio debe permitir la creación y escritura de paquetes.
+
+Render sigue construyendo desde el código fuente de `main`; **no utiliza estas imágenes** y su despliegue automático es independiente del resultado de Actions. Antes de pasar a `main`, comprueba en Render que los servicios estén conectados a esa rama y tengan activado el despliegue automático. La imagen actual del frontend ejecuta el servidor de desarrollo de Vite y no debe considerarse una imagen de producción. Además, utiliza Node 20 mientras algunas dependencias de desarrollo requieren Node 22 o superior; hay que revisar esa compatibilidad antes de usarla.
+
+### Verificación local
+
+Con Docker y las dependencias de pruebas instaladas, desde la raíz del repositorio:
+
+```bash
+docker compose -f docker-compose.test.yml up -d --wait
+export TEST_DATABASE_URL='postgresql+psycopg2://lubix_test:lubix_test@localhost:5433/lubix_test'
+export REPOSITORY_TEST_DATABASE_URL="$TEST_DATABASE_URL"
+cd backend
+python scripts/init_test_db.py
+pytest tests/repositories/ -v --no-cov
+pytest
+```
+
+Usa únicamente la base de pruebas desechable: las pruebas pueden vaciar sus tablas. En Windows, si `python` no se reconoce, usa `py` para el inicializador y `py -m pytest` para las pruebas, con las dependencias instaladas en ese intérprete.
+
+Para verificar el frontend desde la raíz, con Node 22 y Chromium de Playwright instalados:
+
+```bash
+cd frontend
+npm ci
+npm run lint
+npm run test:coverage
+npm run build
+VITE_API_URL=http://127.0.0.1:59999 npm run test:e2e
+```
+
+Para construir localmente las imágenes existentes sin publicarlas, desde la raíz:
+
+```bash
+docker build -t lubix-backend:local backend
+docker build -t lubix-frontend:local frontend
+```
+
+En GitHub, revisa el resultado del flujo **CI** del pull request y confirma que sus trabajos de imágenes solo construyan. Tras un push a `main`, comprueba que los trabajos de publicación finalicen y que las etiquetas `sha-<commit>` aparezcan en los paquetes; revisa por separado el despliegue de cada servicio en Render.

@@ -1,5 +1,9 @@
 # Plan de Respaldo — LUBIX (v0)
 
+> **Actualización:** para la operación real usa la versión v1, que incluye script de
+> respaldo cifrado, rotación y prueba automatizada de restauración:
+> [`Respaldo_v1_Operativo.md`](./Respaldo_v1_Operativo.md).
+
 > **Versión:** v0 (borrador inicial)
 > **Documento complementario de:** [`BC-Implantacion.md`](./BC-Implantacion.md) y [`Plan_Migracion_v0.md`](./Plan_Migracion_v0.md)
 > **Fecha:** 2026-10-18

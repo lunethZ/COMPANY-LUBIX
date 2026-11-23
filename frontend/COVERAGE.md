@@ -11,16 +11,16 @@ npm run test:watch     # modo observador
 npm run test:coverage  # pruebas + reporte de cobertura (carpeta coverage/)
 ```
 
-## Cobertura inicial
+## Cobertura actual
 
-Resultado de `npm run test:coverage` sobre la rama en la que se instaló Vitest:
+Resultado de `npm run test:coverage` sobre la rama actual (30 archivos de prueba, 306 pruebas):
 
 | Statements | Branches | Functions | Lines |
 | ---------- | -------- | --------- | ----- |
-| 0.5% | 0.96% | 0.5% | 0.55% |
+| 89.39% | 78.07% | 87.73% | 91.21% |
 
-Los valores salen de la tabla `All files` que imprime el comando (o de `coverage/coverage-summary.json`).
+Los valores salen de la tabla `All files` que imprime el comando (o de `coverage/coverage-summary.json`). Todas las páginas de `src/pages` tienen pruebas y superan el umbral mínimo.
 
 ## Umbral de CI (S3)
 
-Desde S3 el comando `npm run test:coverage` falla si `login.tsx`, `register.tsx` o `pqrs.tsx` bajan de 40 % en sentencias, ramas, funciones o líneas (ver `coverage.thresholds` en `vite.config.ts`). El resto de páginas todavía no tiene pruebas y no se mide contra el umbral. La estrategia completa está en `Docs/Estrategia_Hosting_y_Dominio.md`.
+Desde S3 el comando `npm run test:coverage` exige al menos 80 % de líneas a nivel global y 40 % en sentencias, ramas, funciones y líneas para cada página de `src/pages` (ver `coverage.thresholds` en `vite.config.ts`). La estrategia completa está en `Docs/Estrategia_Hosting_y_Dominio.md`.
