@@ -73,16 +73,20 @@ PNF-001 | Rendimiento | Tiempo de respuesta del API (RNF-001)
     2. Ejecutar GET a http://localhost:8002/products/catalogs.
     3. Medir tiempo de respuesta.
     4. Repetir 5 veces.
-    5. Calcular promedio.
+     5. Repetir 30 veces con curl.exe contra https://lubix-api.onrender.com/health.
+     6. Calcular promedio, mediana y p95.
 
   RESULTADO ESPERADO:
     Tiempo promedio menor a 200 ms.
 
   RESULTADO OBTENIDO:
-    Pendiente de ejecución - Se requiere backend ejecutándose.
+    Medición real del 2026-11-22 con 30 peticiones a /health en Render:
+    min 0.191713 s | mediana 0.222572 s | p95 0.545538 s | max 2.230732 s | promedio 0.307858 s.
+    El p95 supera el objetivo de 0.200 s; se observó un arranque en frío de 2.230732 s
+    y un timeout de calentamiento de 30 s previo a la serie. No cumple RNF-001 desde la red de pruebas.
 
-  ESTADO: Pendiente
-  CAPTURA: Pendiente de captura
+  ESTADO: Rechazado
+  CAPTURA: Salida de curl.exe registrada en esta sección; sin captura PNG
 
 
 --------------------------------------------------------------------------------
@@ -103,16 +107,19 @@ PNF-002 | Rendimiento | Tiempo de carga del frontend (RNF-001)
     2. Ir a pestaña Network.
     3. Navegar a http://localhost:5173.
     4. Observar tiempo de First Contentful Paint.
-    5. Verificar que sea menor a 3 segundos.
+     5. Verificar que sea menor a 3 segundos con curl.exe contra https://lubix-frontend.onrender.com/.
 
   RESULTADO ESPERADO:
     Tiempo de carga menor a 3 segundos.
 
   RESULTADO OBTENIDO:
-    Pendiente de ejecución - Se requiere frontend ejecutándose.
+    Medición real del 2026-11-22 con 15 peticiones:
+    min 0.052166 s | mediana 0.063070 s | p95 0.260592 s | max 0.260592 s.
+    Cumple el objetivo de 3 s. La medición corresponde al tiempo total de descarga
+    del documento, no sustituye una medición de FCP en DevTools.
 
-  ESTADO: Pendiente
-  CAPTURA: Pendiente de captura
+  ESTADO: Aprobado
+  CAPTURA: Salida de curl.exe registrada en esta sección; sin captura PNG
 
 
 --------------------------------------------------------------------------------
@@ -292,10 +299,13 @@ PNF-008 | Seguridad | Control de acceso por roles (RNF-003)
     Rutas de admin retornan 403 para usuario regular.
 
   RESULTADO OBTENIDO:
-    Pendiente de ejecución - Se requiere usuario con rol "user".
+    Verificado con pruebas automatizadas en CI (run 45089479684):
+    backend/tests/test_auth_middleware.py, backend/tests/test_auth.py,
+    backend/tests/test_company.py y backend/tests/test_admin.py cubren 401/403
+    para usuarios sin rol o con rol insuficiente. No se repitió manualmente con un token real.
 
-  ESTADO: Pendiente
-  CAPTURA: Pendiente de captura
+  ESTADO: Aprobado
+  CAPTURA: Evidencia en texto de CI 45089479684
 
 
 --------------------------------------------------------------------------------
@@ -506,17 +516,22 @@ PNF-015 | Confiabilidad | Respuestas de error del API (RNF-009)
     1. GET a /endpoint-inexistente → verificar 404.
     2. POST a /auth/login-user con JSON malformado → verificar 422.
     3. GET a /products/uuid-invalido → verificar 400.
-    4. Verificar que respuestas no incluyan stack trace.
+     4. Verificar que respuestas no incluyan stack trace.
 
   RESULTADO ESPERADO:
     Códigos de error apropiados (400, 404, 422). Mensajes descriptivos.
     Sin información sensible del servidor.
 
   RESULTADO OBTENIDO:
-    Pendiente de ejecución - Se requiere backend ejecutándose.
+    Medición real del 2026-11-22 contra Render:
+    /endpoint-inexistente → HTTP 401 (se esperaba 404);
+    POST /auth/login-user con JSON malformado → HTTP 422 (correcto);
+    /products/uuid-invalido → HTTP 500 con cuerpo "Internal Server Error" (se esperaba 400).
+    Las respuestas no exponen stack trace, pero los dos primeros códigos no cumplen lo esperado.
+    Acción correctiva registrada en https://github.com/lunethZ/COMPANY-LUBIX/issues/84.
 
-  ESTADO: Pendiente
-  CAPTURA: Pendiente de captura
+  ESTADO: Rechazado
+  CAPTURA: Salida de curl.exe registrada en esta sección; sin captura PNG
 
 
 --------------------------------------------------------------------------------
@@ -571,16 +586,19 @@ PNF-017 | Disponibilidad | Health check base de datos (RNF-008)
     3. Verificar cuerpo de respuesta con estado de PostgreSQL.
     4. Detener contenedor de PostgreSQL.
     5. Ejecutar nuevamente GET a /health/database.
-    6. Verificar código 503.
+     6. Verificar código 503.
 
   RESULTADO ESPERADO:
     200 OK cuando PostgreSQL está activo. 503 cuando no.
 
   RESULTADO OBTENIDO:
-    Pendiente de ejecución - Se requiere Docker ejecutándose.
+    En Render: GET /health/database → HTTP 200 en 1.626856 s.
+    El escenario 503 por base de datos caída está cubierto en backend/tests/test_health.py
+    y ejecutado en CI 45089479684. No se pudo detener un contenedor real porque
+    Docker daemon no está disponible en la máquina de medición.
 
-  ESTADO: Pendiente
-  CAPTURA: Pendiente de captura
+  ESTADO: Aprobado
+  CAPTURA: Salida de curl.exe y CI 45089479684 registrados en esta sección
 
 
 --------------------------------------------------------------------------------
@@ -600,16 +618,17 @@ PNF-018 | Disponibilidad | Health check internet (RNF-008)
   PASOS DE EJECUCIÓN:
     1. Ejecutar GET a http://localhost:8002/health/internet.
     2. Verificar código de respuesta (200).
-    3. Verificar cuerpo con estado de conexión.
+     3. Verificar cuerpo con estado de conexión.
 
   RESULTADO ESPERADO:
     200 OK indicando conexión a internet disponible.
 
   RESULTADO OBTENIDO:
-    Pendiente de ejecución - Se requiere backend con internet.
+    Medición real del 2026-11-22: GET https://lubix-api.onrender.com/health/internet
+    → HTTP 200 en 0.437511 s, cuerpo {"message":"Conexión a Internet exitosa"}.
 
-  ESTADO: Pendiente
-  CAPTURA: Pendiente de captura
+  ESTADO: Aprobado
+  CAPTURA: Salida de curl.exe registrada en esta sección; sin captura PNG
 
 
 --------------------------------------------------------------------------------
@@ -681,9 +700,10 @@ PNF-020 | Mantenibilidad | Documentación Swagger (RNF-014)
 ================================================================================
 
   Total de pruebas:     20
-  Aprobadas:             1  (PNF-019)
-  Rechazadas:            0
-  Pendientes:           19
+  Aprobadas:             5  (PNF-002, PNF-008, PNF-017, PNF-018, PNF-019)
+  Rechazadas:            2  (PNF-001, PNF-015)
+  Pendientes:           13
+  Última medición:      2026-11-22 sobre https://lubix-api.onrender.com y https://lubix-frontend.onrender.com
 
   Distribución por categoría:
   ┌────────────────┬────────────┐
