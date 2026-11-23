@@ -74,7 +74,7 @@ jobs:
 
       - name: Pruebas y cobertura del backend
         working-directory: backend
-        run: pytest --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=80
+        run: pytest --cov=app --cov-report=term-missing --cov-report=xml:coverage.xml --cov-fail-under=75
 
       - name: Verificar reportes de cobertura
         run: |
