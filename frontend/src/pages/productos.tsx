@@ -68,7 +68,7 @@ export default function ProductosPage() {
   };
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       await fetchProducts();
     })();
   }, []);

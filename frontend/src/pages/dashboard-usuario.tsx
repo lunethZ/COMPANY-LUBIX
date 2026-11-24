@@ -426,26 +426,26 @@ export default function BuyerDashboard() {
   };
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       await fetchUserData();
     })();
   }, []);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       await loadFavorites();
     })();
   }, [activeTab]);
 
   useEffect(() => {
-    (async () => {
+    void (async () => {
       await loadOrders();
     })();
   }, [activeTab]);
 
   useEffect(() => {
     if (!showProfileDrawer) return;
-    (async () => {
+    void (async () => {
       setProfileForm({ name: userData.name, phone: userData.phone });
       await loadAddresses();
     })();
