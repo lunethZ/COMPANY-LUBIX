@@ -126,7 +126,11 @@ const Login: React.FC = () => {
         let errorMsg = errorDetailMessage(error, "Error de login");
 
         // Mostrar mensajes más específicos según el tipo de error
-        if (error.response?.status === 400) {
+        if (error.code === "ECONNABORTED") {
+          errorMsg = "El servidor está iniciando, intenta nuevamente en unos segundos.";
+        } else if (!error.response) {
+          errorMsg = "No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.";
+        } else if (error.response.status === 400) {
           if (errorMsg.includes("Correo o contraseña")) {
             errorMsg = "El correo o la contraseña son incorrectos. Verifica tus datos.";
           } else if (errorMsg.includes("Contraseña incorrecta")) {

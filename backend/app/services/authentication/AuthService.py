@@ -3,7 +3,7 @@
 # recuperación de contraseña y cierre de sesión.
 import logging
 
-from fastapi import HTTPException
+from fastapi import BackgroundTasks, HTTPException
 from datetime import datetime, timedelta, timezone
 from app.models.ModelCompany import Company
 from app.models.ModelUser import Users
@@ -29,7 +29,7 @@ from app.Config import config
 logger = logging.getLogger(__name__)
 
 
-def register_user_service(user: createUser, database: Session):
+def register_user_service(user: createUser, database: Session, background_tasks: BackgroundTasks | None = None):
     user_role = database.query(Role).filter(Role.name == "user").first()
     exists_user = database.query(Users).filter(Users.email == user.email).first()
 
@@ -52,7 +52,13 @@ def register_user_service(user: createUser, database: Session):
         database.commit()
         database.refresh(new_user)
         confirm_id_user = database.query(Users).filter(Users.email == user.email).first()
-        create_code_and_send_code(database, confirm_id_user.id, email=user.email, code_type="verifyEmail")
+        create_code_and_send_code(
+            database,
+            confirm_id_user.id,
+            email=user.email,
+            code_type="verifyEmail",
+            background_tasks=background_tasks,
+        )
         return {
             "message": "Usuario registrado correctamente, se ha enviado un código de verificación a tu correo electrónico para verificar tu cuenta."
         }
@@ -63,7 +69,7 @@ def register_user_service(user: createUser, database: Session):
         logger.exception("Error al registrar usuario")
         raise HTTPException(status_code=500, detail="Error al crear cuenta")
 
-def register_company_service(user: createUser, company: createCompany, certificate_result: str, database: Session):
+def register_company_service(user: createUser, company: createCompany, certificate_result: str, database: Session, background_tasks: BackgroundTasks | None = None):
     company_role = database.query(Role).filter(Role.name == "company").first()
     exists_NIT = database.query(Company).filter(Company.CompanyNIT == company.companyNIT).first()
     exists_email = database.query(Users).filter(Users.email == user.email).first()
@@ -107,7 +113,15 @@ def register_company_service(user: createUser, company: createCompany, certifica
         database.add(new_company)
         database.commit()
         database.refresh(new_company)
-        EmailRegisterCompany(user.email, company.companyName, company.companyNIT)
+        if background_tasks is not None:
+            background_tasks.add_task(
+                EmailRegisterCompany,
+                user.email,
+                company.companyName,
+                company.companyNIT,
+            )
+        else:
+            EmailRegisterCompany(user.email, company.companyName, company.companyNIT)
 
         return {
             "message": "Empresa registrada correctamente. espera que el equipo de Lubix se ponga en contacto contigo para verificar tu empresa y activar tu cuenta.",
@@ -123,13 +137,20 @@ def register_company_service(user: createUser, company: createCompany, certifica
 
         raise HTTPException(status_code=500, detail="Error al crear cuenta empresarial")
 
-def verify_email_service(code: verifyEmail, database: Session):
+def verify_email_service(code: verifyEmail, database: Session, background_tasks: BackgroundTasks | None = None):
     user = database.query(Users).filter(Users.email == code.email).first()
     if not user:
         raise HTTPException(status_code=400, detail="Correo incorrecto")
     
     if not verify_code(database, user.id, code.code, code_type="verifyEmail"):
-        create_code_and_send_code(database, user.id, user.email, code_type="verifyEmail")
+        # Este endpoint termina lanzando HTTPException y FastAPI descarta las
+        # BackgroundTasks en ese caso; se envía en línea, acotado por el timeout SMTP.
+        create_code_and_send_code(
+            database,
+            user.id,
+            user.email,
+            code_type="verifyEmail",
+        )
         raise HTTPException(
             status_code=400,
             detail="Código de verificación incorrecto o expirado. Se ha enviado un nuevo código a tu correo electrónico."
@@ -143,7 +164,7 @@ def verify_email_service(code: verifyEmail, database: Session):
         "message": "Correo electrónico verificado correctamente"
     }
 
-def login_user_service(user: userLogin, database: Session):
+def login_user_service(user: userLogin, database: Session, background_tasks: BackgroundTasks | None = None):
     logger.info("Intento de inicio de sesion: %s", user.email)
     search_user = database.query(Users).filter(Users.email == user.email).first()
 
@@ -159,7 +180,13 @@ def login_user_service(user: userLogin, database: Session):
         raise HTTPException(status_code=403, detail="Esta cuenta es de empresa. Usa el acceso de Empresa.")
     
     if not search_user.verified:
-        result = create_code_and_send_code(database, search_user.id, search_user.email, code_type="verifyEmail")
+        result = create_code_and_send_code(
+            database,
+            search_user.id,
+            search_user.email,
+            code_type="verifyEmail",
+            background_tasks=background_tasks,
+        )
         if result.get("email_sent"):
             message = "Tu correo electrónico no ha sido verificado. Se ha enviado un nuevo código de verificación a tu correo electrónico."
         else:
@@ -187,7 +214,7 @@ def login_user_service(user: userLogin, database: Session):
         email=search_user.email
     )
 
-def login_company_service(company: LoginCompany, database: Session):
+def login_company_service(company: LoginCompany, database: Session, background_tasks: BackgroundTasks | None = None):
     search_company = database.query(Users).filter(Users.email == company.email).first()
     
     if not search_company:
@@ -207,7 +234,13 @@ def login_company_service(company: LoginCompany, database: Session):
         raise HTTPException(status_code=403, detail="Cuenta de empresa no encontrada o no verificada por Lubix")
     
     if not search_company.verified:
-        create_code_and_send_code(database, search_company.id, search_company.email, code_type="verifyEmail")
+        create_code_and_send_code(
+            database,
+            search_company.id,
+            search_company.email,
+            code_type="verifyEmail",
+            background_tasks=background_tasks,
+        )
         return {
             "message": "Tu correo electrónico no ha sido verificado. Se ha enviado un nuevo código de verificación a tu correo electrónico."
         }
@@ -232,11 +265,17 @@ def login_company_service(company: LoginCompany, database: Session):
         email=search_company.email
     )
 
-def forgot_password_service(user: forgotPassword, database: Session):
+def forgot_password_service(user: forgotPassword, database: Session, background_tasks: BackgroundTasks | None = None):
     search_user = database.query(Users).filter(Users.email == user.email).first()
     if not search_user:
         raise HTTPException(status_code=400, detail="Correo no registrado")
-    create_code_and_send_code(database, search_user.id, user.email, code_type="resetPassword")
+    create_code_and_send_code(
+        database,
+        search_user.id,
+        user.email,
+        code_type="resetPassword",
+        background_tasks=background_tasks,
+    )
 
     return {
         "message": "se ha enviado un código de recuperación de contraseña a tu correo electrónico."
@@ -270,13 +309,19 @@ def save_refresh_token(database: Session, user_id, token: str):
     database.add(new_token)
     database.commit()
 
-def resend_verification_service(email: str, database: Session):
+def resend_verification_service(email: str, database: Session, background_tasks: BackgroundTasks | None = None):
     user = database.query(Users).filter(Users.email == email).first()
     if not user:
         raise HTTPException(status_code=400, detail="Correo no registrado")
     if user.verified:
         raise HTTPException(status_code=400, detail="El correo ya ha sido verificado")
-    create_code_and_send_code(database, user.id, user.email, code_type="verifyEmail")
+    create_code_and_send_code(
+        database,
+        user.id,
+        user.email,
+        code_type="verifyEmail",
+        background_tasks=background_tasks,
+    )
     return {
         "message": "Se ha enviado un nuevo código de verificación a tu correo electrónico."
     }

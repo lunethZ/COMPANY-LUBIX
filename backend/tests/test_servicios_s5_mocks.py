@@ -24,7 +24,7 @@ def test_send_email_envia_con_argumentos_exactos(mocker):
     resultado = send_email("ana@lubix.com", "Asunto S5", "<p>Hola</p>")
 
     assert resultado is True
-    smtp_cls.assert_called_once_with("smtp.gmail.com", 587)
+    smtp_cls.assert_called_once_with("smtp.gmail.com", 587, timeout=10)
     servidor.starttls.assert_called_once_with()
     servidor.login.assert_called_once_with(GMAIL_USERNAME, GMAIL_PASSWORD)
     servidor.send_message.assert_called_once()
@@ -47,7 +47,7 @@ def test_send_email_no_continua_si_no_hay_conexion(mocker):
     )
 
     assert send_email("ana@lubix.com", "Asunto", "<p>x</p>") is False
-    smtp_cls.assert_called_once_with("smtp.gmail.com", 587)
+    smtp_cls.assert_called_once_with("smtp.gmail.com", 587, timeout=10)
     smtp_cls.return_value.starttls.assert_not_called()
 
 
@@ -60,7 +60,7 @@ def test_send_email_no_envia_si_login_falla(mocker):
 
     assert send_email("ana@lubix.com", "Asunto", "<p>x</p>") is False
     servidor.send_message.assert_not_called()
-    servidor.quit.assert_not_called()
+    servidor.quit.assert_called_once()
 
 
 # ---------- NasService ----------

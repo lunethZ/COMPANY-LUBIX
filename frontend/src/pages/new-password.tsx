@@ -87,6 +87,14 @@ const NewPassword: React.FC = () => {
       console.error("❌ Error reset:", err);
       
       if (axios.isAxiosError(err)) {
+        if (err.code === "ECONNABORTED") {
+          showMessage("El servidor está iniciando, intenta nuevamente en unos segundos.", "error");
+          return;
+        }
+        if (!err.response) {
+          showMessage("No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.", "error");
+          return;
+        }
         const errorData = err.response?.data as { detail?: unknown; message?: string } | undefined;
         const errorMsg =
           errorDetailMessage(err, "") ||
