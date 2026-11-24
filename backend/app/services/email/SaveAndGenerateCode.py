@@ -1,5 +1,7 @@
 # Este servicio se encarga de generar códigos de verificación o recuperación de contraseña,
 # almacenarlos en la base de datos y enviarlos por correo electrónico al usuario.
+import logging
+
 from datetime import datetime, timedelta, timezone
 from sqlalchemy.orm import Session
 from app.models.ModelCode import Codes, typeCode
@@ -10,6 +12,9 @@ import secrets
 import uuid
 
 CODE_DIGITS = "0123456789"
+
+logger = logging.getLogger(__name__)
+
 
 def generate_code(length: int = 6) -> str:
     return ''.join(secrets.choice(CODE_DIGITS) for _ in range(length))
@@ -36,7 +41,7 @@ def create_code_and_send_code(database: Session, user_id: uuid.UUID, email: str,
     database.commit()
     database.refresh(new_code)
 
-    print(f"[LUBIX-DEBUG] Código de verificación generado para {email} ({code_type}): {code}")
+    logger.debug("Código de verificación generado para %s (%s)", email, code_type)
     
     email_sent = False
     if code_type == typeCode.resetPassword:
@@ -45,7 +50,7 @@ def create_code_and_send_code(database: Session, user_id: uuid.UUID, email: str,
         email_sent = EmailVerify(email, code, code_type)
     
     if not email_sent:
-        print(f"[LUBIX-ERROR] No se pudo enviar el correo de verificación a {email}")
+        logger.error("No se pudo enviar el correo de verificación a %s", email)
         
     return {
         "message": "Código enviado correctamente" if email_sent else "Código generado pero no se pudo enviar el correo. Intenta de nuevo.",

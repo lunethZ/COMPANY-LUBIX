@@ -1,6 +1,8 @@
 # Este servicio se encarga de manejar la lógica de autenticación de usuarios, 
 # incluyendo registro, inicio de sesión, verificación de correo electrónico, 
 # recuperación de contraseña y cierre de sesión.
+import logging
+
 from fastapi import HTTPException
 from datetime import datetime, timedelta, timezone
 from app.models.ModelCompany import Company
@@ -24,6 +26,9 @@ from app.services.email.SaveAndGenerateCode import create_code_and_send_code, ve
 from app.services.email.template.EmailRegisterCompany import EmailRegisterCompany
 from app.Config import config
 
+logger = logging.getLogger(__name__)
+
+
 def register_user_service(user: createUser, database: Session):
     user_role = database.query(Role).filter(Role.name == "user").first()
     exists_user = database.query(Users).filter(Users.email == user.email).first()
@@ -43,22 +48,19 @@ def register_user_service(user: createUser, database: Session):
             isActive = user.isActive,
             verified = user.verified,
         )
-        print("aca 1")
         database.add(new_user)
-        print("aca 2")
         database.commit()
         database.refresh(new_user)
-        print("aca 3")
         confirm_id_user = database.query(Users).filter(Users.email == user.email).first()
         create_code_and_send_code(database, confirm_id_user.id, email=user.email, code_type="verifyEmail")
         return {
             "message": "Usuario registrado correctamente, se ha enviado un código de verificación a tu correo electrónico para verificar tu cuenta."
         }
     
-    except Exception as e:
+    except Exception:
         database.rollback()
 
-        print("ERROR:",e)
+        logger.exception("Error al registrar usuario")
         raise HTTPException(status_code=500, detail="Error al crear cuenta")
 
 def register_company_service(user: createUser, company: createCompany, certificate_result: str, database: Session):
@@ -115,9 +117,9 @@ def register_company_service(user: createUser, company: createCompany, certifica
             "certificate": certificate_result["path"]
         }
     
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR",e)
+        logger.exception("Error al registrar empresa")
 
         raise HTTPException(status_code=500, detail="Error al crear cuenta empresarial")
 
@@ -149,7 +151,7 @@ def resend_verification_service(email: str, database: Session):
     return {"message": "Se ha enviado un nuevo código de verificación a tu correo electrónico."}
 
 def login_user_service(user: userLogin, database: Session):
-    print("entra a login_user_service")
+    logger.info("Intento de inicio de sesion: %s", user.email)
     search_user = database.query(Users).filter(Users.email == user.email).first()
 
     if not search_user:
@@ -182,9 +184,7 @@ def login_user_service(user: userLogin, database: Session):
     )
 
     save_refresh_token(database, search_user.id, refresh_token)
-    
-    print(search_user.id)
-    print(search_user.role.name)
+
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,

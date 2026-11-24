@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
@@ -6,6 +8,9 @@ from app.models.ModelProduct import Product, Catalog
 from app.models.ModelOrder import Order, OrderItem
 from app.schemas.SchemaProduct import CreateProductRequest, UpdateProductRequest
 import uuid
+
+logger = logging.getLogger(__name__)
+
 
 def _get_company_by_user(user_id, database: Session):
     user = database.query(Users).filter(Users.id == user_id).first()
@@ -72,9 +77,9 @@ def create_product_service(user_id: str, data: CreateProductRequest, database: S
         database.add(new_product)
         database.commit()
         database.refresh(new_product)
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al crear producto")
         raise HTTPException(status_code=500, detail="Error al crear el producto")
 
     return {
@@ -189,9 +194,9 @@ def update_product_service(user_id: str, product_id: str, data: UpdateProductReq
     except HTTPException:
         database.rollback()
         raise
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al actualizar producto")
         raise HTTPException(status_code=500, detail="Error al actualizar el producto")
 
     return {
@@ -213,9 +218,9 @@ def delete_product_service(user_id: str, product_id: str, database: Session):
     try:
         database.delete(product)
         database.commit()
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al eliminar producto")
         raise HTTPException(status_code=500, detail="Error al eliminar el producto")
 
     return {

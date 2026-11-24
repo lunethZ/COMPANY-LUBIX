@@ -109,7 +109,7 @@ def _authenticate(request: Request):
     try:
         payload = verify_token(token)
     except Exception as exc:
-        print("Auth Error", exc)
+        logger.warning("Token invalido: %s", exc)
         return None, _cors_response(401, "Token invalido", request)
 
     if not isinstance(payload, dict) or payload is None:

@@ -7,6 +7,7 @@ Credenciales demo:
     Usuario cliente:  cliente@lubix.com  /  Cliente123!
     Empresa:          tienda@lubix.com   /  Tienda123!   (empresa aprobada)
 """
+import logging
 import uuid
 from sqlalchemy.orm import Session
 from app.database.Connection import SessionLocal
@@ -15,6 +16,8 @@ from app.models.ModelUser import Users
 from app.models.ModelCompany import Company
 from app.models.ModelProduct import Product, Catalog
 from app.utils.Security import hash_password
+
+logger = logging.getLogger(__name__)
 
 
 def get_or_create_role(database: Session, name: str) -> Role:
@@ -140,7 +143,7 @@ def seed_demo(database: Session):
     created = 0
     existing = database.query(Product).count()
     if existing > 0:
-        print(f"Ya existen {existing} productos. Seed demo omitido.")
+        logger.info("Ya existen %s productos. Seed demo omitido.", existing)
         return
 
     for name, catalog_name, price, stock, discount, descripcion, specs in PRODUCT_LIST:
@@ -162,12 +165,13 @@ def seed_demo(database: Session):
         created += 1
 
     database.commit()
-    print(f"Seed demo completado: {created} productos, 8 catálogos.")
-    print("Cliente:  cliente@lubix.com / Cliente123!")
-    print("Empresa:  tienda@lubix.com  / Tienda123!")
+    logger.info("Seed demo completado: %s productos, 8 catálogos.", created)
+    logger.info("Cliente:  cliente@lubix.com / Cliente123!")
+    logger.info("Empresa:  tienda@lubix.com  / Tienda123!")
 
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO, format="%(message)s")
     session = SessionLocal()
     try:
         seed_demo(session)

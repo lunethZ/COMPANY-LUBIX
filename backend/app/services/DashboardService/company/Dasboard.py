@@ -1,3 +1,5 @@
+import logging
+
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.ModelUser import Users
@@ -8,6 +10,8 @@ from app.models.ModelCompany import Company
 from fastapi import HTTPException
 from app.schemas.SchemaDashboard.ShemaCompany import UpdateInformationCompanyRequest, UpdateBannerAndLogoRequest
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 
 def _get_company_metrics(company_id, database: Session):
@@ -142,10 +146,10 @@ def company_dashboard_upgrade_my_profile_service(user_id: str, CompanyRequest:Up
         database.refresh(user)
         database.refresh(company)
 
-    except Exception as e:
+    except Exception:
         database.rollback()
 
-        print("ERROR:",e)
+        logger.exception("Error al actualizar el perfil de empresa")
         raise HTTPException(status_code=500, detail="En actualizar datos")
     
     return {
@@ -259,9 +263,9 @@ def company_update_order_status_service(user_id: str, order_id: str, new_status:
     try:
         order.status = new_status
         database.commit()
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al actualizar el estado del pedido")
         raise HTTPException(status_code=500, detail="Error al actualizar el pedido")
 
     status_progress = {
