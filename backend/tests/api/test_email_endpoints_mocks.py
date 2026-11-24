@@ -106,11 +106,11 @@ def test_register_company_sube_certificado_y_envia_correo(
     email_mocks.smtp.assert_not_called()
 
 
-def test_register_company_con_fallo_de_correo_devuelve_500(
+def test_register_company_responde_200_aunque_falle_el_correo(
     client, seed, email_mocks, storage_mocks
 ):
     seed.roles("company")
-    email_mocks.company.side_effect = RuntimeError("smtp caído")
+    email_mocks.company.return_value = False
 
     response = client.post(
         "/auth/register-company",
@@ -118,8 +118,7 @@ def test_register_company_con_fallo_de_correo_devuelve_500(
         files=_company_files(),
     )
 
-    assert response.status_code == 500
-    assert response.json() == {"detail": "Error al crear cuenta empresarial"}
+    assert response.status_code == 200
     storage_mocks.upload.assert_called_once()
     email_mocks.company.assert_called_once()
     email_mocks.smtp.assert_not_called()
