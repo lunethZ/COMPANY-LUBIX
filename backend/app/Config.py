@@ -47,8 +47,15 @@ class config():
     GMAIL_USERNAME = os.getenv("GMAIL_USERNAME")
     GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
-    # Resend (API HTTPS) evita el bloqueo de puertos SMTP de Render free.
-    # Si RESEND_API_KEY no está definida, EmailService cae al flujo SMTP.
+    # Brevo (API HTTPS v3) es el proveedor principal de correo transaccional:
+    # Render free bloquea los puertos SMTP salientes y Resend queda limitado a
+    # destinatarios autorizados en modo sandbox.
+    BREVO_API_KEY = os.getenv("BREVO_API_KEY")
+    BREVO_SENDER_EMAIL = os.getenv("BREVO_SENDER_EMAIL") or "lubixcompanyemail@gmail.com"
+    BREVO_SENDER_NAME = os.getenv("BREVO_SENDER_NAME") or "lubix"
+
+    # Resend queda como respaldo si BREVO_API_KEY no está definida; si tampoco
+    # hay RESEND_API_KEY, EmailService cae al flujo SMTP.
     RESEND_API_KEY = os.getenv("RESEND_API_KEY")
     RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL") or "LUBIX <onboarding@resend.dev>"
 

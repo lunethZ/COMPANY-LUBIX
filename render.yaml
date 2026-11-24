@@ -55,7 +55,14 @@ services:
         sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
-      # Resend (API HTTPS): Render free bloquea SMTP saliente.
+      # Brevo (API HTTPS v3): proveedor principal; Render free bloquea SMTP.
+      - key: BREVO_API_KEY
+        sync: false
+      - key: BREVO_SENDER_EMAIL
+        value: lubixcompanyemail@gmail.com
+      - key: BREVO_SENDER_NAME
+        value: lubix
+      # Resend: respaldo cuando BREVO_API_KEY no está configurada.
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM_EMAIL
