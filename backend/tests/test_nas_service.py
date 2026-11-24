@@ -179,3 +179,19 @@ def test_subir_delete_file_happy_path():
 
     # Restore
     subir.client = original_client
+
+
+def test_ensure_bucket_falla_registra_warning(monkeypatch, caplog):
+    import logging
+
+    from app.services import NasService as nas
+
+    monkeypatch.setattr(nas.config, "MINIO_AUTO_CREATE_BUCKET", True)
+    fake_client = MagicMock()
+    fake_client.bucket_exists = MagicMock(side_effect=RuntimeError("sin conexión"))
+    monkeypatch.setattr(nas, "client", fake_client)
+
+    with caplog.at_level(logging.WARNING):
+        nas._ensure_bucket()
+
+    assert "No se pudo verificar el bucket" in caplog.text

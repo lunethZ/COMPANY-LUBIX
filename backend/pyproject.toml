@@ -85,6 +85,10 @@ testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra"
 
+[tool.coverage.run]
+# Script manual de siembra: se ejecuta dentro del contenedor, no lo cubre pytest.
+omit = ["app/utils/seed_demo.py"]
+
 [tool.coverage.report]
 include_namespace_packages = true
 fail_under = 80

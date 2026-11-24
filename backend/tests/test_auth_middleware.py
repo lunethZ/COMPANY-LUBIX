@@ -48,6 +48,19 @@ def test_token_malformado_devuelve_401(client, seed):
     assert response.json() == {"detail": "Token invalido"}
 
 
+def test_error_al_verificar_token_devuelve_401(client, seed, monkeypatch):
+    seed.roles("user")
+    monkeypatch.setattr(
+        "app.middleware.AuthMiddleware.verify_token",
+        lambda token: (_ for _ in ()).throw(RuntimeError("jwt roto")),
+    )
+
+    response = client.get(PROTECTED, headers={"Authorization": "Bearer cualquiera"})
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Token invalido"}
+
+
 def test_token_expirado_devuelve_401(client, seed):
     user = seed.user()
     token = _expired_access_token(str(user.id))
