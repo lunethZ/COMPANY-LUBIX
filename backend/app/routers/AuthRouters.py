@@ -1,7 +1,7 @@
 # Este router se encarga de manejar las rutas relacionadas 
 # con la autenticación de usuarios, incluyendo registro, inicio de sesión,
 # verificación de correo electrónico, recuperación de contraseña y cierre de sesión.
-from fastapi import APIRouter,Depends, UploadFile, File, Form, requests
+from fastapi import APIRouter,Depends, UploadFile, File, Form, BackgroundTasks, requests
 from app.services.authentication.AuthService import (
     register_user_service,
     register_company_service,
@@ -39,14 +39,15 @@ router = APIRouter(
 )
 
 @router.post("/register-user")
-def registerUser(user: createUser, database: Session = Depends(get_db)):
-    register_user_service(user, database)
+def registerUser(user: createUser, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):
+    register_user_service(user, database, background_tasks=background_tasks)
     return {
         "message": "Usuario registrado correctamente, se ha enviado un código de verificación a tu correo electrónico para verificar tu cuenta.",
     }
 
 @router.post("/register-company")
 def registerCompany(
+    background_tasks: BackgroundTasks,
     fullName: str = Form(...),
     email: str = Form(...),
     password: str = Form(...),
@@ -75,7 +76,13 @@ def registerCompany(
         path = f"companies/{companyNIT}/certificates/"
         certificate_result = subir.upload_file(certificate, path)
         
-        return register_company_service(user, company, certificate_result, database)
+        return register_company_service(
+            user,
+            company,
+            certificate_result,
+            database,
+            background_tasks=background_tasks,
+        )
     except Exception as e:
         # Re-lanzar HTTPExceptions (errores de validación de Pydantic o del servicio)
         from fastapi import HTTPException
@@ -89,25 +96,25 @@ def registerCompany(
         )
 
 @router.post("/verify-email-user")
-def verify_email(code: verifyEmail, database: Session = Depends(get_db)):
+def verify_email(code: verifyEmail, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):
     
-    return verify_email_service(code, database)
+    return verify_email_service(code, database, background_tasks=background_tasks)
 
 @router.post("/resend-verification")
-def resend_verification(user: ResendVerification, database: Session = Depends(get_db)):
-    return resend_verification_service(user.email, database)
+def resend_verification(user: ResendVerification, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):
+    return resend_verification_service(user.email, database, background_tasks=background_tasks)
 
 @router.post("/login-user")
-def login_user(user: userLogin, database: Session = Depends(get_db)):
-    return login_user_service(user, database)
+def login_user(user: userLogin, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):
+    return login_user_service(user, database, background_tasks=background_tasks)
 
 @router.post("/login-company")
-def login_company(company: LoginCompany, database: Session = Depends(get_db)):
-    return login_company_service(company, database)
+def login_company(company: LoginCompany, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):
+    return login_company_service(company, database, background_tasks=background_tasks)
 
 @router.post("/forgot-password-user")
-def forgot_password(user: forgotPassword, database: Session = Depends(get_db)):
-    return forgot_password_service(user, database)
+def forgot_password(user: forgotPassword, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):
+    return forgot_password_service(user, database, background_tasks=background_tasks)
 
 @router.post("/reset-password-user")
 def reset_password(user: ResetPassword, database: Session = Depends(get_db)):

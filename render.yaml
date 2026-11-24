@@ -47,13 +47,19 @@ services:
       - key: REFRESH_TOKEN_DAYS
         value: "7"
       - key: URL_FRONTEND
-        sync: false
+        value: https://lubix-frontend.onrender.com
+      # Orígenes adicionales separados por coma (se suman a URL_FRONTEND).
       - key: CORS_ORIGINS
-        sync: false
+        value: https://lubix-frontend.onrender.com
       - key: GMAIL_USERNAME
         sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
+      # Resend (API HTTPS): Render free bloquea SMTP saliente.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: "LUBIX <onboarding@resend.dev>"
       - key: MINIO_ENDPOINT
         sync: false
       - key: MINIO_SECURE

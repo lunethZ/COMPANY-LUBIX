@@ -47,6 +47,11 @@ class config():
     GMAIL_USERNAME = os.getenv("GMAIL_USERNAME")
     GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD")
 
+    # Resend (API HTTPS) evita el bloqueo de puertos SMTP de Render free.
+    # Si RESEND_API_KEY no está definida, EmailService cae al flujo SMTP.
+    RESEND_API_KEY = os.getenv("RESEND_API_KEY")
+    RESEND_FROM_EMAIL = os.getenv("RESEND_FROM_EMAIL") or "LUBIX <onboarding@resend.dev>"
+
     URL_FRONTEND = os.getenv("URL_FRONTEND")
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
 
