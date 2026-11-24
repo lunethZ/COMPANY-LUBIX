@@ -1,7 +1,7 @@
-"""Envío de correo por la API HTTPS de Resend.
+"""Envío de correo por la API HTTPS de Resend (respaldo de Brevo).
 
-En Render free el puerto SMTP 587 está bloqueado, por lo que producción usa
-Resend cuando `RESEND_API_KEY` está definida; sin ella se conserva SMTP.
+Brevo es el proveedor principal; Resend solo se usa cuando `BREVO_API_KEY` no
+está definida y `RESEND_API_KEY` sí. Sin ninguna de las dos, se conserva SMTP.
 """
 import logging
 from unittest.mock import MagicMock
@@ -21,6 +21,7 @@ HTML_BODY = "<p>Tu código es <b>123456</b></p>"
 
 @pytest.fixture()
 def resend_enabled(monkeypatch):
+    monkeypatch.setattr(config, "BREVO_API_KEY", "", raising=False)
     monkeypatch.setattr(config, "RESEND_API_KEY", "re_test_key", raising=False)
     monkeypatch.setattr(
         config, "RESEND_FROM_EMAIL", "LUBIX <onboarding@resend.dev>", raising=False
@@ -84,6 +85,7 @@ def test_resend_error_de_red_devuelve_false(resend_enabled, smtp_forbidden, monk
 
 
 def test_sin_api_key_usa_smtp_de_respaldo(monkeypatch):
+    monkeypatch.setattr(config, "BREVO_API_KEY", "", raising=False)
     monkeypatch.setattr(config, "RESEND_API_KEY", "", raising=False)
     monkeypatch.setattr(config, "RESEND_FROM_EMAIL", "LUBIX <onboarding@resend.dev>", raising=False)
     post = MagicMock()

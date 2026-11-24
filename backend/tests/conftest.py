@@ -95,7 +95,9 @@ os.environ.update(
         "MINIO_ROOT_PASSWORD": "test",
         "GMAIL_USERNAME": "test@example.com",
         "GMAIL_APP_PASSWORD": "test",
-        # Vacía a propósito: la suite usa el flujo SMTP doblado, nunca Resend.
+        # Vacías a propósito: la suite usa el flujo SMTP doblado, nunca Brevo
+        # ni Resend, salvo en las pruebas que los habilitan explícitamente.
+        "BREVO_API_KEY": "",
         "RESEND_API_KEY": "",
         "ADMIN_DEFAULT": "admin@example.com",
         "PASSWORD_DEFAULT": "Admin123!",
