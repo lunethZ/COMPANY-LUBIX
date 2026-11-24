@@ -1,7 +1,11 @@
+import logging
+
 from fastapi import Request
 from starlette.responses import JSONResponse
 from app.middleware.CorsMiddleware import allowed_origins
 from app.services.authentication.JWTService import verify_token
+
+logger = logging.getLogger(__name__)
 
 CORS_HEADERS = {
     "Access-Control-Allow-Methods": "*",
@@ -126,9 +130,9 @@ def _authenticate(request: Request):
 async def _call_next_safely(request: Request, call_next):
     try:
         return await call_next(request)
-    except Exception as exc:
-        print("Auth Error", exc)
-        return _cors_response(401, "Token invalido", request)
+    except Exception:
+        logger.exception("Error interno en %s %s", request.method, request.url.path)
+        return _cors_response(500, "Error interno del servidor", request)
 
 
 async def auth_middleware(request: Request, call_next):
