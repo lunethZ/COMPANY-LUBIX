@@ -95,6 +95,8 @@ os.environ.update(
         "MINIO_ROOT_PASSWORD": "test",
         "GMAIL_USERNAME": "test@example.com",
         "GMAIL_APP_PASSWORD": "test",
+        # Vacía a propósito: la suite usa el flujo SMTP doblado, nunca Resend.
+        "RESEND_API_KEY": "",
         "ADMIN_DEFAULT": "admin@example.com",
         "PASSWORD_DEFAULT": "Admin123!",
         "RUN_SEED": "false",

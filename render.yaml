@@ -55,6 +55,11 @@ services:
         sync: false
       - key: GMAIL_APP_PASSWORD
         sync: false
+      # Resend (API HTTPS): Render free bloquea SMTP saliente.
+      - key: RESEND_API_KEY
+        sync: false
+      - key: RESEND_FROM_EMAIL
+        value: "LUBIX <onboarding@resend.dev>"
       - key: MINIO_ENDPOINT
         sync: false
       - key: MINIO_SECURE
