@@ -80,7 +80,7 @@ jobs:
           python-version: "3.13"
       - name: Instalar dependencias
         run: >
-          pip install -r requirements.txt httpx==0.28.1 pytest pytest-cov
+          pip install -r requirements.txt httpx==0.28.1 pytest pytest-cov pytest-mock
       - name: Crear esquema de la BD de pruebas
         run: python scripts/init_test_db.py
       - name: Tests de repositorio contra PostgreSQL real

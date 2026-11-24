@@ -320,3 +320,18 @@ def test_reset_password_no_envia_correo(client, seed, email_mocks):
     email_mocks.code.assert_not_called()
     email_mocks.company.assert_not_called()
     email_mocks.smtp.assert_not_called()
+
+def test_register_user_con_correo_en_uso_no_envia_correo(client, seed, email_mocks):
+    seed.user(email="s5-duplicado@lubix.com")
+
+    response = client.post(
+        "/auth/register-user",
+        json={**REGISTER_USER_PAYLOAD, "email": "s5-duplicado@lubix.com"},
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "correo en uso"}
+    email_mocks.code.assert_not_called()
+    email_mocks.company.assert_not_called()
+    email_mocks.smtp.assert_not_called()
+    
