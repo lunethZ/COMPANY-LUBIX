@@ -62,6 +62,8 @@ def company_dashboard_me_service(user_id, database: Session):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
     company = user.company
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
     role = user.role
     metrics = _get_company_metrics(company.id, database)
 
@@ -86,6 +88,8 @@ def company_dashboard_my_profile_service(user_id: str, database: Session):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
         
     company = user.company
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
     metrics = _get_company_metrics(company.id, database)
 
     return {
@@ -117,6 +121,8 @@ def company_dashboard_upgrade_my_profile_service(user_id: str, CompanyRequest:Up
     
     
     company = user.company
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
 
     try:
 

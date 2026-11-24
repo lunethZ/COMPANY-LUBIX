@@ -516,7 +516,7 @@ def test_rutas_de_empresa_sin_token_devuelve_401(client, seed):
     assert response.json() == {"detail": "Token requerido"}
 
 
-def test_company_sin_registro_devuelve_401_en_dashboard(client, seed):
+def test_company_sin_registro_devuelve_404_en_dashboard(client, seed):
     company_user = seed.user(email="sin-empresa@lubix.com", role="company")
 
     response = client.get(
@@ -524,5 +524,5 @@ def test_company_sin_registro_devuelve_401_en_dashboard(client, seed):
         headers=seed.headers(company_user),
     )
 
-    assert response.status_code == 401
-    assert response.json()["detail"] == "Token invalido"
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Empresa no encontrada"}
