@@ -106,6 +106,26 @@ def test_register_company_sube_certificado_y_envia_correo(
     email_mocks.smtp.assert_not_called()
 
 
+def test_register_company_commit_fallido_devuelve_500(
+    client, seed, email_mocks, storage_mocks, monkeypatch
+):
+    seed.roles("company")
+
+    def boom(self):
+        raise RuntimeError("base de datos caída")
+
+    monkeypatch.setattr("sqlalchemy.orm.Session.commit", boom)
+
+    response = client.post(
+        "/auth/register-company",
+        data=COMPANY_FORM,
+        files=_company_files(),
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error al crear cuenta empresarial"}
+
+
 def test_register_company_responde_200_aunque_falle_el_correo(
     client, seed, email_mocks, storage_mocks
 ):

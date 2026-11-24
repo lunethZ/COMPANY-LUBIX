@@ -203,13 +203,13 @@ def test_get_file_usa_fallback_cuando_falla_lectura_directa(client, storage_mock
     storage_mocks.download_stream.assert_called_once_with("products/producto.jpg")
 
 
-def test_get_file_con_almacenamiento_caido_devuelve_404(client, storage_mocks):
+def test_get_file_con_almacenamiento_caido_devuelve_503(client, storage_mocks):
     storage_mocks.get_object.side_effect = RuntimeError("NoSuchKey")
     storage_mocks.download_stream.side_effect = RuntimeError("sin red")
 
     response = client.get("/files/no-existe.png")
 
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Archivo no encontrado"}
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Almacenamiento no disponible"}
     storage_mocks.get_object.assert_called_once_with("uploads", "no-existe.png")
     storage_mocks.download_stream.assert_called_once_with("no-existe.png")

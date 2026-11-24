@@ -295,5 +295,5 @@ Pendiente de ejecución por un compañero distinto al autor. Checklist: clonar `
 | Temas tratados | Despliegue en Render, respaldo y restauración, CI/Sonar, RNFs y acciones correctivas |
 | Evidencias revisadas | CI 45089479684; `/health`, `/health/database`, `/health/internet`; [`Prueba_Restauracion_2026-11-19.md`](./Evidencias/Prueba_Restauracion_2026-11-19.md); [`p4-s5-seguridad.txt`](./Evidencias/p4-s5-seguridad.txt) |
 | Acuerdos | Revisar y fusionar PR #81, #82, #83 y #85; activar protección de `main`; configurar Healthchecks.io cuando se entregue el ping URL; corregir issue #84 |
-| Observaciones | RNF-001 no cumple p95 < 200 ms en Render (p95 medido 0.545538 s). RNF-009 quedó con hallazgos de error 401/500, registrados en issue #84. |
-| Firmas | Pendiente de @lunethZ y @juanpineda tras aprobación de PRs y simulacro |
+| Observaciones | RNF-001 no cumple p95 < 200 ms en Render (medición 2026-11-24: catálogo p95 605 ms; en local p95 30.7 ms, sí cumple). Mitigación en PNF-001: ping externo y plan siempre activo. RNF-009 quedó con hallazgos de error 401/500, registrados en issue #84. |
+| Firmas | @lunethZ (calidad y backend, 2026-11-24) — pendiente @juanpineda y la ejecución del simulacro de 8.1 |

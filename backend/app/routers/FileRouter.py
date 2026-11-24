@@ -5,6 +5,13 @@ import mimetypes
 
 router = APIRouter(prefix="/files", tags=["files"])
 
+NOT_FOUND_CODES = {"NoSuchKey", "NoSuchBucket", "NoSuchObject", "NoSuchVersion"}
+
+
+def _is_not_found(exc: Exception) -> bool:
+    return getattr(exc, "code", None) in NOT_FOUND_CODES
+
+
 @router.get("/{file_path:path}")
 def get_file(file_path: str):
     response = None
@@ -22,11 +29,13 @@ def get_file(file_path: str):
                 "Cache-Control": "public, max-age=86400",
             },
         )
-    except Exception:
+    except Exception as primer_error:
         try:
             return subir.download_stream(file_path)
-        except Exception:
-            raise HTTPException(status_code=404, detail="Archivo no encontrado")
+        except Exception as segundo_error:
+            if _is_not_found(primer_error) and _is_not_found(segundo_error):
+                raise HTTPException(status_code=404, detail="Archivo no encontrado")
+            raise HTTPException(status_code=503, detail="Almacenamiento no disponible")
     finally:
         if response:
             try:

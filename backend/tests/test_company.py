@@ -40,6 +40,13 @@ def _create_order(client, seed, buyer, product, *, quantity=1):
     return response.json()
 
 
+def _commit_roto(monkeypatch):
+    def boom(self):
+        raise RuntimeError("base de datos caída")
+
+    monkeypatch.setattr("sqlalchemy.orm.Session.commit", boom)
+
+
 # --------------------------------------------------------------------------- #
 # Dashboard
 # --------------------------------------------------------------------------- #
@@ -100,7 +107,7 @@ def test_upgrade_profile_devuelve_200(client, seed):
     )
 
     assert response.status_code == 200
-    assert response.json() == {"messaje": "Perfil actualizado correctamente"}
+    assert response.json() == {"message": "Perfil actualizado correctamente"}
 
 
 def test_upgrade_profile_email_en_uso_devuelve_400(client, seed):
@@ -127,6 +134,20 @@ def test_upgrade_profile_email_invalido_devuelve_422(client, seed):
     )
 
     assert response.status_code == 422
+
+
+def test_upgrade_profile_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    company = seed.company()
+    _commit_roto(monkeypatch)
+
+    response = client.patch(
+        "/company/dashboard/upgrade-my-profile",
+        json={"nameCompany": "Empresa Renombrada"},
+        headers=seed.headers(company),
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "En actualizar datos"}
 
 
 # --------------------------------------------------------------------------- #
@@ -325,6 +346,49 @@ def test_delete_product_devuelve_200_y_404(client, seed):
     assert missing.status_code == 404
 
 
+def test_create_product_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    company = seed.company()
+    _commit_roto(monkeypatch)
+
+    response = client.post(
+        "/company/products",
+        json=PRODUCT_PAYLOAD,
+        headers=seed.headers(company),
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error al crear el producto"}
+
+
+def test_update_product_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    company = seed.company()
+    product = seed.product(company)
+    _commit_roto(monkeypatch)
+
+    response = client.patch(
+        f"/company/products/{product.id}",
+        json={"price": 999.0},
+        headers=seed.headers(company),
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error al actualizar el producto"}
+
+
+def test_delete_product_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    company = seed.company()
+    product = seed.product(company)
+    _commit_roto(monkeypatch)
+
+    response = client.delete(
+        f"/company/products/{product.id}",
+        headers=seed.headers(company),
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error al eliminar el producto"}
+
+
 # --------------------------------------------------------------------------- #
 # Pedidos de la empresa
 # --------------------------------------------------------------------------- #
@@ -412,6 +476,22 @@ def test_update_order_status_sin_productos_propios_devuelve_403(client, seed):
 
     assert response.status_code == 403
     assert response.json() == {"detail": "Este pedido no contiene productos de tu empresa"}
+
+
+def test_update_order_status_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    company = seed.company()
+    product = seed.product(company)
+    order = _create_order(client, seed, seed.user(), product)
+    _commit_roto(monkeypatch)
+
+    response = client.patch(
+        f"/company/orders/{order['id']}/status",
+        json={"status": "confirmed"},
+        headers=seed.headers(company),
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error al actualizar el pedido"}
 
 
 # --------------------------------------------------------------------------- #
@@ -516,7 +596,7 @@ def test_rutas_de_empresa_sin_token_devuelve_401(client, seed):
     assert response.json() == {"detail": "Token requerido"}
 
 
-def test_company_sin_registro_devuelve_401_en_dashboard(client, seed):
+def test_company_sin_registro_devuelve_404_en_dashboard(client, seed):
     company_user = seed.user(email="sin-empresa@lubix.com", role="company")
 
     response = client.get(
@@ -524,5 +604,5 @@ def test_company_sin_registro_devuelve_401_en_dashboard(client, seed):
         headers=seed.headers(company_user),
     )
 
-    assert response.status_code == 401
-    assert response.json()["detail"] == "Token invalido"
+    assert response.status_code == 404
+    assert response.json() == {"detail": "Empresa no encontrada"}

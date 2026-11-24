@@ -1,7 +1,7 @@
 # Este router se encarga de manejar las rutas relacionadas 
 # con la autenticación de usuarios, incluyendo registro, inicio de sesión,
 # verificación de correo electrónico, recuperación de contraseña y cierre de sesión.
-from fastapi import APIRouter,Depends, UploadFile, File, Form, BackgroundTasks, requests
+from fastapi import APIRouter,Depends, UploadFile, File, Form, BackgroundTasks
 from app.services.authentication.AuthService import (
     register_user_service,
     register_company_service,
@@ -12,7 +12,6 @@ from app.services.authentication.AuthService import (
     forgot_password_service,
     reset_password_service,
     refresh_token_service,
-    resend_verification_service,
     logout_service
 )
 from sqlalchemy.orm import Session
@@ -30,8 +29,6 @@ from app.schemas.SchemaAuthUser import (
 from app.schemas.SchemaAuthCompany import createCompany, LoginCompany
 from app.services.NasService import subir
 
-from app.services.authentication.JWTService import verify_token
-from app.Config import config
 
 router = APIRouter(
     prefix=("/auth"),   

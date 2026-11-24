@@ -83,9 +83,8 @@ def test_create_pqrs_sin_token_devuelve_401(client, seed):
     assert response.json() == {"detail": "Token requerido"}
 
 
-def test_create_pqrs_commit_fallido_no_da_500(client, seed, monkeypatch):
-    """Documenta un hallazgo: una excepción cruda en el endpoint no llega a
-    ser 500; el `except Exception` de `auth_middleware` la reporta como 401."""
+def test_create_pqrs_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    """Un error interno del endpoint no se disfraza de 401 en el middleware."""
     user = seed.user()
 
     def boom(self):
@@ -95,8 +94,8 @@ def test_create_pqrs_commit_fallido_no_da_500(client, seed, monkeypatch):
 
     response = client.post("/pqrs", json=PQRS_PAYLOAD, headers=seed.headers(user))
 
-    assert response.status_code == 401
-    assert response.json() == {"detail": "Token invalido"}
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error interno del servidor"}
 
 
 # --------------------------------------------------------------------------- #

@@ -115,6 +115,24 @@ def test_update_profile_nombre_corto_devuelve_422(client, seed):
     assert response.json()["detail"][0]["loc"][-1] == "fullName"
 
 
+def test_update_profile_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    user = seed.user()
+
+    def boom(self):
+        raise RuntimeError("base de datos caída")
+
+    monkeypatch.setattr("sqlalchemy.orm.Session.commit", boom)
+
+    response = client.patch(
+        "/user/profile",
+        json={"fullName": "Nombre Actualizado"},
+        headers=seed.headers(user),
+    )
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error al actualizar el perfil"}
+
+
 def test_change_password_devuelve_200(client, seed):
     user = seed.user()
 
@@ -165,6 +183,20 @@ def test_delete_account_devuelve_200_y_luego_404(client, seed):
 
     after = client.get("/user/dashboard/me", headers=headers)
     assert after.status_code == 404
+
+
+def test_delete_account_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    user = seed.user()
+
+    def boom(self):
+        raise RuntimeError("base de datos caída")
+
+    monkeypatch.setattr("sqlalchemy.orm.Session.commit", boom)
+
+    response = client.delete("/user/account", headers=seed.headers(user))
+
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error al eliminar la cuenta"}
 
 
 def test_export_devuelve_200_y_su_forma(client, seed):
