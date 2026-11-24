@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.database.Connection import get_db
 
@@ -23,7 +23,7 @@ def get_pending_companies(database: Session = Depends(get_db)):
             Users.email.label("email")
         )
         .join(Users, Users.id == Company.user_id)
-        .filter(Users.verified == False)
+        .filter(Users.verified.is_(False))
         .all()
     )
     return [
@@ -41,7 +41,7 @@ def get_approved_companies(database: Session = Depends(get_db)):
             Users.email.label("email")
         )
         .join(Users, Users.id == Company.user_id)
-        .filter(Users.verified == True)
+        .filter(Users.verified.is_(True))
         .all()
     )
     return [

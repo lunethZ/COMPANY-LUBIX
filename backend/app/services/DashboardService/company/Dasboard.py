@@ -6,9 +6,8 @@ from app.models.ModelUser import Users
 from app.models.ModelProduct import Product
 from app.models.ModelReview import Review
 from app.models.ModelOrder import Order, OrderItem
-from app.models.ModelCompany import Company
 from fastapi import HTTPException
-from app.schemas.SchemaDashboard.ShemaCompany import UpdateInformationCompanyRequest, UpdateBannerAndLogoRequest
+from app.schemas.SchemaDashboard.ShemaCompany import UpdateInformationCompanyRequest
 from datetime import datetime, timedelta
 
 logger = logging.getLogger(__name__)

@@ -143,13 +143,6 @@ def verify_email_service(code: verifyEmail, database: Session):
         "message": "Correo electrónico verificado correctamente"
     }
 
-def resend_verification_service(email: str, database: Session):
-    user = database.query(Users).filter(Users.email == email).first()
-    if not user:
-        raise HTTPException(status_code=400, detail="Correo no registrado")
-    create_code_and_send_code(database, user.id, email, code_type="verifyEmail")
-    return {"message": "Se ha enviado un nuevo código de verificación a tu correo electrónico."}
-
 def login_user_service(user: userLogin, database: Session):
     logger.info("Intento de inicio de sesion: %s", user.email)
     search_user = database.query(Users).filter(Users.email == user.email).first()

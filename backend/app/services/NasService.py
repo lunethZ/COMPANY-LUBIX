@@ -128,7 +128,7 @@ class NasService:
                     "Content-Disposition": f"attachment; filename={object_name.split('/')[-1]}"
                 }
             )
-        except S3Error as e:
+        except S3Error:
             raise
         finally:
             if response:

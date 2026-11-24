@@ -7,7 +7,6 @@ from app.models.ModelUser import Users
 from app.models.ModelProduct import Product, Catalog
 from app.models.ModelOrder import Order, OrderItem
 from app.schemas.SchemaProduct import CreateProductRequest, UpdateProductRequest
-import uuid
 
 logger = logging.getLogger(__name__)
 

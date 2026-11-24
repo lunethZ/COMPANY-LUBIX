@@ -1,12 +1,11 @@
 from fastapi import APIRouter, Query, Depends, HTTPException, Request
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_, func
 from app.database.Connection import get_db
 from app.models.ModelProduct import Product, Catalog
 from app.models.ModelCompany import Company
 from app.models.ModelUser import Users
 from app.models.ModelReview import Review
-from app.models.ModelFavorite import Favorite
 from app.models.ModelOrder import Order, OrderItem
 from app.schemas.SchemaReview import CreateReviewRequest
 
