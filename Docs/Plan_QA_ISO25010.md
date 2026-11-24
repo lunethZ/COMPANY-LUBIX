@@ -48,7 +48,7 @@ El plan cubre el backend (FastAPI / Python), el frontend web (React / TypeScript
 | M-05 | Densidad de defectos | defectos confirmados ÷ KLOC | Revisión + Sonar | < 2 por KLOC | En seguimiento | 2026-11-20 |
 | M-06 | Cumplimiento de SLA de soporte | tickets respondidos en plazo ÷ tickets totales × 100 | Mesa de ayuda (1.1.8) | ≥ 90 % | Sin medición formal | — |
 | M-07 | Tiempo medio de resolución (MTTR) | Σ tiempo de resolución ÷ tickets cerrados | Mesa de ayuda | ≤ 2 días hábiles (P3) | Sin medición formal | — |
-| M-08 | Tiempo de respuesta API | percentil 95 de latencia | Render + pruebas manuales | < 200 ms (RNF-001) | Pendiente de prueba formal | — |
+| M-08 | Tiempo de respuesta API | percentil 95 de latencia | Render + pruebas manuales | < 200 ms (RNF-001) | Medido 2026-11-24: local 30.7 ms; Render 605 ms (no cumple) | 2026-11-24 |
 | M-09 | Cobertura del manual | secciones con capturas ÷ secciones del manual × 100 | Revisión documental | 100 % de secciones verificables | 1.1.5, 1.1.7, 1.1.9 con capturas reales | 2026-11-20 |
 
 ## 5. Niveles de prueba y responsabilidades

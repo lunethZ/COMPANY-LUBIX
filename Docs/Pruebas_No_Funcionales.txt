@@ -63,30 +63,70 @@ PNF-001 | Rendimiento | Tiempo de respuesta del API (RNF-001)
     de 200 milisegundos.
 
   PRECONDICIONES:
-    Backend ejecutándose en Docker con PostgreSQL conectado.
+    Backend local con Python 3.14 + uvicorn contra PostgreSQL 16
+    (contenedor de pruebas, puerto 5433) y el API desplegado en Render
+    para la medición remota.
 
   DATOS DE ENTRADA:
-    Endpoint GET /products/catalogs.
+    Local: GET /products/catalogs, POST /auth/login-user y
+    POST /user/orders (usuario y producto sembrados para la prueba).
+    Producción: GET /health y GET /products/catalogs (login y pedido
+    requieren credenciales de producción).
 
   PASOS DE EJECUCIÓN:
-    1. Abrir Postman o curl.
-    2. Ejecutar GET a http://localhost:8002/products/catalogs.
-    3. Medir tiempo de respuesta.
-    4. Repetir 5 veces.
-     5. Repetir 30 veces con curl.exe contra https://lubix-api.onrender.com/health.
-     6. Calcular promedio, mediana y p95.
+    1. Levantar el backend local: uvicorn en 127.0.0.1:8010.
+    2. Por endpoint: 3 peticiones de calentamiento y 30 mediciones con
+       Docs/herramientas/medir_rnf001.py (tiempo de pared por petición).
+    3. Repetir la serie contra https://lubix-api.onrender.com y
+       registrar aparte la primera petición (posible arranque en frío).
+    4. Calcular mínimo, mediana, p95, máximo y promedio; p95 con el
+       índice ceil(0.95 * n) - 1 sobre la serie ordenada.
 
   RESULTADO ESPERADO:
-    Tiempo promedio menor a 200 ms.
+    Consultas simples con p95 menor a 200 ms (RNF-001).
 
   RESULTADO OBTENIDO:
-    Medición real del 2026-11-22 con 30 peticiones a /health en Render:
-    min 0.191713 s | mediana 0.222572 s | p95 0.545538 s | max 2.230732 s | promedio 0.307858 s.
-    El p95 supera el objetivo de 0.200 s; se observó un arranque en frío de 2.230732 s
-    y un timeout de calentamiento de 30 s previo a la serie. No cumple RNF-001 desde la red de pruebas.
+    Medición local del 2026-11-24 (n=30, p95):
+      GET /products/catalogs  p95  30.7 ms  (mín 4.0 | mediana 17.5 | máx 31.5 | prom 16.7)  CUMPLE (< 200 ms)
+      POST /auth/login-user   p95 306.1 ms  (mín 250.4 | mediana 278.9 | máx 308.1 | prom 280.4)
+      POST /user/orders       p95  38.2 ms  (mín 12.3 | mediana 13.7 | máx 38.9 | prom 20.4)  CUMPLE (< 500 ms)
+
+    El login supera los 200 ms porque verifica el hash bcrypt de la
+    contraseña (costo fijo de CPU), no porque la consulta sea lenta: se
+    clasifica como operación compleja y queda dentro del umbral de
+    500 ms. La medición previa del 2026-11-22 (30 peticiones a /health
+    en Render: p95 0.545538 s) se conserva como referencia histórica.
+
+    Medición en Render del 2026-11-24 (n=30, p95):
+      GET /health             p95 510 ms  (mín 369 | mediana 416 | máx 692 | prom 431)
+      GET /products/catalogs  p95 605 ms  (mín 339 | mediana 420 | máx 659 | prom 443)
+    La primera petición de cada serie respondió en 629 ms y 612 ms: el
+    servicio estaba despierto, no hubo arranque en frío en esta ventana.
+    Aun así, el p95 remoto supera el objetivo de 200 ms.
+
+  ANÁLISIS:
+    El costo remoto es de red e infraestructura, no de la consulta:
+    /health no toca la base de datos y aun así responde sobre 500 ms.
+    Cada petición cruza internet hasta Render (plan free), que aplica
+    CPU compartida y suspende el servicio por inactividad.
+
+  MITIGACIÓN PROPUESTA:
+    1. Mantener el servicio despierto con un ping externo (cron cada
+       10-14 minutos) para evitar la suspensión del plan free.
+    2. Migrar a un plan con instancia siempre activa (Render Starter o
+       superior) si se exige el umbral en producción.
+    3. Reducir trabajo por consulta: índices en columnas filtradas,
+       paginación en listados y caché de catálogos.
+    4. Repetir la medición con k6/Locust desde una región cercana al
+       despliegue y con carga concurrente (RNF-002).
 
   ESTADO: Rechazado
-  CAPTURA: Salida de curl.exe registrada en esta sección; sin captura PNG
+    Local: cumple (catálogo p95 30.7 ms, pedido p95 38.2 ms).
+    Producción (Render): no cumple (catálogo p95 605 ms).
+    RNF-001 queda "No cumple" en producción mientras el API se
+    mantenga en el plan free de Render.
+  CAPTURA: Salida de Docs/herramientas/medir_rnf001.py registrada en
+    esta sección; sin captura PNG
 
 
 --------------------------------------------------------------------------------

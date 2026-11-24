@@ -6,7 +6,6 @@ from app.database.Connection import get_db
 from app.models.ModelUser import Users
 from app.models.ModelCart import Cart, CartItem
 from app.models.ModelProduct import Product
-from app.models.ModelCompany import Company
 
 router = APIRouter(
     prefix="/cart",

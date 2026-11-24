@@ -289,9 +289,8 @@ def test_resolve_pqrs_inexistente_devuelve_404(client, seed):
 # --------------------------------------------------------------------------- #
 # 5xx
 # --------------------------------------------------------------------------- #
-def test_toggle_user_status_commit_fallido_no_da_500(client, seed, monkeypatch):
-    """Documenta el mismo hallazgo que en /pqrs: las excepciones crudas no
-    llegan a 500, el `except Exception` de la middleware las reporta 401."""
+def test_toggle_user_status_commit_fallido_devuelve_500(client, seed, monkeypatch):
+    """Un error interno del endpoint no se disfraza de 401 en el middleware."""
     admin = seed.admin()
     target = seed.user(email="uno@lubix.com")
 
@@ -304,5 +303,5 @@ def test_toggle_user_status_commit_fallido_no_da_500(client, seed, monkeypatch):
         f"/admin/users/{target.id}/toggle-status", headers=seed.headers(admin)
     )
 
-    assert response.status_code == 401
-    assert response.json() == {"detail": "Token invalido"}
+    assert response.status_code == 500
+    assert response.json() == {"detail": "Error interno del servidor"}

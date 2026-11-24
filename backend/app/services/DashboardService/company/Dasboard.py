@@ -1,13 +1,16 @@
+import logging
+
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from app.models.ModelUser import Users
 from app.models.ModelProduct import Product
 from app.models.ModelReview import Review
 from app.models.ModelOrder import Order, OrderItem
-from app.models.ModelCompany import Company
 from fastapi import HTTPException
-from app.schemas.SchemaDashboard.ShemaCompany import UpdateInformationCompanyRequest, UpdateBannerAndLogoRequest
+from app.schemas.SchemaDashboard.ShemaCompany import UpdateInformationCompanyRequest
 from datetime import datetime, timedelta
+
+logger = logging.getLogger(__name__)
 
 
 def _get_company_metrics(company_id, database: Session):
@@ -62,6 +65,8 @@ def company_dashboard_me_service(user_id, database: Session):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
     company = user.company
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
     role = user.role
     metrics = _get_company_metrics(company.id, database)
 
@@ -86,6 +91,8 @@ def company_dashboard_my_profile_service(user_id: str, database: Session):
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
         
     company = user.company
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
     metrics = _get_company_metrics(company.id, database)
 
     return {
@@ -117,6 +124,8 @@ def company_dashboard_upgrade_my_profile_service(user_id: str, CompanyRequest:Up
     
     
     company = user.company
+    if not company:
+        raise HTTPException(status_code=404, detail="Empresa no encontrada")
 
     try:
 
@@ -136,14 +145,14 @@ def company_dashboard_upgrade_my_profile_service(user_id: str, CompanyRequest:Up
         database.refresh(user)
         database.refresh(company)
 
-    except Exception as e:
+    except Exception:
         database.rollback()
 
-        print("ERROR:",e)
+        logger.exception("Error al actualizar el perfil de empresa")
         raise HTTPException(status_code=500, detail="En actualizar datos")
     
     return {
-        "messaje": "Perfil actualizado correctamente"
+        "message": "Perfil actualizado correctamente"
     }
 
 
@@ -253,9 +262,9 @@ def company_update_order_status_service(user_id: str, order_id: str, new_status:
     try:
         order.status = new_status
         database.commit()
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al actualizar el estado del pedido")
         raise HTTPException(status_code=500, detail="Error al actualizar el pedido")
 
     status_progress = {

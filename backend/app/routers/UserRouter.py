@@ -1,3 +1,5 @@
+import logging
+
 from fastapi import APIRouter, Request, Depends, HTTPException, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database.Connection import get_db
@@ -20,6 +22,8 @@ router = APIRouter(
     prefix="/user",
     tags=["user"]
 )
+
+logger = logging.getLogger(__name__)
 
 @router.get("/dashboard/me")
 def user_dashboard_me(request: Request, database: Session = Depends(get_db)):
@@ -66,9 +70,9 @@ def update_profile(request: Request, data: UpdateUserProfileRequest, database: S
 
         database.commit()
         database.refresh(user)
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al actualizar el perfil")
         raise HTTPException(status_code=500, detail="Error al actualizar el perfil")
 
     return {
@@ -105,9 +109,9 @@ def delete_account(request: Request, database: Session = Depends(get_db)):
     try:
         database.delete(user)
         database.commit()
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al eliminar la cuenta")
         raise HTTPException(status_code=500, detail="Error al eliminar la cuenta")
 
     return {
@@ -377,9 +381,9 @@ def _guardar_pedido(database: Session, pedido: Order) -> None:
         database.add(pedido)
         database.commit()
         database.refresh(pedido)
-    except Exception as e:
+    except Exception:
         database.rollback()
-        print("ERROR:", e)
+        logger.exception("Error al crear el pedido")
         raise HTTPException(status_code=500, detail="Error al crear el pedido")
 
 

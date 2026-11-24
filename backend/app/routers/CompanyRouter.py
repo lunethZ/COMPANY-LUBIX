@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request,Depends, UploadFile, File, Form
+from fastapi import APIRouter, Request,Depends, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database.Connection import get_db
 from app.services.NasService import subir
@@ -22,7 +22,7 @@ from app.services.DashboardService.company.Dasboard import (
     company_upload_banner_service,
 )
 
-from app.schemas.SchemaDashboard.ShemaCompany import UpdateInformationCompanyRequest, UpdateBannerAndLogoRequest
+from app.schemas.SchemaDashboard.ShemaCompany import UpdateInformationCompanyRequest
 from app.schemas.SchemaProduct import CreateProductRequest, UpdateProductRequest
 
 
