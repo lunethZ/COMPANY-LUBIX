@@ -43,7 +43,13 @@ const RecoverPassword: React.FC = () => {
 
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
-        showMessage(errorDetailMessage(err, "Error enviando el correo"), "error");
+        if (err.code === "ECONNABORTED") {
+          showMessage("El servidor está iniciando, intenta nuevamente en unos segundos.", "error");
+        } else if (!err.response) {
+          showMessage("No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.", "error");
+        } else {
+          showMessage(errorDetailMessage(err, "Error enviando el correo"), "error");
+        }
       } else {
         showMessage("Error de conexión", "error");
       }

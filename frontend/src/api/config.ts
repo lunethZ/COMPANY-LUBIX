@@ -1,7 +1,12 @@
+const PRODUCTION_API_URL = "https://lubix-api.onrender.com";
+
 const fallbackApiUrl = import.meta.env.PROD
-  ? "https://lubix-api.onrender.com"
+  ? PRODUCTION_API_URL
   : "http://localhost:8002";
 
-export const API_BASE_URL: string = (
-  import.meta.env.VITE_API_URL || fallbackApiUrl
-).replace(/\/$/, "");
+const configuredApiUrl = (import.meta.env.VITE_API_URL || "").trim();
+
+export const API_BASE_URL: string = (configuredApiUrl || fallbackApiUrl).replace(/\/+$/, "");
+
+// Render Free duerme el servicio y el primer request tarda cerca de un minuto.
+export const API_TIMEOUT_MS = 65_000;

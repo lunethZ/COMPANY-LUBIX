@@ -184,7 +184,11 @@ function LoginForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess: (
           if (typeof errorData.detail === "string") errorMsg = errorData.detail;
           else if (Array.isArray(errorData.detail)) errorMsg = errorData.detail.map((e: { msg?: string }) => e.msg).join(". ");
         }
-        if (error.response?.status === 400 && errorMsg.includes("incorrectos")) {
+        if (error.code === "ECONNABORTED") {
+          errorMsg = "El servidor está iniciando, intenta nuevamente en unos segundos.";
+        } else if (!error.response) {
+          errorMsg = "No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.";
+        } else if (error.response.status === 400 && errorMsg.includes("incorrectos")) {
           errorMsg = "El correo o la contraseña son incorrectos.";
         } else if (error.response?.status === 403) {
           errorMsg = errorMsg.includes("empresa")
