@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Query, Depends, HTTPException, Request
 from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, func
+from sqlalchemy import and_, or_, func
 from app.database.Connection import get_db
 from app.models.ModelProduct import Product, Catalog
 from app.models.ModelCompany import Company
@@ -30,8 +30,10 @@ def _get_product_rating(product_id, database):
 def list_catalogs(database: Session = Depends(get_db)):
     rows = (
         database.query(Catalog, func.count(Product.id))
-        .outerjoin(Product, Product.catalog_id == Catalog.id)
-        .filter(Product.status == "active")
+        .outerjoin(
+            Product,
+            and_(Product.catalog_id == Catalog.id, Product.status == "active"),
+        )
         .group_by(Catalog.id)
         .order_by(Catalog.name.asc())
         .all()

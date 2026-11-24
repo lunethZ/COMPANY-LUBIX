@@ -397,7 +397,7 @@ def test_company_profile_inexistente_devuelve_404(client, seed):
     assert response.status_code == 404
     assert response.json() == {"detail": "Empresa no encontrada"}
 
-def test_catalogs_excluye_catalogo_sin_productos_activos(client, seed):
+def test_catalogs_incluye_catalogo_sin_productos_activos(client, seed):
     company = seed.company()
     visible = seed.catalog("Celulares")
     sin_activos = seed.catalog("Sin activos")
@@ -410,10 +410,10 @@ def test_catalogs_excluye_catalogo_sin_productos_activos(client, seed):
     )
 
     body = client.get("/products/catalogs").json()
-    nombres = [catalogo["name"] for catalogo in body]
+    por_nombre = {catalogo["name"]: catalogo for catalogo in body}
 
-    assert "Celulares" in nombres
-    assert "Sin activos" not in nombres
+    assert por_nombre["Celulares"]["product_count"] == 1
+    assert por_nombre["Sin activos"]["product_count"] == 0
 
 def test_review_con_body_invalido_devuelve_422(client, seed):
     user = seed.user()
