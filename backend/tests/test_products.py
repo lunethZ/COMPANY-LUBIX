@@ -287,15 +287,8 @@ def test_create_review_producto_inexistente_devuelve_404(client, seed):
     assert response.json() == {"detail": "Producto no encontrado"}
 
 
-def test_create_review_rating_invalido_devuelve_401(client, seed):
-    """Validación fallida reportada como 401.
-
-    El router valida a mano con `CreateReviewRequest(**data)` (sin FastAPI),
-    así que la `ValidationError` de Pydantic se escapa del endpoint y el
-    `except Exception` de `auth_middleware` la convierte en 401 "Token
-    invalido" en lugar de un 422/500. Se deja documentado el comportamiento
-    actual: es un falso negativo de autenticación.
-    """
+def test_create_review_rating_invalido_devuelve_422(client, seed):
+    """FastAPI valida el body con CreateReviewRequest y responde 422."""
     company = seed.company()
     product = seed.product(company)
     buyer = seed.user(email="comprador@lubix.com")
@@ -307,8 +300,8 @@ def test_create_review_rating_invalido_devuelve_401(client, seed):
         headers=seed.headers(buyer),
     )
 
-    assert response.status_code == 401
-    assert response.json() == {"detail": "Token invalido"}
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"][-1] == "rating"
 
 
 def test_create_review_sin_token_devuelve_401(client, seed):
@@ -422,7 +415,7 @@ def test_catalogs_excluye_catalogo_sin_productos_activos(client, seed):
     assert "Celulares" in nombres
     assert "Sin activos" not in nombres
 
-def test_review_con_body_invalido_devuelve_401_por_middleware(client, seed):
+def test_review_con_body_invalido_devuelve_422(client, seed):
     user = seed.user()
 
     response = client.post(
@@ -431,5 +424,5 @@ def test_review_con_body_invalido_devuelve_401_por_middleware(client, seed):
         headers=seed.headers(user),
     )
 
-    assert response.status_code == 401
-    assert response.json()["detail"] == "Token invalido"
+    assert response.status_code == 422
+    assert response.json()["detail"][0]["loc"][-1] == "rating"

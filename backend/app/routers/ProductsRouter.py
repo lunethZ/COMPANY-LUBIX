@@ -8,6 +8,7 @@ from app.models.ModelUser import Users
 from app.models.ModelReview import Review
 from app.models.ModelFavorite import Favorite
 from app.models.ModelOrder import Order, OrderItem
+from app.schemas.SchemaReview import CreateReviewRequest
 
 import uuid
 
@@ -206,12 +207,9 @@ def get_product_reviews(product_id: str, database: Session = Depends(get_db)):
 def create_review(
     product_id: str,
     request: Request,
-    data: dict,
+    validated: CreateReviewRequest,
     database: Session = Depends(get_db),
 ):
-    from app.schemas.SchemaReview import CreateReviewRequest
-    validated = CreateReviewRequest(**data)
-
     user_id = request.state.user_id
     user = database.query(Users).filter(Users.id == user_id).first()
     if not user:
