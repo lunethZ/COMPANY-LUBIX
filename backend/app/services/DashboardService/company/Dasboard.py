@@ -149,7 +149,7 @@ def company_dashboard_upgrade_my_profile_service(user_id: str, CompanyRequest:Up
         raise HTTPException(status_code=500, detail="En actualizar datos")
     
     return {
-        "messaje": "Perfil actualizado correctamente"
+        "message": "Perfil actualizado correctamente"
     }
 
 

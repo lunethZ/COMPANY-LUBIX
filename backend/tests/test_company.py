@@ -100,7 +100,7 @@ def test_upgrade_profile_devuelve_200(client, seed):
     )
 
     assert response.status_code == 200
-    assert response.json() == {"messaje": "Perfil actualizado correctamente"}
+    assert response.json() == {"message": "Perfil actualizado correctamente"}
 
 
 def test_upgrade_profile_email_en_uso_devuelve_400(client, seed):
