@@ -1,8 +1,6 @@
 # Guía de Instalación — LUBIX (v0)
 
 > **Versión:** v0 (borrador inicial)
->
-> **Sustituida por [`Instalacion_v1.md`](./Instalacion_v1.md)**, validada en el simulacro de instalación del 2026-11-24.
 > **Documento complementario de:** [`BC-Implantacion.md`](./BC-Implantacion.md) y [`Ficha_Tecnica.md`](./Ficha_Tecnica.md)
 > **Fecha:** 2026-10-18
 

@@ -1,4 +1,0 @@
-backend	Up 6 minutes	0.0.0.0:8002->8000/tcp, [::]:8002->8000/tcp
-frontend	Up 8 minutes	0.0.0.0:5173->5173/tcp, [::]:5173->5173/tcp
-mobile	Up 8 minutes	0.0.0.0:8081->8081/tcp, [::]:8081->8081/tcp
-postgres	Up 8 minutes	0.0.0.0:5435->5432/tcp, [::]:5435->5432/tcp
