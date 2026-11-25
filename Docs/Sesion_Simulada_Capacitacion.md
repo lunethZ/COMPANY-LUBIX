@@ -4,6 +4,7 @@
 **Actividad:** semana 3 · aceptación y sustentación (T7-7)
 **Fecha de elaboración:** 2026-11-22
 **Fecha propuesta de ejecución:** 24 y 25 de noviembre de 2026
+**Fecha de ejecución registrada:** 2026-11-24 (modalidad remota simulada, con las cuentas demo de la plataforma desplegada)
 
 ---
 
@@ -65,10 +66,12 @@ Si el cliente simulado requiere ayuda, se registra como observación de usabilid
 
 | Participante | Rol capacitado | Sesión 1 | Sesión 2 | Firma |
 |---|---|---|---|---|
-|  | Usuario Final |  |  |  |
-|  | Empresa |  |  |  |
-|  | Administrador |  |  |  |
-|  | Mesa de ayuda |  |  |  |
+| Perfil Usuario Final (cuenta `manual.usuario@lubix-demo.com`) | Usuario Final | Sí (2026-11-24) | — | Pendiente de rúbrica |
+| Perfil Empresa (cuenta `manual.empresa@lubix-demo.com`) | Empresa | — | Sí (2026-11-24) | Pendiente de rúbrica |
+| Perfil Administrador (cuenta `manual.admin@lubix-demo.com`) | Administrador | — | Sí (2026-11-24) | Pendiente de rúbrica |
+| Facilitador (josearmenta2163) | Acompañamiento y registro | Sí | Sí | Pendiente de rúbrica |
+
+> La ejecución se realizó de forma remota y simulada con los perfiles demo de la plataforma desplegada, siguiendo el guion y el manual. Las firmas del cliente simulado quedan pendientes de la sesión presencial de cierre.
 
 ## 7. Evaluación
 
@@ -76,15 +79,19 @@ Se aplica el cuestionario de cinco preguntas definido en `Docs/Plan_Capacitacion
 
 | Participante | Puntaje (0–5) | Práctica superada (Sí/No) | Resultado |
 |---|---|---|---|
-|  |  |  |  |
-|  |  |  |  |
+| Perfil Usuario Final | — | Sí | Checkout completo y pedido visible en **Mis pedidos** (PA-02) |
+| Perfil Empresa | — | Sí | Producto publicado y pedido llevado hasta **Entregado** (PA-03 y PA-04) |
+| Perfil Administrador | — | Parcial | PQRS resuelta (PA-06); validación de empresa bloqueada por D-01 |
+
+> El cuestionario no se puntuó en esta ejecución técnica: se aplicará en la sesión de cierre con el cliente simulado. La práctica por rol se verificó con los casos de aceptación.
 
 ## 8. Observaciones de la sesión
 
 | N.º | Observación | Sección del manual afectada | Acción propuesta |
 |---|---|---|---|
-| 1 |  |  |  |
-| 2 |  |  |  |
+| 1 | El registro de empresa falla en producción por el almacenamiento de archivos (D-01) | 1.1.5 (registro) / 1.1.7 (admin) | Configurar MinIO/S3 en Render o permitir registro sin certificado |
+| 2 | La validación de empresa está en **Resumen**, no en **Empresas** como indica el manual (D-02) | 1.1.7 (Administrador) | Alinear manual o mover la acción |
+| 3 | El catálogo puede tardar en cargar por el arranque en frío | 1.1.7 (Usuario) | Mantener la plataforma activa antes de la sesión |
 
 ## 9. Evidencias a conservar
 

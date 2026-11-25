@@ -6,7 +6,7 @@
 **Fecha de ejecución:** 2026-11-24
 **Ventana de ejecución:** 24 al 26 de noviembre de 2026
 **Versión evaluada:** `main` (`2b85add`), frontend y API desplegados en Render
-**Evidencias:** `Docs/evidencias/semana3/`
+**Evidencias:** `Docs/Evidencias/semana3/`
 
 ---
 
@@ -57,7 +57,7 @@ Si un caso falla, se registra el defecto en la sección 8 y se decide si la entr
 | Resultado esperado | Mensaje de bienvenida y redirección a `/home-usuario` con el catálogo y el menú del usuario |
 | Resultado obtenido | Ingreso exitoso con el mensaje de bienvenida y llegada a `/home-usuario` con catálogo y menú del usuario |
 | Veredicto | **Aprobado** |
-| Evidencia | `Docs/evidencias/semana3/pa-01-login-usuario.png` |
+| Evidencia | `Docs/Evidencias/semana3/pa-01-login-usuario.png` |
 | Referencia | Manual 1.1.5.4 |
 
 ### PA-02 · Compra completa del Usuario Final
@@ -71,7 +71,7 @@ Si un caso falla, se registra el defecto en la sección 8 y se decide si la entr
 | Resultado esperado | Pedido creado con estado inicial **Pendiente** y visible en **Mis pedidos** |
 | Resultado obtenido | Pedido `2c0a0c4a` creado en estado **Pendiente** y visible en **Mis pedidos**; revisión del checkout y confirmación sin errores |
 | Veredicto | **Aprobado** |
-| Evidencia | `Docs/evidencias/semana3/pa-02-01-revision-checkout.png`, `Docs/evidencias/semana3/pa-02-02-mis-pedidos.png` |
+| Evidencia | `Docs/Evidencias/semana3/pa-02-01-revision-checkout.png`, `Docs/Evidencias/semana3/pa-02-02-mis-pedidos.png` |
 | Referencia | Manual 1.1.7 (Usuario Final) |
 
 ### PA-03 · Publicación de producto por la Empresa
@@ -85,7 +85,7 @@ Si un caso falla, se registra el defecto en la sección 8 y se decide si la entr
 | Resultado esperado | Mensaje de confirmación y producto visible en **Mis Productos** con estado **Activo** |
 | Resultado obtenido | Producto «Parlante QA Aceptacion 311340» publicado con estado **Activo** y visible en **Mis Productos**. La imagen se cargó por URL porque la subida de archivos está caída en producción (D-01) |
 | Veredicto | **Aprobado** |
-| Evidencia | `Docs/evidencias/semana3/pa-03-01-formulario-producto.png`, `Docs/evidencias/semana3/pa-03-02-producto-publicado.png` |
+| Evidencia | `Docs/Evidencias/semana3/pa-03-01-formulario-producto.png`, `Docs/Evidencias/semana3/pa-03-02-producto-publicado.png` |
 | Referencia | Manual 1.1.7 (Empresa) |
 
 ### PA-04 · Gestión del estado de un pedido recibido
@@ -99,7 +99,7 @@ Si un caso falla, se registra el defecto en la sección 8 y se decide si la entr
 | Resultado esperado | El pedido cambia a **Confirmado**, luego **Enviado** y finalmente **Entregado**, sin acciones pendientes |
 | Resultado obtenido | El pedido `2c0a0c4a` pasó por **Confirmado → Enviado → Entregado**; al final no quedan acciones disponibles |
 | Veredicto | **Aprobado** |
-| Evidencia | `Docs/evidencias/semana3/pa-04-01-pedido-pendiente.png`, `Docs/evidencias/semana3/pa-04-02-pedido-entregado.png` |
+| Evidencia | `Docs/Evidencias/semana3/pa-04-01-pedido-pendiente.png`, `Docs/Evidencias/semana3/pa-04-02-pedido-entregado.png` |
 | Referencia | Manual 1.1.7 (Empresa) |
 
 ### PA-05 · Validación de una empresa pendiente
@@ -113,7 +113,7 @@ Si un caso falla, se registra el defecto en la sección 8 y se decide si la entr
 | Resultado esperado | La empresa pasa a **Validada** y el contador de pendientes disminuye |
 | Resultado obtenido | **No ejecutado.** No fue posible crear la empresa pendiente: el registro de empresa devuelve HTTP 500 y la subida de archivos falla porque el host `minio` no resuelve en Render (D-01). Queda como defecto bloqueante de la precondición |
 | Veredicto | **No aprobado (bloqueado por D-01)** |
-| Evidencia | `Docs/evidencias/semana3/pa-05-01-empresa-pendiente.png`, `Docs/evidencias/semana3/ejecucion-2026-11-24.txt` |
+| Evidencia | `Docs/Evidencias/semana3/pa-05-01-empresa-pendiente.png`, `Docs/Evidencias/semana3/ejecucion-2026-11-24.txt` |
 | Referencia | Manual 1.1.7 (Administrador) |
 
 ### PA-06 · Resolución de una PQRS
@@ -127,7 +127,7 @@ Si un caso falla, se registra el defecto en la sección 8 y se decide si la entr
 | Resultado esperado | La solicitud cambia a **Resuelta** y se resalta en verde |
 | Resultado obtenido | La PQRS `9a48d1ab` cambió de **Pendiente** a **Resuelta** y se resaltó en verde |
 | Veredicto | **Aprobado** |
-| Evidencia | `Docs/evidencias/semana3/pa-06-01-pqrs-pendiente.png`, `Docs/evidencias/semana3/pa-06-02-pqrs-resuelta.png` |
+| Evidencia | `Docs/Evidencias/semana3/pa-06-01-pqrs-pendiente.png`, `Docs/Evidencias/semana3/pa-06-02-pqrs-resuelta.png` |
 | Referencia | Manual 1.1.7 (Administrador) |
 
 ## 5. Resumen de resultados
