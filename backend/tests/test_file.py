@@ -24,13 +24,17 @@ class _Stream:
         pass
 
 
+class _NoSuchKeyError(Exception):
+    code = "NoSuchKey"
+
+
 @pytest.fixture()
 def minio_con_archivo(monkeypatch):
     """`get_object` devuelve un archivo de prueba."""
 
     def fake_get_object(bucket, object_name, *args, **kwargs):
         if object_name == "no-existe.png":
-            raise RuntimeError("NoSuchKey")
+            raise _NoSuchKeyError("no-existe.png")
         return _Stream(b"contenido-binario")
 
     monkeypatch.setattr(
@@ -43,7 +47,7 @@ def minio_sin_archivos(monkeypatch):
     """Ni `get_object` ni `download_stream` encuentran nada."""
 
     def fake_get_object(bucket, object_name, *args, **kwargs):
-        raise RuntimeError("NoSuchKey")
+        raise _NoSuchKeyError("no-existe.png")
 
     monkeypatch.setattr(
         "app.services.NasService.subir.client.get_object", fake_get_object
@@ -82,9 +86,8 @@ def test_get_file_inexistente_devuelve_404(client, minio_sin_archivos):
     assert response.json() == {"detail": "Archivo no encontrado"}
 
 
-def test_get_file_con_get_object_roto_tambien_devuelve_404(client, minio_con_archivo, monkeypatch):
-    """Si el primer intento falla, se intenta `download_stream`; si ese
-    también falla, se responde 404."""
+def test_get_file_con_almacenamiento_caido_devuelve_503(client, minio_con_archivo, monkeypatch):
+    """Si ambos intentos fallan por red y no por ausencia, no es un 404."""
     monkeypatch.setattr(
         "app.services.NasService.NasService.download_stream",
         lambda self, name: (_ for _ in ()).throw(RuntimeError("sin red")),
@@ -96,5 +99,5 @@ def test_get_file_con_get_object_roto_tambien_devuelve_404(client, minio_con_arc
 
     response = client.get("/files/roto.png")
 
-    assert response.status_code == 404
-    assert response.json() == {"detail": "Archivo no encontrado"}
+    assert response.status_code == 503
+    assert response.json() == {"detail": "Almacenamiento no disponible"}

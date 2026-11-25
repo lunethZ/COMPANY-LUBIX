@@ -48,7 +48,7 @@ El plan cubre el backend (FastAPI / Python), el frontend web (React / TypeScript
 | M-05 | Densidad de defectos | defectos confirmados ÷ KLOC | Revisión + Sonar | < 2 por KLOC | En seguimiento | 2026-11-20 |
 | M-06 | Cumplimiento de SLA de soporte | tickets respondidos en plazo ÷ tickets totales × 100 | Mesa de ayuda (1.1.8) | ≥ 90 % | Sin medición formal | — |
 | M-07 | Tiempo medio de resolución (MTTR) | Σ tiempo de resolución ÷ tickets cerrados | Mesa de ayuda | ≤ 2 días hábiles (P3) | Sin medición formal | — |
-| M-08 | Tiempo de respuesta API | percentil 95 de latencia | Render + pruebas manuales | < 200 ms (RNF-001) | Pendiente de prueba formal | — |
+| M-08 | Tiempo de respuesta API | percentil 95 de latencia | Render + pruebas manuales | < 200 ms (RNF-001) | Medido 2026-11-24: local 30.7 ms; Render 605 ms (no cumple) | 2026-11-24 |
 | M-09 | Cobertura del manual | secciones con capturas ÷ secciones del manual × 100 | Revisión documental | 100 % de secciones verificables | 1.1.5, 1.1.7, 1.1.9 con capturas reales | 2026-11-20 |
 
 ## 5. Niveles de prueba y responsabilidades
@@ -86,7 +86,7 @@ El plan cubre el backend (FastAPI / Python), el frontend web (React / TypeScript
 | Medición | Hallazgo | Decisión |
 |---|---|---|
 | Cobertura backend 22 % (2026-10-18) | Suite insuficiente para el tamaño del backend | Se fijó umbral inicial de 50 % y se priorizaron pruebas de servicios |
-| Cobertura backend ~89 % y 528 pruebas (2026-11-16) | La meta inicial quedó corta | Se elevó el umbral obligatorio de 50 % a **80 %** y se unificaron las suites |
+| Cobertura backend ~89 % y 528 pruebas (2026-11-16) | La meta inicial quedó corta | Se elevó el umbral obligatorio de 50 % a **80 %** y se unificaron las suites; S6 lo mantiene en **80 %** |
 | Brechas de cobertura en páginas del frontend | Cobertura global no garantizaba vistas críticas | Se añadieron umbrales por página (40 %) en `vite.config.ts` para las vistas de mayor riesgo |
 | Revisión ISO 25010 (2026-10-05): ASISTENCIA AL USUARIO sin FAQ | El usuario dependía de soporte externo para dudas básicas | Se creó la sección **1.1.10 Preguntas frecuentes** dentro del manual (2026-11-20) |
 | Campaña de capturas reales (2026-11-19/20) | El catálogo se queda cargando para sesiones que no son de empresa | Se registró como defecto P2, se documentó la conducta en la FAQ y se añadió a la lista de casos E2E |

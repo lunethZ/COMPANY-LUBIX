@@ -103,7 +103,7 @@ function BuscarProducto() {
   // Disparar la búsqueda siempre (sin filtros muestra todos los productos de empresas)
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    void (async () => {
       const params = buildSearchParams();
       setSearchParams(params, { replace: true });
       setLoading(true);

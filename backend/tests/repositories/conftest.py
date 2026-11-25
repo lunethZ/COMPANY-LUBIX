@@ -5,7 +5,7 @@ from decimal import Decimal
 
 DATABASE_URL = os.getenv(
     "REPOSITORY_TEST_DATABASE_URL",
-    "postgresql+psycopg2://lubix_test:lubix_test@localhost:5435/lubix_test",
+    "postgresql+psycopg2://lubix_test:lubix_test@localhost:5433/lubix_test",
 )
 os.environ.setdefault("URL_DATABASE", DATABASE_URL)
 os.environ.setdefault("SECRET_KEY", "clave-solo-para-tests-de-repositorio")
@@ -15,6 +15,7 @@ os.environ.setdefault("MINIO_ROOT_USER", "test")
 os.environ.setdefault("MINIO_ROOT_PASSWORD", "test")
 os.environ.setdefault("GMAIL_USERNAME", "test@example.com")
 os.environ.setdefault("GMAIL_APP_PASSWORD", "test")
+os.environ.setdefault("RESEND_API_KEY", "")
 os.environ.setdefault("ADMIN_DEFAULT", "admin@example.com")
 os.environ.setdefault("PASSWORD_DEFAULT", "Admin123!")
 os.environ.setdefault("RUN_SEED", "false")

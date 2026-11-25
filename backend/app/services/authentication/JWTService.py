@@ -1,3 +1,5 @@
+import logging
+
 from jose import jwt, JWTError, ExpiredSignatureError
 from datetime import datetime, timedelta, timezone
 from app.Config import config
@@ -6,6 +8,9 @@ SECRET_KEY = config.SECRET_KEY
 ALGORITHM = config.ALGORITHM
 ACCESS_TOKEN_EXPIRE_MINUTES = config.ACCESS_TOKEN_EXPIRE_MINUTES
 REFRESH_TOKEN_DAYS = config.REFRESH_TOKEN_DAYS
+
+logger = logging.getLogger(__name__)
+
 
 def create_access_token(user_id: str, role: str):
 
@@ -39,7 +44,6 @@ def create_refresh_token(user_id: str):
 def verify_token(token: str):
     
     try:
-        print("Prueba token: ",token)
         payload = jwt.decode(
             token,
             SECRET_KEY,
@@ -49,9 +53,9 @@ def verify_token(token: str):
         return payload
     
     except ExpiredSignatureError:
-        print("TOKEN EXPIRADO")
+        logger.warning("Token expirado")
         return "expired"
     
     except JWTError as e:
-        print("ERROR: ", str(e))
+        logger.warning("Token invalido: %s", e)
         return None

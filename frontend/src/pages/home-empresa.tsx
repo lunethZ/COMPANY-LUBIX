@@ -65,7 +65,7 @@ const HomeEmpresa = () => {
       <NavbarEmpresa />
 
       {/* 1. HERO SECTION CORPORATIVO */}
-      <section className="flex flex-col lg:flex-row justify-between items-center px-8 md:px-16 py-24 gap-12 max-w-7xl mx-auto w-full">
+      <section className="flex flex-col lg:flex-row justify-between items-center px-4 sm:px-8 md:px-16 py-14 sm:py-24 gap-10 sm:gap-12 max-w-7xl mx-auto w-full">
         <div className="max-w-xl text-center lg:text-left">
           <div className="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-600 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wider mb-4">
             <BriefcaseIcon className="w-4 h-4" /> {user?.name || "Empresa"}
@@ -117,7 +117,7 @@ const HomeEmpresa = () => {
 
       {/* 2. CIFRAS ASOCIATIVAS (LOGROS INSTITUCIONALES) */}
       <section className="border-y border-gray-200 dark:border-gray-800 bg-gray-50/50 dark:bg-gray-900/30">
-        <div className="max-w-7xl mx-auto px-8 md:px-16 py-12 grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 md:px-16 py-10 sm:py-12 grid grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8 text-center">
           {[
             { numero: "12+", etiqueta: "Años de Trayectoria" },
             { numero: "500k+", etiqueta: "Transacciones Diarias" },
@@ -133,7 +133,7 @@ const HomeEmpresa = () => {
       </section>
 
       {/* 3. PROPUESTA DE VALOR / PILARES */}
-      <section className="max-w-7xl mx-auto px-8 md:px-16 py-24 w-full">
+      <section className="max-w-7xl mx-auto px-4 sm:px-8 md:px-16 py-14 sm:py-24 w-full">
         <div className="text-center max-w-2xl mx-auto mb-16">
           <h2 className="text-3xl font-black mb-4" style={{ color: "var(--color-text)" }}>
             Diferenciales que Sostienen Nuestro Éxito

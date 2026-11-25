@@ -35,6 +35,22 @@ async function seedSession(page: Page) {
   }, USER);
 }
 
+const product = {
+  id: "p1",
+  name: "Portátil Lubix Pro",
+  descripcion: "Portátil de alto rendimiento para trabajo y estudio.",
+  price: 2_000_000,
+  images: [],
+  stock: 5,
+  discount_enable: false,
+  discount_value: 0,
+  company_id: "company-1",
+  company_name: "TechStore",
+  technical_spec: null,
+  avg_rating: 4.5,
+  review_count: 2,
+};
+
 async function mockPurchaseApi(page: Page) {
   await page.route("**/cart/merge", (route) =>
     route.fulfill({ json: { items: [], subtotal: 0, total_items: 0 } }),
@@ -62,26 +78,11 @@ async function mockPurchaseApi(page: Page) {
   );
 }
 
-test("flujo de compra: carrito, envío, pago y confirmación del pedido", async ({
-  page,
-}) => {
-  await seedSession(page);
-  await mockPurchaseApi(page);
-
-  let orderPayload: Record<string, unknown> | null = null;
-  await page.route("**/user/orders", async (route) => {
-    orderPayload = route.request().postDataJSON();
-    await route.fulfill({ json: { id: "order-e2e-123" } });
-  });
-
-  // Carrito con un producto.
-  await page.goto("/carrito");
-  await expect(
-    page.getByRole("heading", { name: "Carrito de Compras" }),
-  ).toBeVisible();
-  await expect(page.getByText("Portátil Lubix Pro")).toBeVisible();
-  await expect(page.getByText("$2.000.000")).toBeVisible();
-
+/**
+ * Completa los tres pasos del checkout (envío, pago y confirmación) desde el
+ * carrito con un producto. Se reutiliza en los flujos de compra.
+ */
+async function completeCheckout(page: Page) {
   // Paso 1: datos de envío.
   await page.getByRole("button", { name: "Proceder al pago" }).click();
   await page.waitForURL("**/pago");
@@ -120,6 +121,29 @@ test("flujo de compra: carrito, envío, pago y confirmación del pedido", async 
   await expect(
     page.getByRole("heading", { name: "¡Pago exitoso!" }),
   ).toBeVisible();
+}
+
+test("flujo de compra: carrito, envío, pago y confirmación del pedido", async ({
+  page,
+}) => {
+  await seedSession(page);
+  await mockPurchaseApi(page);
+
+  let orderPayload: Record<string, unknown> | null = null;
+  await page.route("**/user/orders", async (route) => {
+    orderPayload = route.request().postDataJSON();
+    await route.fulfill({ json: { id: "order-e2e-123" } });
+  });
+
+  // Carrito con un producto.
+  await page.goto("/carrito");
+  await expect(
+    page.getByRole("heading", { name: "Carrito de Compras" }),
+  ).toBeVisible();
+  await expect(page.getByText("Portátil Lubix Pro")).toBeVisible();
+  await expect(page.getByText("$2.000.000").first()).toBeVisible();
+
+  await completeCheckout(page);
   await expect(page.getByText("order-e2e-123")).toBeVisible();
 
   expect(orderPayload).toMatchObject({
@@ -143,12 +167,80 @@ test("flujo de compra: valida los datos de envío antes de avanzar", async ({
 
   await page.getByRole("button", { name: /Continuar al pago/ }).click();
 
-  await expect(page.getByText("El nombre es obligatorio")).toBeVisible();
-  await expect(page.getByText("El correo es obligatorio")).toBeVisible();
-  await expect(page.getByText("El teléfono es obligatorio")).toBeVisible();
   await expect(page.getByText("El documento es obligatorio")).toBeVisible();
+  await expect(page.getByText("La dirección es obligatoria")).toBeVisible();
+  await expect(page.getByText("La ciudad es obligatoria")).toBeVisible();
   // Sigue en el paso de envío.
   await expect(
     page.getByRole("heading", { name: "Datos de envío" }),
   ).toBeVisible();
+});
+
+test("recorrido completo: home de usuario, detalle de producto, carrito y pago", async ({
+  page,
+}) => {
+  await seedSession(page);
+  await mockPurchaseApi(page);
+
+  await page.route("**/products/search", (route) =>
+    route.fulfill({ json: { products: [product] } }),
+  );
+  await page.route(/\/products\/p1\/reviews$/, (route) =>
+    route.fulfill({ json: [] }),
+  );
+  await page.route(/\/products\/p1$/, (route) =>
+    route.fulfill({ json: product }),
+  );
+  await page.route(/\/user\/favorites$/, (route) =>
+    route.fulfill({ json: [] }),
+  );
+
+  let addPayload: Record<string, unknown> | null = null;
+  await page.route("**/cart/items", async (route) => {
+    addPayload = route.request().postDataJSON();
+    await route.fulfill({ json: { message: "Producto agregado" } });
+  });
+
+  let orderPayload: Record<string, unknown> | null = null;
+  await page.route("**/user/orders", async (route) => {
+    orderPayload = route.request().postDataJSON();
+    await route.fulfill({ json: { id: "order-e2e-123" } });
+  });
+
+  // 1. Home del usuario con el catálogo.
+  await page.goto("/home-usuario");
+  await expect(
+    page.getByRole("heading", { name: "Bienvenido de nuevo a Lubix" }),
+  ).toBeVisible();
+  await expect(page.getByText("Portátil Lubix Pro").first()).toBeVisible();
+
+  // 2. Detalle del producto.
+  await page.getByRole("button", { name: "Ver detalle" }).first().click();
+  await page.waitForURL("**/producto/p1");
+  await expect(
+    page.getByRole("heading", { level: 1, name: "Portátil Lubix Pro" }),
+  ).toBeVisible();
+
+  // 3. Agregar al carrito desde el detalle.
+  await page.getByRole("button", { name: "Agregar al carrito" }).click();
+  await expect(
+    page.getByRole("button", { name: /Agregado al carrito/ }),
+  ).toBeVisible();
+  expect(addPayload).toEqual({ product_id: "p1", quantity: 1 });
+
+  // 4. Ir al carrito desde la barra de navegación.
+  await page.getByRole("link", { name: /Carrito/ }).click();
+  await page.waitForURL("**/carrito");
+  await expect(
+    page.getByRole("heading", { name: "Carrito de Compras" }),
+  ).toBeVisible();
+  await expect(page.getByText("Portátil Lubix Pro")).toBeVisible();
+
+  // 5. Checkout completo hasta la confirmación.
+  await completeCheckout(page);
+  await expect(page.getByText("order-e2e-123")).toBeVisible();
+  expect(orderPayload).toMatchObject({
+    recipient: "Ana Tester",
+    total: 2_000_000,
+  });
 });

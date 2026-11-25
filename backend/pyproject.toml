@@ -22,6 +22,7 @@ dependencies = [
     "greenlet==3.3.2",
     "h11==0.16.0",
     "httptools==0.7.1",
+    "httpx==0.28.1",
     "idna>=3.15",
     "mako==1.3.12",
     "markupsafe==3.0.3",
@@ -58,13 +59,35 @@ dev = [
     "httpx>=0.27.0",
     "pytest>=9.0.0",
     "pytest-cov>=7.0.0",
+    "pytest-mock>=3.14.0",
+    "ruff>=0.9.0",
 ]
+
+[tool.ruff]
+# Estilo del backend: lineas largas en mensajes y queries SQL.
+target-version = "py313"
+line-length = 120
+
+[tool.ruff.lint]
+# Errores de pycodestyle y pyflakes: imports sin usar, nombres indefinidos,
+# redefiniciones. El resto de reglas queda fuera del gate.
+select = ["E4", "E7", "E9", "F"]
+
+[tool.ruff.lint.per-file-ignores]
+# Los modelos usan referencias en cadena ("Users") resueltas por SQLAlchemy.
+"app/models/*.py" = ["F821"]
+# __init__ reexporta los modelos para registrar los mapeos.
+"app/models/__init__.py" = ["F401"]
 
 [tool.pytest.ini_options]
 # Correr `pytest` desde `backend/` descubre la suite automáticamente.
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-ra"
+
+[tool.coverage.run]
+# Script manual de siembra: se ejecuta dentro del contenedor, no lo cubre pytest.
+omit = ["app/utils/seed_demo.py"]
 
 [tool.coverage.report]
 include_namespace_packages = true

@@ -114,7 +114,7 @@ const ProductoDetalle: React.FC = () => {
 
   useEffect(() => {
     if (!id) return;
-    (async () => {
+    void (async () => {
       setLoading(true);
       try {
         const [prodRes, revRes] = await Promise.all([

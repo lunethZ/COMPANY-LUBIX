@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from jose import jwt
 
 from app.Config import config
+from app.middleware import CorsMiddleware
 from app.services.authentication.JWTService import create_refresh_token
 
 PROTECTED = "/user/dashboard/me"
@@ -42,6 +43,19 @@ def test_token_malformado_devuelve_401(client, seed):
     seed.roles("user")
 
     response = client.get(PROTECTED, headers={"Authorization": "Bearer no.es.un.jwt"})
+
+    assert response.status_code == 401
+    assert response.json() == {"detail": "Token invalido"}
+
+
+def test_error_al_verificar_token_devuelve_401(client, seed, monkeypatch):
+    seed.roles("user")
+    monkeypatch.setattr(
+        "app.middleware.AuthMiddleware.verify_token",
+        lambda token: (_ for _ in ()).throw(RuntimeError("jwt roto")),
+    )
+
+    response = client.get(PROTECTED, headers={"Authorization": "Bearer cualquiera"})
 
     assert response.status_code == 401
     assert response.json() == {"detail": "Token invalido"}
@@ -131,3 +145,30 @@ def test_preflight_cors_no_requiere_token(client, seed):
 
     assert response.status_code in (200, 204)
     assert response.headers.get("access-control-allow-origin")
+
+
+def test_respuesta_401_refleja_origen_permitido(client, monkeypatch):
+    monkeypatch.setattr(
+        CorsMiddleware.config,
+        "CORS_ORIGINS",
+        "https://monitor.example.com",
+    )
+
+    response = client.get(
+        PROTECTED,
+        headers={"Origin": "https://monitor.example.com"},
+    )
+
+    assert response.status_code == 401
+    assert response.headers["access-control-allow-origin"] == "https://monitor.example.com"
+    assert response.headers["access-control-allow-credentials"] == "true"
+
+
+def test_respuesta_401_no_devuelve_wildcard_con_credenciales(client):
+    response = client.get(
+        PROTECTED,
+        headers={"Origin": "https://origen-no-permitido.example"},
+    )
+
+    assert response.status_code == 401
+    assert response.headers.get("access-control-allow-origin") != "*"

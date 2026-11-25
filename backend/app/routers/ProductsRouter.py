@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Query, Depends, HTTPException, Request
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import or_, func
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_, func
 from app.database.Connection import get_db
 from app.models.ModelProduct import Product, Catalog
 from app.models.ModelCompany import Company
 from app.models.ModelUser import Users
 from app.models.ModelReview import Review
-from app.models.ModelFavorite import Favorite
 from app.models.ModelOrder import Order, OrderItem
+from app.schemas.SchemaReview import CreateReviewRequest
 
 import uuid
 
@@ -29,8 +29,10 @@ def _get_product_rating(product_id, database):
 def list_catalogs(database: Session = Depends(get_db)):
     rows = (
         database.query(Catalog, func.count(Product.id))
-        .outerjoin(Product, Product.catalog_id == Catalog.id)
-        .filter(Product.status == "active")
+        .outerjoin(
+            Product,
+            and_(Product.catalog_id == Catalog.id, Product.status == "active"),
+        )
         .group_by(Catalog.id)
         .order_by(Catalog.name.asc())
         .all()
@@ -206,12 +208,9 @@ def get_product_reviews(product_id: str, database: Session = Depends(get_db)):
 def create_review(
     product_id: str,
     request: Request,
-    data: dict,
+    validated: CreateReviewRequest,
     database: Session = Depends(get_db),
 ):
-    from app.schemas.SchemaReview import CreateReviewRequest
-    validated = CreateReviewRequest(**data)
-
     user_id = request.state.user_id
     user = database.query(Users).filter(Users.id == user_id).first()
     if not user:

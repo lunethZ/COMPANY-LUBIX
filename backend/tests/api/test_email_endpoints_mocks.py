@@ -106,11 +106,15 @@ def test_register_company_sube_certificado_y_envia_correo(
     email_mocks.smtp.assert_not_called()
 
 
-def test_register_company_con_fallo_de_correo_devuelve_500(
-    client, seed, email_mocks, storage_mocks
+def test_register_company_commit_fallido_devuelve_500(
+    client, seed, email_mocks, storage_mocks, monkeypatch
 ):
     seed.roles("company")
-    email_mocks.company.side_effect = RuntimeError("smtp caído")
+
+    def boom(self):
+        raise RuntimeError("base de datos caída")
+
+    monkeypatch.setattr("sqlalchemy.orm.Session.commit", boom)
 
     response = client.post(
         "/auth/register-company",
@@ -120,6 +124,21 @@ def test_register_company_con_fallo_de_correo_devuelve_500(
 
     assert response.status_code == 500
     assert response.json() == {"detail": "Error al crear cuenta empresarial"}
+
+
+def test_register_company_responde_200_aunque_falle_el_correo(
+    client, seed, email_mocks, storage_mocks
+):
+    seed.roles("company")
+    email_mocks.company.return_value = False
+
+    response = client.post(
+        "/auth/register-company",
+        data=COMPANY_FORM,
+        files=_company_files(),
+    )
+
+    assert response.status_code == 200
     storage_mocks.upload.assert_called_once()
     email_mocks.company.assert_called_once()
     email_mocks.smtp.assert_not_called()
@@ -321,3 +340,18 @@ def test_reset_password_no_envia_correo(client, seed, email_mocks):
     email_mocks.code.assert_not_called()
     email_mocks.company.assert_not_called()
     email_mocks.smtp.assert_not_called()
+
+def test_register_user_con_correo_en_uso_no_envia_correo(client, seed, email_mocks):
+    seed.user(email="s5-duplicado@lubix.com")
+
+    response = client.post(
+        "/auth/register-user",
+        json={**REGISTER_USER_PAYLOAD, "email": "s5-duplicado@lubix.com"},
+    )
+
+    assert response.status_code == 409
+    assert response.json() == {"detail": "correo en uso"}
+    email_mocks.code.assert_not_called()
+    email_mocks.company.assert_not_called()
+    email_mocks.smtp.assert_not_called()
+    

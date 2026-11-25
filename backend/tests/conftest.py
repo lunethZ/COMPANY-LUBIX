@@ -95,6 +95,10 @@ os.environ.update(
         "MINIO_ROOT_PASSWORD": "test",
         "GMAIL_USERNAME": "test@example.com",
         "GMAIL_APP_PASSWORD": "test",
+        # Vacías a propósito: la suite usa el flujo SMTP doblado, nunca Brevo
+        # ni Resend, salvo en las pruebas que los habilitan explícitamente.
+        "BREVO_API_KEY": "",
+        "RESEND_API_KEY": "",
         "ADMIN_DEFAULT": "admin@example.com",
         "PASSWORD_DEFAULT": "Admin123!",
         "RUN_SEED": "false",
@@ -604,7 +608,7 @@ def code_spy(monkeypatch):
     """Doble de create_code_and_send_code: no escribe en BD ni envía correo, solo registra."""
     calls = []
 
-    def fake_create_code(database, user_id, email, code_type):
+    def fake_create_code(database, user_id, email, code_type, background_tasks=None):
         calls.append({"user_id": user_id, "email": email, "code_type": code_type})
         return {"message": "Código enviado correctamente"}
 

@@ -1,3 +1,5 @@
+import logging
+
 from minio import Minio
 from minio.error import S3Error
 from app.Config import config
@@ -15,6 +17,8 @@ client = Minio(
 
 bucket = config.MINIO_BUCKET
 
+logger = logging.getLogger(__name__)
+
 
 def _ensure_bucket():
     """Crea el bucket si hace falta, sin impedir el arranque de la API.
@@ -30,9 +34,11 @@ def _ensure_bucket():
         if not client.bucket_exists(bucket):
             client.make_bucket(bucket)
     except Exception as exc:
-        print(
-            f"[LUBIX-WARN] No se pudo verificar el bucket '{bucket}' "
-            f"en {config.MINIO_ENDPOINT}: {exc}"
+        logger.warning(
+            "No se pudo verificar el bucket '%s' en %s: %s",
+            bucket,
+            config.MINIO_ENDPOINT,
+            exc,
         )
 
 
@@ -122,7 +128,7 @@ class NasService:
                     "Content-Disposition": f"attachment; filename={object_name.split('/')[-1]}"
                 }
             )
-        except S3Error as e:
+        except S3Error:
             raise
         finally:
             if response:

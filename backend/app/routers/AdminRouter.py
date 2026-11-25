@@ -23,11 +23,11 @@ def admin_dashboard_me(request: Request, database: Session = Depends(get_db)):
     total_users = database.query(Users).filter(Users.role_id == role_user).count() if role_user else 0
     total_companies = database.query(Users).filter(Users.role_id == role_company).count() if role_company else 0
     pending_companies = (
-        database.query(Users).filter(Users.role_id == role_company, Users.verified == False).count()
+        database.query(Users).filter(Users.role_id == role_company, Users.verified.is_(False)).count()
         if role_company else 0
     )
-    active_users = database.query(Users).filter(Users.isActive == True).count()
-    inactive_users = database.query(Users).filter(Users.isActive == False).count()
+    active_users = database.query(Users).filter(Users.isActive.is_(True)).count()
+    inactive_users = database.query(Users).filter(Users.isActive.is_(False)).count()
 
     return {
         "totalUsers": total_users,

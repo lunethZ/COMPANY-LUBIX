@@ -25,6 +25,7 @@ jobs:
           --health-timeout 5s
           --health-retries 5
     env:
+      TEST_DATABASE_URL: postgresql+psycopg2://lubix_test:lubix_test@localhost:5435/lubix_test
       REPOSITORY_TEST_DATABASE_URL: postgresql+psycopg2://lubix_test:lubix_test@localhost:5435/lubix_test
 
     steps:
@@ -61,11 +62,15 @@ jobs:
 
       - name: Instalar dependencias del backend
         working-directory: backend
-        run: pip install -r requirements.txt httpx==0.28.1 pytest pytest-cov
+        run: pip install -r requirements.txt httpx==0.28.1 pytest pytest-cov pytest-mock
+
+      - name: Crear esquema de la BD de pruebas
+        working-directory: backend
+        run: python scripts/init_test_db.py
 
       - name: Tests de repositorio contra PostgreSQL real
         working-directory: backend
-        run: pytest tests/repositories/ -v
+        run: pytest tests/repositories/ -v --no-cov
 
       - name: Pruebas y cobertura del backend
         working-directory: backend
