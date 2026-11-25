@@ -22,7 +22,7 @@ export default function NavbarAdmin() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     logout();
-    navigate("/login");
+    void navigate("/login");
   };
 
   return (
@@ -30,7 +30,7 @@ export default function NavbarAdmin() {
       
       {/* SECCIÓN MARCA: clickeable para volver al inicio */}
       <div className="flex items-center gap-2 sm:gap-3 min-w-0">
-        <button onClick={() => navigate("/")} className="flex flex-col text-left cursor-pointer" title="Ir al inicio">
+        <button onClick={() => void navigate("/")} className="flex flex-col text-left cursor-pointer" title="Ir al inicio">
           <span className="text-white text-lg sm:text-xl font-black tracking-wide leading-none">
             Lubix Console
           </span>
@@ -39,7 +39,7 @@ export default function NavbarAdmin() {
           </span>
         </button>
         <button
-          onClick={() => navigate("/")}
+          onClick={() => void navigate("/")}
           className="hidden sm:inline-flex ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold border border-green-800/50 bg-green-950/30 text-green-400 hover:bg-green-900/40 transition"
           title="Ir al inicio"
         >

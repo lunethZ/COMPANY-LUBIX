@@ -17,7 +17,7 @@ export default function NavbarEmpresa() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login", { replace: true });
+    void navigate("/login", { replace: true });
   };
 
   return (

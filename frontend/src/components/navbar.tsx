@@ -20,7 +20,7 @@ export default function Navbar() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (!searchValue.trim()) return;
-    navigate(`/buscar?q=${encodeURIComponent(searchValue.trim())}`);
+    void navigate(`/buscar?q=${encodeURIComponent(searchValue.trim())}`);
     setMobileOpen(false);
   };
 

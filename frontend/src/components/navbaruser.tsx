@@ -39,14 +39,14 @@ export default function NavbarUsuario() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchValue.trim()) {
-      navigate(`/buscar?q=${encodeURIComponent(searchValue.trim())}`);
+      void navigate(`/buscar?q=${encodeURIComponent(searchValue.trim())}`);
       setMobileOpen(false);
     }
   };
 
   const handleLogout = () => {
     logout();
-    navigate("/login", { replace: true });
+    void navigate("/login", { replace: true });
   };
 
   return (

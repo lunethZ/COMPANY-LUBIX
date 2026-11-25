@@ -73,7 +73,7 @@ const CartPage = () => {
                 <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
                   <div className="flex items-center gap-2">
                     <button
-                      onClick={() => decrement(item.product_id)}
+                      onClick={() => void decrement(item.product_id)}
                       className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg font-bold"
                       style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
                       aria-label={`Quitar una unidad de ${item.name}`}
@@ -82,7 +82,7 @@ const CartPage = () => {
                     </button>
                     <span className="w-8 text-center font-semibold" style={{ color: "var(--color-text)" }}>{item.quantity}</span>
                     <button
-                      onClick={() => increment(item.product_id)}
+                      onClick={() => void increment(item.product_id)}
                       className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg font-bold"
                       style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
                       aria-label={`Agregar una unidad de ${item.name}`}
@@ -91,7 +91,7 @@ const CartPage = () => {
                     </button>
                   </div>
                   <button
-                    onClick={() => removeItem(item.product_id)}
+                    onClick={() => void removeItem(item.product_id)}
                     className="p-2 text-red-400 hover:text-red-300 transition"
                     aria-label={`Eliminar ${item.name}`}
                   >
