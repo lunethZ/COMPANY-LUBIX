@@ -80,11 +80,11 @@ describe('Página del carrito', () => {
 
     await screen.findByText('Mouse Gamer');
 
-    await user.click(screen.getByRole('button', { name: '+' }));
+    await user.click(screen.getByRole('button', { name: 'Agregar una unidad de Mouse Gamer' }));
     expect(screen.getByText(/Total \(3 artículos\)/)).toBeInTheDocument();
     expect(screen.getByText('$255.000')).toBeInTheDocument();
 
-    await user.click(screen.getByRole('button', { name: '-' }));
+    await user.click(screen.getByRole('button', { name: 'Quitar una unidad de Mouse Gamer' }));
     expect(screen.getByText(/Total \(2 artículos\)/)).toBeInTheDocument();
     expect(screen.getByText('$170.000')).toBeInTheDocument();
   });
@@ -121,7 +121,7 @@ describe('Página del carrito', () => {
     renderWithProviders(<CartPage />);
 
     expect(await screen.findByText(/Total \(1 artículo\)/)).toBeInTheDocument();
-    await user.click(screen.getByRole('button', { name: '-' }));
+    await user.click(screen.getByRole('button', { name: 'Quitar una unidad de Mouse Gamer' }));
 
     expect(await screen.findByText('Tu carrito está vacío')).toBeInTheDocument();
   });

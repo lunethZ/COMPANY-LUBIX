@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useLocation } from 'react-router-dom';
 import NavbarEmpresa from './navbar-empresa';
@@ -110,5 +110,47 @@ describe('Navbar de empresa', () => {
     await userEvent.click(screen.getByTitle('Modo oscuro'));
 
     expect(screen.getByTitle('Modo claro')).toBeInTheDocument();
+  });
+
+  it('abre el menú móvil con perfil, PQRS y cierre de sesión', async () => {
+    loginAsCompany();
+    renderNavbar();
+
+    const toggle = screen.getByRole('button', { name: 'Abrir menú' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(toggle);
+
+    const panel = document.getElementById('navbar-empresa-movil') as HTMLElement;
+    expect(panel).toBeInTheDocument();
+    expect(within(panel).getByText('TechStore')).toBeInTheDocument();
+    expect(within(panel).getByText('tienda@lubix.test')).toBeInTheDocument();
+    expect(within(panel).getByRole('link', { name: 'Perfil de Empresa' })).toHaveAttribute(
+      'href',
+      '/dashboard-empresa',
+    );
+    expect(within(panel).getByRole('link', { name: /PQRS/ })).toHaveAttribute('href', '/pqrs');
+  });
+
+  it('cierra la sesión desde el menú móvil', async () => {
+    loginAsCompany();
+    renderNavbar();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    const panel = document.getElementById('navbar-empresa-movil') as HTMLElement;
+    await userEvent.click(within(panel).getByRole('button', { name: 'Cerrar Sesión' }));
+
+    expect(localStorage.getItem('access_token')).toBeNull();
+    expect(screen.getByTestId('location')).toHaveTextContent('/login');
+  });
+
+  it('cierra el menú móvil al abrir y cerrar la hamburguesa', async () => {
+    loginAsCompany();
+    renderNavbar();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    expect(document.getElementById('navbar-empresa-movil')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cerrar menú' }));
+    expect(document.getElementById('navbar-empresa-movil')).not.toBeInTheDocument();
   });
 });

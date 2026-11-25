@@ -201,14 +201,14 @@ const HomeUsuario: React.FC = () => {
     <div className="page-container">
       <NavbarUsuario />
 
-      <section className="flex flex-col md:flex-row justify-between items-center px-8 md:px-16 py-20 min-h-[calc(100vh-80px)]" style={{ backgroundColor: "var(--color-bg)" }}>
-        <div className="max-w-lg text-center md:text-left mr-8">
+      <section className="flex flex-col md:flex-row justify-between items-center gap-10 md:gap-0 px-4 sm:px-8 md:px-16 py-14 sm:py-20 min-h-[calc(100vh-80px)]" style={{ backgroundColor: "var(--color-bg)" }}>
+        <div className="max-w-lg text-center md:text-left md:mr-8">
           <div className="text-accent mb-2 text-sm font-semibold uppercase tracking-wide">Bienvenido {user?.name || "Usuario"}</div>
           <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight" style={{ color: "var(--color-text)" }}>Bienvenido de nuevo a Lubix</h1>
           <p className="text-lg text-muted mb-6">Explora productos de las mejores tiendas de manera rápida y sencilla.</p>
         </div>
 
-        <div className="mt-10 md:mt-0 w-[420px] h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105 cursor-pointer" style={{ backgroundColor: "var(--color-bg-card)" }} onClick={() => carouselProducts.length > 0 && navigate(`/producto/${carouselProducts[index]?.id}`)}>
+        <div className="mt-2 md:mt-0 w-full max-w-[420px] h-[420px] sm:h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105 cursor-pointer" style={{ backgroundColor: "var(--color-bg-card)" }} onClick={() => carouselProducts.length > 0 && navigate(`/producto/${carouselProducts[index]?.id}`)}>
           {loading ? (
             <div className="w-full h-full flex flex-col items-center justify-center p-8">
               <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
@@ -242,7 +242,7 @@ const HomeUsuario: React.FC = () => {
 
       <section className="card">
         <h2 className="text-3xl font-bold mb-10 text-center">Categorías Principales</h2>
-        <div className="grid md:grid-cols-3 lg:grid-cols-6 gap-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
           {[
             { nombre: "Computadores", icono: <ComputerDesktopIcon className="w-10 h-10" /> },
             { nombre: "Celulares", icono: <DevicePhoneMobileIcon className="w-10 h-10" /> },
@@ -279,11 +279,11 @@ const HomeUsuario: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               {productos.slice(0, 3).map(renderProducto)}
             </div>
             {productos.length > 3 && (
-              <div className="grid md:grid-cols-3 gap-8 mt-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mt-12">
                 {productos.slice(3, 6).map(renderProducto)}
               </div>
             )}

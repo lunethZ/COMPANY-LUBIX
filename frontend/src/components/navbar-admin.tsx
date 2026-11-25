@@ -22,16 +22,16 @@ export default function NavbarAdmin() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
     logout();
-    navigate("/login");
+    void navigate("/login");
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-[#111827] border-b border-slate-700 w-full select-none">
+    <div className="flex items-center justify-between gap-3 px-4 sm:px-6 py-4 bg-[#111827] border-b border-slate-700 w-full select-none">
       
       {/* SECCIÓN MARCA: clickeable para volver al inicio */}
-      <div className="flex items-center gap-3">
-        <button onClick={() => navigate("/")} className="flex flex-col text-left cursor-pointer" title="Ir al inicio">
-          <span className="text-white text-xl font-black tracking-wide leading-none">
+      <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+        <button onClick={() => void navigate("/")} className="flex flex-col text-left cursor-pointer" title="Ir al inicio">
+          <span className="text-white text-lg sm:text-xl font-black tracking-wide leading-none">
             Lubix Console
           </span>
           <span className="text-[10px] bg-green-950/80 text-green-400 border border-green-800/50 px-1.5 py-0.5 rounded font-mono uppercase mt-1 font-bold tracking-wider self-start">
@@ -39,8 +39,8 @@ export default function NavbarAdmin() {
           </span>
         </button>
         <button
-          onClick={() => navigate("/")}
-          className="ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold border border-green-800/50 bg-green-950/30 text-green-400 hover:bg-green-900/40 transition"
+          onClick={() => void navigate("/")}
+          className="hidden sm:inline-flex ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold border border-green-800/50 bg-green-950/30 text-green-400 hover:bg-green-900/40 transition"
           title="Ir al inicio"
         >
           Inicio
@@ -48,7 +48,7 @@ export default function NavbarAdmin() {
       </div>
 
       {/* ACCIONES DERECHAS: Tema + Menú de Perfil */}
-      <div className="flex items-center gap-6 text-white">
+      <div className="flex items-center gap-3 sm:gap-6 text-white">
         
         {/* Toggle Theme */}
         <button

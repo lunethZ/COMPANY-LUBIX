@@ -192,10 +192,10 @@ export default function DashboardAdminPage() {
     <div className="bg-[#030712] min-h-screen text-slate-100 flex flex-col font-sans">
       <NavbarAdmin />
 
-      <main className="p-6 flex-1 max-w-7xl w-full mx-auto space-y-6">
-        <div className="flex items-center justify-between">
+      <main className="p-4 sm:p-6 flex-1 max-w-7xl w-full mx-auto space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-2xl font-bold text-white tracking-tight">Panel de Administración</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Panel de Administración</h1>
             <p className="text-sm text-slate-400 mt-1">Gestión de usuarios y empresas registradas en el sistema.</p>
           </div>
           <span className="text-sm text-slate-400">
