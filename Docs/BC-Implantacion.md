@@ -325,7 +325,7 @@ Escalamiento: incidencia → responsable del componente → revisión conjunta �
 | Repetición de restauración en máquina distinta | Pendiente | Copiar el respaldo y ejecutar `pg_backup.py verify` allí |
 | RNF-001 (p95 < 200 ms en Render) | No cumple en producción | Catálogo p95 605 ms; en local p95 30.7 ms. Mitigación: ping externo y plan siempre activo |
 | RNF-009 (respuestas de error) | Rechazado | 401 en ruta inexistente y 500 en UUID inválido; seguimiento en issue #84 |
-| Simulacro ejecutado por un tercero | Pendiente | Checklist en la sección 7.4 |
+| Simulacro ejecutado por un tercero | Cumple con observación | Ejecutado el 2026-11-24 en un clon limpio de `main` (`2b85add`): instalación y restauración PASS; D-03 (permisos de MinIO en Windows) documentado en [`Simulacro_Instalacion_2026-11-24.md`](./Evidencias/Simulacro_Instalacion_2026-11-24.md) |
 
 ### 7.4 Checklist del simulacro de implantación
 
@@ -346,7 +346,7 @@ Escalamiento: incidencia → responsable del componente → revisión conjunta �
 | Responsable de implantación | @nacoooobit |
 | Participantes | @nacoooobit · @lunethZ · @WinStormX · @juanpineda (revisión pendiente) |
 | Temas tratados | Arquitectura y alcance, despliegue en Render, CI/CD y gates 80/80, respaldo y restauración, monitoreo, contingencia y soporte |
-| Evidencias revisadas | CI y SonarCloud del repositorio; `/health`, `/health/database`, `/health/internet`; [`Prueba_Restauracion_2026-11-19.md`](./Evidencias/Prueba_Restauracion_2026-11-19.md); [`p4-s5-seguridad.txt`](./Evidencias/p4-s5-seguridad.txt) |
+| Evidencias revisadas | CI y SonarCloud del repositorio; `/health`, `/health/database`, `/health/internet`; [`Prueba_Restauracion_2026-11-19.md`](./Evidencias/Prueba_Restauracion_2026-11-19.md); [`p4-s5-seguridad.txt`](./Evidencias/p4-s5-seguridad.txt); [`Simulacro_Instalacion_2026-11-24.md`](./Evidencias/Simulacro_Instalacion_2026-11-24.md) |
 | Acuerdos | Mantener CI y Quality Gate en verde; activar alerta externa; completar simulacro en máquina distinta; corregir issue #84; mantener respaldo cada 6 h |
 | Observaciones | RNF-001 no cumple en el plan free de Render (latencia de red e infraestructura, no de consulta). RNF-009 con hallazgos de códigos de error registrados en issue #84. |
 | Firmas | @lunethZ (calidad y backend) — pendiente @juanpineda y cierre del simulacro |

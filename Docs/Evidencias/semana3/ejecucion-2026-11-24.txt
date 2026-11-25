@@ -1,0 +1,26 @@
+Ejecucion de pruebas de aceptacion - LUBIX
+Fecha: 2026-11-24 22:19:02 HPS
+
+== Health de la API ==
+{"status":"ok","service":"lubix-api","environment":"production","database":"ok"}
+{"Base de datos":"OK"}
+
+== Caso PA-05: registro de empresa (precondicion) ==
+500 {"detail":"Error al crear cuenta empresarial"}
+
+== Subida de archivos en produccion ==
+upload-image 500 {"detail":"HTTPSConnectionPool(host='minio', port=9000): Max retries exceeded with url: /uploads/products/b39a0e40-190d-4053-8ab7-4c880dd5b58e.png (Caused by NameResolutionError(\"HTTPSConnection(host='minio', port=9000): Failed to resolve 'minio' ([Errno -2] Name or service not known)\"))"}
+
+== Resultado resumido de la ejecucion ==
+{
+  "product": "Parlante QA Aceptacion 311340",
+  "company": "Empresa Aceptacion QA 1340",
+  "result": {
+    "PA01": "OK https://lubix-frontend.onrender.com/home-usuario",
+    "PA03": "OK producto 854c9f74-5ff0-4569-aaa5-f486d8582dc9 estado active",
+    "PA02": "OK pedido 2c0a0c4a-b2c2-44b8-af7a-321b4129faec estado pending",
+    "PA04": "OK pedido 2c0a0c4a-b2c2-44b8-af7a-321b4129faec entregado",
+    "PA05": "FALLO locator.click: Timeout 45000ms exceeded.\nCall log:\n\u001b[2m  - waiting for locator('div').filter({ hasText: 'Empresa Aceptacion QA 1340' }).filter({ has: getByRole('button', { name: 'Validar empresa' }) }).last().getByRole('button', { name: 'Validar empresa' })\u001b[22m\n",
+    "PA06": "OK PQRS resuelta 9a48d1ab-5227-4b31-8afc-1a464e8cb52a"
+  }
+}
