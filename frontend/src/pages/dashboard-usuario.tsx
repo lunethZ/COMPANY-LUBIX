@@ -617,7 +617,7 @@ export default function BuyerDashboard() {
                     Ver todos <ChevronRightIcon className="w-4 h-4" />
                   </button>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                   {favoriteProducts.slice(0, 3).map((p) => (
                     <div key={p.id} className="rounded-xl overflow-hidden bg-slate-800 hover:bg-slate-700 transition-all group cursor-pointer">
                       <div className="relative">
@@ -1055,12 +1055,12 @@ export default function BuyerDashboard() {
                   <MapPinIcon className="w-4 h-4" /> Direcciones
                 </h3>
                 <div className="space-y-3 mb-4">
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input value={addressForm.label} onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))} placeholder="Etiqueta (Casa, Oficina)" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                     <input value={addressForm.postal_code} onChange={(e) => setAddressForm((prev) => ({ ...prev, postal_code: e.target.value }))} placeholder="Código postal" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   </div>
                   <input value={addressForm.address} onChange={(e) => setAddressForm((prev) => ({ ...prev, address: e.target.value }))} placeholder="Dirección" className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <input value={addressForm.city} onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))} placeholder="Ciudad" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                     <input value={addressForm.department} onChange={(e) => setAddressForm((prev) => ({ ...prev, department: e.target.value }))} placeholder="Departamento" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   </div>

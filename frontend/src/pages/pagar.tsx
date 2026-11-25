@@ -392,8 +392,8 @@ const PagarPage = () => {
     <div className="page-container min-h-screen">
       <NavbarAuto />
       <div className="max-w-6xl mx-auto px-4 py-10">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Finalizar compra</h1>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold">Finalizar compra</h1>
           <button
             onClick={() => navigate("/carrito")}
             className="text-sm text-muted hover:text-accent transition flex items-center gap-1"
@@ -403,11 +403,11 @@ const PagarPage = () => {
           </button>
         </div>
 
-        <div className="flex items-center gap-2 mb-10">
+        <div className="flex flex-wrap items-center gap-2 mb-10">
           {steps.map((s, i) => (
             <div key={s.id} className="flex items-center gap-2">
               <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold transition ${
+                className={`flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full text-xs sm:text-sm font-semibold transition ${
                   i <= stepIndex
                     ? "bg-emerald-600 text-white"
                     : "bg-gray-100 text-muted dark:bg-gray-800"
@@ -433,7 +433,7 @@ const PagarPage = () => {
                 </h2>
                 <p className="text-sm text-muted mb-5">Ingresa la información del destinatario y la dirección de entrega.</p>
 
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="label-base">Nombre completo *</label>
                     <input name="nombre" value={envio.nombre} onChange={handleEnvioChange} className="input-base" placeholder="Juan Pérez" />
@@ -454,7 +454,7 @@ const PagarPage = () => {
                     <input name="telefono" value={envio.telefono} onChange={handleEnvioChange} className="input-base" placeholder="300 123 4567" />
                     {errors.telefono && <p className="text-xs text-red-500 mt-1">{errors.telefono}</p>}
                   </div>
-                  <div className="col-span-2">
+                  <div className="sm:col-span-2">
                     <label className="label-base">Dirección de entrega *</label>
                     <input name="direccion" value={envio.direccion} onChange={handleEnvioChange} className="input-base" placeholder="Calle 123 #45-67" />
                     {errors.direccion && <p className="text-xs text-red-500 mt-1">{errors.direccion}</p>}
@@ -540,7 +540,7 @@ const PagarPage = () => {
                       <input name="nombreTitular" value={tarjeta.nombreTitular} onChange={handleTarjetaChange} className="input-base" placeholder="Como aparece en la tarjeta" />
                       {errors.nombreTitular && <p className="text-xs text-red-500 mt-1">{errors.nombreTitular}</p>}
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
                         <label className="label-base">Expiración *</label>
                         <input name="expira" value={tarjeta.expira} onChange={handleTarjetaChange} className="input-base" placeholder="MM/AA" inputMode="numeric" />
@@ -644,8 +644,8 @@ const PagarPage = () => {
                   </div>
                 </div>
 
-                <div className="flex gap-3 mt-8">
-                  <button onClick={goBack} className="btn-secondary flex items-center gap-2">
+                <div className="flex flex-col-reverse sm:flex-row gap-3 mt-8">
+                  <button onClick={goBack} className="btn-secondary flex items-center justify-center gap-2">
                     <ChevronLeftIcon className="w-4 h-4" /> Atrás
                   </button>
                   <button onClick={confirmPayment} className="btn-primary flex items-center justify-center gap-2 flex-1">

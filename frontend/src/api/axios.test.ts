@@ -84,6 +84,53 @@ describe('Cliente axios', () => {
     expect(result).toMatchObject({ data: 'retried' });
   });
 
+  it('limpia la sesión y redirige si el refresh falla', async () => {
+    localStorage.setItem('access_token', 'old-token');
+    localStorage.setItem('refresh_token', 'a.b.c');
+    localStorage.setItem('user', '{}');
+    mocks.instance.post.mockRejectedValue(new Error('refresh caído'));
+    const originalLocation = window.location;
+    Object.defineProperty(window, 'location', { configurable: true, value: { href: '' } });
+
+    const error = {
+      config: { url: '/user/dashboard/me', headers: {} },
+      response: { status: 401 },
+    };
+
+    try {
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+
+      expect(localStorage.getItem('access_token')).toBeNull();
+      expect(localStorage.getItem('refresh_token')).toBeNull();
+      expect(localStorage.getItem('user')).toBeNull();
+      expect(window.location.href).toBe('/login');
+    } finally {
+      Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
+    }
+  });
+
+  it('redirige al login si el refresh token no es un JWT', async () => {
+    localStorage.setItem('access_token', 'old-token');
+    localStorage.setItem('refresh_token', 'no-es-jwt');
+    const originalLocation = window.location;
+    Object.defineProperty(window, 'location', { configurable: true, value: { href: '' } });
+
+    const error = {
+      config: { url: '/user/dashboard/me', headers: {} },
+      response: { status: 401 },
+    };
+
+    try {
+      await expect(responseErrorHandler(error)).rejects.toBe(error);
+
+      expect(mocks.instance.post).not.toHaveBeenCalled();
+      expect(localStorage.getItem('access_token')).toBeNull();
+      expect(window.location.href).toBe('/login');
+    } finally {
+      Object.defineProperty(window, 'location', { configurable: true, value: originalLocation });
+    }
+  });
+
   it('no reintenta el refresh sobre /auth/refresh', async () => {
     const error = {
       config: { url: '/auth/refresh', headers: {} },

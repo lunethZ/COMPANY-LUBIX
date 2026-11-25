@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useLocation } from 'react-router-dom';
 import NavbarUsuario from './navbaruser';
@@ -77,7 +77,9 @@ describe('Navbar de usuario', () => {
     expect(screen.getByText('A')).toBeInTheDocument();
     expect(screen.getByText('Carrito')).toBeInTheDocument();
     expect(screen.getByText('PQRS')).toBeInTheDocument();
-    await waitFor(() => expect(screen.getByText('2')).toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getAllByText('2').length).toBeGreaterThan(0),
+    );
   });
 
   it('carga la foto de perfil desde una ruta relativa', async () => {
@@ -175,5 +177,66 @@ describe('Navbar de usuario', () => {
 
     expect(screen.getByTitle('Modo oscuro')).toBeInTheDocument();
     expect(localStorage.getItem('theme')).toBe('light');
+  });
+
+  it('abre el menú móvil con búsqueda, carrito, PQRS y perfil', async () => {
+    loginAsUser();
+    mockApi();
+    renderNavbar();
+
+    const toggle = screen.getByRole('button', { name: 'Abrir menú' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    await userEvent.click(toggle);
+
+    const panel = document.getElementById('navbar-usuario-movil') as HTMLElement;
+    expect(panel).toBeInTheDocument();
+    expect(within(panel).getByPlaceholderText('Buscar productos...')).toBeInTheDocument();
+    expect(within(panel).getByRole('link', { name: /Carrito/ })).toHaveAttribute('href', '/carrito');
+    expect(within(panel).getByRole('link', { name: /PQRS/ })).toHaveAttribute('href', '/pqrs');
+    expect(within(panel).getByRole('link', { name: /Ver Perfil/ })).toHaveAttribute(
+      'href',
+      '/dashboard-usuario',
+    );
+  });
+
+  it('busca desde el menú móvil de usuario y lo cierra al navegar', async () => {
+    loginAsUser();
+    mockApi();
+    renderNavbar();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    const panel = document.getElementById('navbar-usuario-movil') as HTMLElement;
+
+    await userEvent.type(within(panel).getByPlaceholderText('Buscar productos...'), 'mouse{Enter}');
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/buscar?q=mouse');
+    expect(document.getElementById('navbar-usuario-movil')).not.toBeInTheDocument();
+  });
+
+  it('cierra la sesión desde el menú móvil', async () => {
+    loginAsUser();
+    mockApi();
+    renderNavbar();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    const panel = document.getElementById('navbar-usuario-movil') as HTMLElement;
+    await userEvent.click(within(panel).getByRole('button', { name: 'Cerrar Sesión' }));
+
+    expect(localStorage.getItem('access_token')).toBeNull();
+    expect(screen.getByTestId('location')).toHaveTextContent('/login');
+    expect(document.getElementById('navbar-usuario-movil')).not.toBeInTheDocument();
+  });
+
+  it('cambia el tema desde el menú móvil', async () => {
+    loginAsUser();
+    localStorage.setItem('theme', 'light');
+    mockApi();
+    renderNavbar();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    const panel = document.getElementById('navbar-usuario-movil') as HTMLElement;
+    await userEvent.click(within(panel).getByRole('button', { name: /Modo oscuro/ }));
+
+    expect(localStorage.getItem('theme')).toBe('dark');
   });
 });
