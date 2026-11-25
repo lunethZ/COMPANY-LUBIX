@@ -1,0 +1,145 @@
+{
+  "status": "PASS",
+  "started_at": "2026-11-25T03:29:29.231152Z",
+  "finished_at": "2026-11-25T03:29:35.987972Z",
+  "duration_seconds": 6.76,
+  "backup": {
+    "file": "C:\\Users\\laura\\Documents\\Qoder\\2026-11-18\\604a39d4\\simulacro-s7\\backups\\db\\lubix_db_20261125T032920Z.dump.gpg",
+    "manifest": "C:\\Users\\laura\\Documents\\Qoder\\2026-11-18\\604a39d4\\simulacro-s7\\backups\\db\\lubix_db_20261125T032920Z.manifest.json",
+    "created_at": "2026-11-25T03:29:23.324711Z",
+    "source": {
+      "mode": "docker-compose",
+      "host": "docker-compose:postgres",
+      "database": "lubix",
+      "user": "lubix_sim",
+      "server_version": "16.15 (Debian 16.15-1.pgdg13+2)"
+    },
+    "encrypted_sha256": "f601d507ea23f8c1c200e7609e0e1ba0dbd9711b38ee17cfc518da226401b3ac",
+    "dump_sha256": "c8aebba53c792b2e796f68e29094c5bf0afd51102b3dac3229722d4cf3b8050e",
+    "row_count": 5,
+    "table_count": 16
+  },
+  "restore_environment": {
+    "hostname": "equipo-instalador",
+    "platform": "Windows-11-10.0.26300-SP0",
+    "container": "lubix-restore-test-ad4a62fc",
+    "server_version": "16.15 (Debian 16.15-1.pgdg13+2)"
+  },
+  "checks": [
+    {
+      "check": "checksum_volcado_descifrado",
+      "expected": "c8aebba53c792b2e796f68e29094c5bf0afd51102b3dac3229722d4cf3b8050e",
+      "actual": "c8aebba53c792b2e796f68e29094c5bf0afd51102b3dac3229722d4cf3b8050e",
+      "ok": true
+    },
+    {
+      "check": "pg_restore",
+      "expected": "sin errores",
+      "actual": "sin errores",
+      "ok": true
+    },
+    {
+      "check": "tabla:addresses",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:alembic_version",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "check": "tabla:cart_items",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:carts",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:catalog",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:company",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:event_codes",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:favorites",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:order_items",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:orders",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:pqrs",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:products",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:refreshToken",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:reviews",
+      "expected": 0,
+      "actual": 0,
+      "ok": true
+    },
+    {
+      "check": "tabla:roles",
+      "expected": 3,
+      "actual": 3,
+      "ok": true
+    },
+    {
+      "check": "tabla:users",
+      "expected": 1,
+      "actual": 1,
+      "ok": true
+    },
+    {
+      "check": "alembic_revision",
+      "expected": "c9d8e7f6a5b4",
+      "actual": "c9d8e7f6a5b4",
+      "ok": true
+    }
+  ],
+  "error": null
+}
