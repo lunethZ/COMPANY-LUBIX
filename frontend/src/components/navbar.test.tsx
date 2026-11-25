@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useLocation } from 'react-router-dom';
 import Navbar from './navbar';
@@ -130,8 +130,78 @@ describe('Navbar público', () => {
 
     expect(screen.getByText('Ana Tester')).toBeInTheDocument();
     expect(screen.getByText('A')).toBeInTheDocument();
-    expect(await screen.findByText('3')).toBeInTheDocument();
+    expect((await screen.findAllByText('3')).length).toBeGreaterThan(0);
     expect(screen.getByRole('button', { name: 'Salir' })).toBeInTheDocument();
+  });
+
+  it('abre y cierra el menú móvil con las acciones públicas', async () => {
+    renderNavbar();
+
+    const toggle = screen.getByRole('button', { name: 'Abrir menú' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(toggle);
+
+    const panel = document.getElementById('navbar-publico-movil') as HTMLElement;
+    expect(panel).toBeInTheDocument();
+    expect(within(panel).getByRole('button', { name: 'Login' })).toBeInTheDocument();
+    expect(within(panel).getByRole('button', { name: 'Register' })).toBeInTheDocument();
+    expect(within(panel).getByRole('button', { name: /Modo (oscuro|claro)/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cerrar menú' })).toHaveAttribute(
+      'aria-expanded',
+      'true',
+    );
+
+    await userEvent.click(screen.getByRole('button', { name: 'Cerrar menú' }));
+    expect(document.getElementById('navbar-publico-movil')).not.toBeInTheDocument();
+  });
+
+  it('busca desde el menú móvil, navega y lo cierra', async () => {
+    renderNavbar();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    const panel = document.getElementById('navbar-publico-movil') as HTMLElement;
+
+    await userEvent.type(within(panel).getByPlaceholderText('Buscar...'), 'monitor{Enter}');
+
+    expect(screen.getByTestId('location')).toHaveTextContent('/buscar?q=monitor');
+    expect(document.getElementById('navbar-publico-movil')).not.toBeInTheDocument();
+  });
+
+  it('abre el login desde el menú móvil y cierra el panel', async () => {
+    renderNavbar();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+    const panel = document.getElementById('navbar-publico-movil') as HTMLElement;
+    await userEvent.click(within(panel).getByRole('button', { name: 'Login' }));
+
+    expect(document.getElementById('navbar-publico-movil')).not.toBeInTheDocument();
+  });
+
+  it('muestra la sesión y permite salir desde el menú móvil', async () => {
+    loginAsUser();
+    const originalLocation = window.location;
+    Object.defineProperty(window, 'location', {
+      configurable: true,
+      value: { href: '' },
+    });
+
+    try {
+      renderNavbar();
+      await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
+      const panel = document.getElementById('navbar-publico-movil') as HTMLElement;
+      expect(within(panel).getByText('Ana Tester')).toBeInTheDocument();
+
+      await userEvent.click(within(panel).getByRole('button', { name: 'Salir' }));
+
+      expect(localStorage.getItem('access_token')).toBeNull();
+      expect(window.location.href).toBe('/login');
+    } finally {
+      Object.defineProperty(window, 'location', {
+        configurable: true,
+        value: originalLocation,
+      });
+    }
   });
 
   it('cierra la sesión al pulsar Salir', async () => {
