@@ -16,7 +16,7 @@ Consolidar los resultados de la verificación de calidad del cierre: capacitaci�
 
 | Frente | Qué se verificó | Evidencia |
 |---|---|---|
-| Aceptación funcional | Casos PA-01 a PA-06 sobre la plataforma desplegada | `Docs/evidencias/semana3/` |
+| Aceptación funcional | Casos PA-01 a PA-06 sobre la plataforma desplegada | `Docs/Evidencias/semana3/` |
 | Capacitación | Guion de dos sesiones, asistencia y práctica por rol | `Docs/Sesion_Simulada_Capacitacion.md` |
 | Instalación y respaldo | Simulacro en máquina limpia y prueba de restauración | `Docs/Evidencias/Simulacro_Instalacion_2026-11-24.md` |
 | Integración continua | Umbrales 80/80, lint, build y pruebas PostgreSQL | `.github/workflows/ci.yml`, `.github/workflows/sonarcloud.yml` |
@@ -41,6 +41,7 @@ Consolidar los resultados de la verificación de calidad del cierre: capacitaci�
 |---|---|---|---|---|
 | D-01 | En producción el registro de empresa devuelve HTTP 500 y la subida de archivos falla porque el host `minio` no resuelve; el certificado del registro y las imágenes dependen de ese almacenamiento | P2 | Abierto | Configurar MinIO/S3 en Render o desacoplar el certificado del registro |
 | D-02 | La acción **Validar empresa** está en **Resumen**, no en **Empresas** como indica el manual | P4 | Abierto | Alinear manual o mover la acción |
+| D-03 | En un clon limpio en Windows, `minio` reinicia por permisos del volumen (imagen no root); las subidas locales fallan y el backend solo advierte | P3 | Con solución documentada | `Docs/Instalacion_v1.md` §4; pendiente ajuste del `docker-compose.yml` |
 | H-01 | Catálogo con latencia alta en el plan gratuito de Render (RNF-001) | P3 | Con mitigación | Mantener la instancia activa y medir con monitor externo |
 | H-02 | Códigos de error inconsistentes en rutas inexistentes y UUID inválidos (RNF-009) | P3 | En seguimiento | Issue #84 |
 
