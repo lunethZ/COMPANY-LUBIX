@@ -54,43 +54,50 @@ const CartPage = () => {
             {items.map((item) => (
               <div
                 key={item.product_id}
-                className="flex items-center gap-4 p-4 rounded-xl border"
+                className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 rounded-xl border"
                 style={{ backgroundColor: "var(--color-bg-card)", borderColor: "var(--color-border)" }}
               >
-                {item.image ? (
-                  <img src={resolveImage(item.image)} alt={item.name} className="w-20 h-20 rounded-lg object-cover" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
-                ) : (
-                  <div className="w-20 h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                    <ShoppingBagIcon className="w-8 h-8 opacity-30" />
+                <div className="flex items-center gap-4 flex-1 min-w-0 w-full">
+                  {item.image ? (
+                    <img src={resolveImage(item.image)} alt={item.name} className="w-20 h-20 rounded-lg object-cover shrink-0" onError={(e) => { (e.target as HTMLImageElement).src = '/placeholder.png'; }} />
+                  ) : (
+                    <div className="w-20 h-20 rounded-lg bg-gray-100 dark:bg-gray-800 flex items-center justify-center shrink-0">
+                      <ShoppingBagIcon className="w-8 h-8 opacity-30" />
+                    </div>
+                  )}
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-semibold" style={{ color: "var(--color-text)" }}>{item.name}</h3>
+                    <p className="text-lg font-bold text-green-500">${item.unit_price.toLocaleString("es-CO")}</p>
                   </div>
-                )}
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold" style={{ color: "var(--color-text)" }}>{item.name}</h3>
-                  <p className="text-lg font-bold text-green-500">${item.unit_price.toLocaleString("es-CO")}</p>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between sm:justify-end w-full sm:w-auto gap-2">
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => decrement(item.product_id)}
+                      className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg font-bold"
+                      style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
+                      aria-label={`Quitar una unidad de ${item.name}`}
+                    >
+                      -
+                    </button>
+                    <span className="w-8 text-center font-semibold" style={{ color: "var(--color-text)" }}>{item.quantity}</span>
+                    <button
+                      onClick={() => increment(item.product_id)}
+                      className="w-10 h-10 sm:w-9 sm:h-9 rounded-lg font-bold"
+                      style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
+                      aria-label={`Agregar una unidad de ${item.name}`}
+                    >
+                      +
+                    </button>
+                  </div>
                   <button
-                    onClick={() => decrement(item.product_id)}
-                    className="w-8 h-8 rounded-lg font-bold"
-                    style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
+                    onClick={() => removeItem(item.product_id)}
+                    className="p-2 text-red-400 hover:text-red-300 transition"
+                    aria-label={`Eliminar ${item.name}`}
                   >
-                    -
-                  </button>
-                  <span className="w-8 text-center font-semibold" style={{ color: "var(--color-text)" }}>{item.quantity}</span>
-                  <button
-                    onClick={() => increment(item.product_id)}
-                    className="w-8 h-8 rounded-lg font-bold"
-                    style={{ backgroundColor: "var(--color-bg-secondary)", color: "var(--color-text)" }}
-                  >
-                    +
+                    <TrashIcon className="w-5 h-5" />
                   </button>
                 </div>
-                <button
-                  onClick={() => removeItem(item.product_id)}
-                  className="p-2 text-red-400 hover:text-red-300 transition"
-                >
-                  <TrashIcon className="w-5 h-5" />
-                </button>
               </div>
             ))}
             <div className="text-right pt-4">

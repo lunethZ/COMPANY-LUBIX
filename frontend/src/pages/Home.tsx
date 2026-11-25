@@ -191,8 +191,8 @@ const Home: React.FC = () => {
     <div className="page-container">
       <NavbarAuto />
 
-      <section className="flex flex-col md:flex-row justify-between items-center px-8 md:px-16 py-20 min-h-[calc(100vh-80px)]" style={{ backgroundColor: "var(--color-bg)" }}>
-        <div className="max-w-lg text-center md:text-left mr-8">
+      <section className="flex flex-col md:flex-row justify-between items-center gap-10 md:gap-0 px-4 sm:px-8 md:px-16 py-14 sm:py-20 min-h-[calc(100vh-80px)]" style={{ backgroundColor: "var(--color-bg)" }}>
+        <div className="max-w-lg text-center md:text-left md:mr-8">
           <div className="text-accent mb-2 text-sm font-semibold uppercase tracking-wide">
             Bienvenidos a Lubix
           </div>
@@ -204,7 +204,7 @@ const Home: React.FC = () => {
           </p>
         </div>
 
-        <div className="mt-10 md:mt-0 w-[420px] h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105 cursor-pointer" style={{ backgroundColor: "var(--color-bg-card)" }} onClick={() => carouselProducts.length > 0 && navigate(`/producto/${carouselProducts[index]?.id}`)}>
+        <div className="mt-2 md:mt-0 w-full max-w-[420px] h-[420px] sm:h-[500px] rounded-3xl shadow-2xl overflow-hidden flex flex-col items-center justify-between transform transition-all duration-700 ease-in-out hover:scale-105 cursor-pointer" style={{ backgroundColor: "var(--color-bg-card)" }} onClick={() => carouselProducts.length > 0 && navigate(`/producto/${carouselProducts[index]?.id}`)}>
           {loading ? (
             <div className="w-full h-full flex flex-col items-center justify-center p-8">
               <div className="w-10 h-10 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin mb-4"></div>
@@ -249,11 +249,11 @@ const Home: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="grid md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8">
               {productos.slice(0, 3).map(renderProducto)}
             </div>
             {productos.length > 3 && (
-              <div className="grid md:grid-cols-3 gap-8 mt-12">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mt-12">
                 {productos.slice(3, 6).map(renderProducto)}
               </div>
             )}
@@ -262,7 +262,7 @@ const Home: React.FC = () => {
       </section>
 
       {showToast && (
-        <div className="fixed bottom-6 right-6 z-[60] flex items-center gap-3 bg-emerald-600 text-white px-5 py-4 rounded-xl shadow-2xl animate-bounce">
+        <div className="fixed bottom-4 right-4 left-4 sm:left-auto sm:bottom-6 sm:right-6 z-[60] flex items-center gap-3 bg-emerald-600 text-white px-4 sm:px-5 py-4 rounded-xl shadow-2xl animate-bounce max-w-[calc(100vw-2rem)] sm:max-w-md">
           <CheckCircleIcon className="w-7 h-7" />
           <div>
             <p className="font-bold text-sm">Agregado al carrito</p>

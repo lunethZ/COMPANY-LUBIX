@@ -4,7 +4,7 @@ import { useCart } from "../context/CartContext";
 import { useTheme } from "../context/ThemeContext";
 import api from "../api/axios";
 import { API_BASE_URL } from "../api/config";
-import { UserCircleIcon, ShoppingCartIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, ShoppingCartIcon, MagnifyingGlassIcon, ChatBubbleLeftEllipsisIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useClickOutside } from "../hooks/useClickOutside";
 
@@ -14,6 +14,7 @@ export default function NavbarUsuario() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -39,6 +40,7 @@ export default function NavbarUsuario() {
     e.preventDefault();
     if (searchValue.trim()) {
       navigate(`/buscar?q=${encodeURIComponent(searchValue.trim())}`);
+      setMobileOpen(false);
     }
   };
 
@@ -48,10 +50,10 @@ export default function NavbarUsuario() {
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-[#162238] w-full">
-      <Link to="/home-usuario" className="text-green-500 text-2xl font-bold hover:text-green-400 transition">Lubix</Link>
+    <div className="relative flex items-center justify-between gap-3 px-4 sm:px-6 py-4 bg-[#162238] w-full">
+      <Link to="/home-usuario" className="text-green-500 text-2xl font-bold hover:text-green-400 transition shrink-0">Lubix</Link>
 
-      <form onSubmit={handleSearch} className="flex w-[500px] bg-[#1c2a4a] rounded-full overflow-hidden">
+      <form onSubmit={handleSearch} className="hidden md:flex w-[500px] bg-[#1c2a4a] rounded-full overflow-hidden">
         <input
           type="text"
           value={searchValue}
@@ -64,7 +66,18 @@ export default function NavbarUsuario() {
         </button>
       </form>
 
-      <div className="flex items-center gap-6 text-white">
+      <div className="flex items-center gap-2 sm:gap-4 md:gap-6 text-white">
+        <button
+          onClick={() => setMobileOpen((open) => !open)}
+          className="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition"
+          aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileOpen}
+          aria-controls="navbar-usuario-movil"
+        >
+          {mobileOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+        </button>
+
+        <div className="hidden md:flex items-center gap-6">
         <button
           onClick={toggleTheme}
           className="relative w-10 h-10 rounded-full flex items-center justify-center hover:opacity-80 transition-all duration-300"
@@ -147,7 +160,93 @@ export default function NavbarUsuario() {
             )}
           </div>
         )}
+        </div>
+
+        <Link
+          to="/carrito"
+          className="md:hidden relative flex items-center justify-center w-10 h-10 hover:text-green-400 transition"
+          aria-label="Ir al carrito"
+        >
+          <ShoppingCartIcon className="w-6 h-6" />
+          {totalItems > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+              {totalItems}
+            </span>
+          )}
+        </Link>
       </div>
+
+      {mobileOpen && (
+        <div
+          id="navbar-usuario-movil"
+          className="absolute left-0 right-0 top-full z-40 md:hidden bg-[#162238] border-t border-white/10 px-4 pb-5 pt-3 space-y-4"
+        >
+          <form onSubmit={handleSearch} className="flex w-full bg-[#1c2a4a] rounded-full overflow-hidden">
+            <input
+              type="text"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Buscar productos..."
+              className="flex-1 px-4 py-2.5 bg-transparent text-white placeholder-gray-400 focus:outline-none"
+            />
+            <button type="submit" className="bg-green-500 px-5 text-white hover:bg-green-600 transition flex items-center justify-center" aria-label="Buscar">
+              <MagnifyingGlassIcon className="w-5 h-5" />
+            </button>
+          </form>
+
+          <div className="flex items-center gap-3 text-white min-w-0">
+            {avatarUrl ? (
+              <img src={avatarUrl} alt="Avatar" className="w-10 h-10 rounded-full object-cover border-2 border-green-400 shrink-0" />
+            ) : (
+              <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-black bg-green-400 shrink-0">
+                {user?.name?.charAt(0).toUpperCase() || <UserCircleIcon className="w-6 h-6 text-green-700" />}
+              </div>
+            )}
+            <span className="font-medium truncate">{user?.name}</span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              to="/carrito"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+            >
+              <ShoppingCartIcon className="w-5 h-5" />
+              Carrito
+            </Link>
+            <Link
+              to="/pqrs"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+            >
+              <ChatBubbleLeftEllipsisIcon className="w-5 h-5" />
+              PQRS
+            </Link>
+            <Link
+              to="/dashboard-usuario"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+            >
+              <UserCircleIcon className="w-5 h-5" />
+              Ver Perfil
+            </Link>
+            <button
+              onClick={() => { setMobileOpen(false); handleLogout(); }}
+              className="flex items-center justify-center gap-2 py-3 rounded-lg bg-red-500/90 text-white hover:bg-red-500 transition"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-white/15 text-white hover:bg-white/10 transition"
+          >
+            <span className="w-5 h-5" aria-hidden="true">{theme === "light" ? "🌙" : "☀️"}</span>
+            {theme === "light" ? "Modo oscuro" : "Modo claro"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { useTheme } from "../context/ThemeContext";
-import { UserCircleIcon, ChatBubbleLeftEllipsisIcon } from "@heroicons/react/24/outline";
+import { UserCircleIcon, ChatBubbleLeftEllipsisIcon, Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState, useRef, useCallback } from "react";
 import { useClickOutside } from "../hooks/useClickOutside";
 
@@ -10,6 +10,7 @@ export default function NavbarEmpresa() {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const closeMenu = useCallback(() => setMenuOpen(false), []);
   useClickOutside(menuRef, closeMenu, menuOpen);
@@ -20,12 +21,23 @@ export default function NavbarEmpresa() {
   };
 
   return (
-    <div className="flex items-center justify-between px-6 py-4 bg-[#162238] w-full">
-      <Link to="/dashboard-empresa" className="text-green-500 text-2xl font-bold hover:text-green-400 transition">
+    <div className="relative flex items-center justify-between gap-3 px-4 sm:px-6 py-4 bg-[#162238] w-full">
+      <Link to="/dashboard-empresa" className="text-green-500 text-2xl font-bold hover:text-green-400 transition shrink-0">
         Lubix
       </Link>
 
-      <div className="flex items-center gap-6 text-white">
+      <div className="flex items-center gap-2 sm:gap-4 md:gap-6 text-white">
+        <button
+          onClick={() => setMobileOpen((open) => !open)}
+          className="md:hidden w-10 h-10 rounded-full flex items-center justify-center hover:bg-white/10 transition"
+          aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={mobileOpen}
+          aria-controls="navbar-empresa-movil"
+        >
+          {mobileOpen ? <XMarkIcon className="w-6 h-6" /> : <Bars3Icon className="w-6 h-6" />}
+        </button>
+
+        <div className="hidden md:flex items-center gap-6">
         <button
           onClick={toggleTheme}
           className="relative w-10 h-10 rounded-full flex items-center justify-center hover:opacity-80 transition-all duration-300"
@@ -96,7 +108,61 @@ export default function NavbarEmpresa() {
             )}
           </div>
         )}
+        </div>
       </div>
+
+      {mobileOpen && (
+        <div
+          id="navbar-empresa-movil"
+          className="absolute left-0 right-0 top-full z-40 md:hidden bg-[#162238] border-t border-white/10 px-4 pb-5 pt-4 space-y-4"
+        >
+          <div className="flex items-center gap-3 text-white min-w-0">
+            {user?.name ? (
+              <div className="w-10 h-10 rounded-full flex items-center justify-center font-bold text-black bg-green-400 shrink-0">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+            ) : (
+              <UserCircleIcon className="w-9 h-9 text-green-500 shrink-0" />
+            )}
+            <div className="min-w-0">
+              <p className="font-semibold truncate">{user?.name || "Empresa"}</p>
+              <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 gap-2">
+            <Link
+              to="/dashboard-empresa"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+            >
+              Perfil de Empresa
+            </Link>
+            <Link
+              to="/pqrs"
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center justify-center gap-2 py-3 rounded-lg bg-white/10 text-white hover:bg-white/20 transition"
+            >
+              <ChatBubbleLeftEllipsisIcon className="w-5 h-5" />
+              PQRS
+            </Link>
+            <button
+              onClick={() => { setMobileOpen(false); handleLogout(); }}
+              className="flex items-center justify-center gap-2 py-3 rounded-lg bg-red-500/90 text-white hover:bg-red-500 transition"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
+
+          <button
+            onClick={toggleTheme}
+            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-lg border border-white/15 text-white hover:bg-white/10 transition"
+          >
+            <span className="w-5 h-5" aria-hidden="true">{theme === "light" ? "🌙" : "☀️"}</span>
+            {theme === "light" ? "Modo oscuro" : "Modo claro"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }

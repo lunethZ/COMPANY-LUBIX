@@ -264,7 +264,7 @@ export const Register = () => {
                         onSubmit={handleRegister}
                         className="card-form space-y-4 sm:space-y-5"
                     >
-                        <div className={`grid gap-4 ${mode === "usuario" ? "grid-cols-2" : "grid-cols-1"}`}>
+                        <div className={`grid gap-4 ${mode === "usuario" ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1"}`}>
                             <div>
                                 <label className="label-base">
                                     {mode === "empresa" ? "Nombre contacto *" : "Nombre *"}
@@ -421,7 +421,7 @@ export const Register = () => {
                                     {fieldErrors.companyName && <p className="text-xs text-red-400 mt-1">{fieldErrors.companyName}</p>}
                                 </div>
 
-                                <div className="grid grid-cols-2 gap-4">
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                     <div>
                                         <label className="label-base">
                                             NIT *
