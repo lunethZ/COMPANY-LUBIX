@@ -232,7 +232,9 @@ El detalle de objetivos, metodología y evaluación está en [`Plan_Capacitacion
 | Funciones de Usuario, Empresa y Administrador | Manual 1.1.7 |
 | Canal de soporte, tiempos y escalamiento | Manual 1.1.8 |
 | Mensajes de error y qué hacer ante cada uno | Manual 1.1.9 |
-| Preguntas frecuentes | Manual 1.1.10 (FAQ) |
+| Preguntas frecuentes | Manual 1.1.10 (FAQ) y [`FAQ_Usuarios.md`](./FAQ_Usuarios.md) |
+| Guía rápida por rol | [`Guia_Rapida_Usuario.md`](./Guia_Rapida_Usuario.md) |
+| Entregable final consolidado | [`Entrega_Final_Capacitacion.md`](./Entrega_Final_Capacitacion.md) |
 | Guion de la sesión | [`Sesion_Simulada_Capacitacion.md`](./Sesion_Simulada_Capacitacion.md) |
 | Casos de aceptación | [`Pruebas_Aceptacion_Cliente_Simulado.md`](./Pruebas_Aceptacion_Cliente_Simulado.md) |
 
@@ -286,8 +288,10 @@ La capacitación se considera cumplida cuando existan:
 4. Resultados del cuestionario y de la práctica por rol.
 5. Casos de aceptación ejecutados y firmados.
 6. Informe final de verificación de calidad.
+7. Guía rápida probada por un compañero, con registro en [`Evidencias/Prueba_Guia_Rapida_2026-11-26.md`](./Evidencias/Prueba_Guia_Rapida_2026-11-26.md).
+8. Entregable final consolidado en [`Entrega_Final_Capacitacion.md`](./Entrega_Final_Capacitacion.md).
 
-Para autoformación se publican el manual de usuario, la FAQ y los mensajes de error; el usuario puede consultarlos sin acompañamiento del equipo.
+Para autoformación se publican el manual de usuario, la FAQ, la guía rápida y los mensajes de error; el usuario puede consultarlos sin acompañamiento del equipo.
 
 ---
 
