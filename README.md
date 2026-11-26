@@ -519,6 +519,7 @@ La arquitectura de LUBIX implementa medidas defensivas estándar de la industria
 | [Requisitos funcionales](Docs/RFs/) | Requisitos funcionales detallados |
 | [Requisitos no funcionales](Docs/RNFs/) | Tiempo de respuesta, concurrencia, seguridad, escalabilidad y más |
 | [Respaldo y restauración](Docs/Respaldo_v1_Operativo.md) | Respaldo cifrado y prueba de restauración de PostgreSQL (`scripts/pg_backup.py`) |
+| [Actualizaciones, soporte, monitoreo y capacitación](Docs/Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) | Plan operativo consolidado: versionado y despliegue, SLA de soporte, monitoreo y guía de capacitación de usuarios |
 
 ---
 

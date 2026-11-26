@@ -5,6 +5,7 @@
 **Criterios asociados:** T7-7 (capacitación y validación con cliente)
 **Fecha de elaboración:** 2026-11-22
 **Ejecución prevista:** 24 al 26 de noviembre de 2026
+**Documento marco:** [`Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md`](./Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) §5
 
 ---
 

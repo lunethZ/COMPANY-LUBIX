@@ -283,6 +283,7 @@ Escalamiento: incidencia → responsable del componente → revisión conjunta �
 
 ### 6.3 Capacitación y documentación
 
+- **Plan operativo consolidado:** [`Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md`](./Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) — actualizaciones, soporte (SLA y escalamiento), monitoreo y guía de capacitación para usuarios.
 - **Manual técnico y de usuario:** [`Docs/Manual Tecnico De Usuario/`](./Manual%20Tecnico%20De%20Usuario/).
 - **Operación y despliegue:** [`DEPLOYMENT.md`](./DEPLOYMENT.md) y [`monitoreo.md`](./monitoreo.md).
 - **Respaldos:** [`Respaldo_v1_Operativo.md`](./Respaldo_v1_Operativo.md).
