@@ -13,6 +13,7 @@ client = Minio(
     access_key=config.MINIO_ROOT_USER,
     secret_key=config.MINIO_ROOT_PASSWORD,
     secure=config.MINIO_SECURE,
+    region=config.MINIO_REGION or None,
 )
 
 bucket = config.MINIO_BUCKET
