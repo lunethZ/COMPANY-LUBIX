@@ -126,7 +126,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - name: Construir sin publicar
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./${{ matrix.component }}
           push: false
@@ -160,7 +160,7 @@ jobs:
           repository="${GITHUB_REPOSITORY,,}"
           echo "name=ghcr.io/${repository}-${COMPONENT}" >> "$GITHUB_OUTPUT"
       - name: Construir y publicar
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ./${{ matrix.component }}
           push: true
