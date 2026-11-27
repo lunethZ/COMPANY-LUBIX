@@ -256,7 +256,8 @@ def test_upload_stream_s3_error_devuelve_falso():
     result = ns.upload_stream(_archivo())
 
     assert result["success"] is False
-    assert "NoSuchKey" in result["message"]
+    assert result["code"] == "NoSuchKey"
+    assert result["message"] == "el objeto no existe"
 
 
 def test_upload_file_sin_archivo_devuelve_none():
@@ -277,7 +278,8 @@ def test_upload_file_s3_error_devuelve_falso():
     result = ns.upload_file(_archivo("report.pdf", "application/pdf"), PATH="users/1/")
 
     assert result["success"] is False
-    assert "NoSuchKey" in result["message"]
+    assert result["code"] == "NoSuchKey"
+    assert result["message"] == "el objeto no existe"
 
 
 def test_upload_file_error_inesperado_devuelve_falso():
