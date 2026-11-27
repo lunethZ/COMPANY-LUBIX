@@ -5,7 +5,6 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "../../context/ThemeContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useCheckout } from "../../context/CheckoutContext";
-import { useCart } from "../../context/CartContext";
 import { formatCOP } from "../../utils/format";
 import type { CheckoutStackParamList, RootStackParamList } from "../../navigation/types";
 
@@ -16,8 +15,7 @@ export default function ConfirmacionOrdenScreen() {
   const route = useRoute<Route>();
   const navigation = useNavigation<RootNav>();
   const { C } = useTheme();
-  const { total } = useCheckout();
-  const { totalItems } = useCart();
+  const { orderSummary } = useCheckout();
   const orderId = route.params.orderId;
 
   const goTo = (screen: "Perfil" | "Inicio") => () =>
@@ -49,11 +47,11 @@ export default function ConfirmacionOrdenScreen() {
           </View>
           <View style={styles.sumRow}>
             <Text style={{ color: C.textSecondary }}>Artículos</Text>
-            <Text style={{ color: C.text, fontWeight: "700" }}>{totalItems}</Text>
+            <Text style={{ color: C.text, fontWeight: "700" }}>{orderSummary.items}</Text>
           </View>
           <View style={[styles.sumRow, { borderTopWidth: 1, borderTopColor: C.border, paddingTop: 10 }]}>
             <Text style={{ color: C.text, fontSize: 16, fontWeight: "800" }}>Total</Text>
-            <Text style={{ color: C.accent, fontSize: 19, fontWeight: "900" }}>{formatCOP(total)}</Text>
+            <Text style={{ color: C.accent, fontSize: 19, fontWeight: "900" }}>{formatCOP(orderSummary.total)}</Text>
           </View>
         </View>
 
