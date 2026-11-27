@@ -70,19 +70,28 @@ La aplicación incluye autenticación, gestión de usuarios y empresas, un siste
 ```
 frontend/
 ├── src/
-│   ├── components/          Componentes reutilizables (navbar, etc.)
-│   ├── pages/                Páginas (login, registro, home...)
-│   ├── context/               Contexto de tema y autenticación
-│   ├── constants/             Variables globales
-│   ├── services/               Servicios HTTP (axios)
-│   ├── App.tsx                 Componente raíz con rutas
-│   ├── main.tsx                 Punto de entrada
-│   └── index.css                 Estilos globales y variables CSS
-├── public/
+│   ├── components/          Componentes reutilizables (navbar, cards...)
+│   ├── pages/               Páginas (login, registro, home...)
+│   ├── context/             Contexto de tema, autenticación y carrito
+│   ├── api/                 Cliente HTTP y servicios REST (axios)
+│   ├── hooks/               Hooks personalizados
+│   ├── utils/               Utilidades y formateadores
+│   ├── types/               Tipos de TypeScript
+│   ├── data/                Datos estáticos y catálogos de apoyo
+│   ├── mocks/               Mocks usados por las pruebas
+│   ├── test/                Configuración de Vitest
+│   ├── assets/              Recursos multimedia
+│   ├── App.tsx              Componente raíz con rutas
+│   ├── main.tsx             Punto de entrada
+│   └── index.css            Estilos globales y animaciones
+├── e2e/                     Pruebas end-to-end (Playwright)
+├── public/                  Archivos estáticos
 ├── package.json
 ├── vite.config.ts
+├── playwright.config.ts
 ├── tailwind.config.js
 ├── Dockerfile
+├── COVERAGE.md              Cobertura y umbrales
 └── README.md
 ```
 
@@ -455,6 +464,15 @@ function MiComponente() {
 | `npm run build` | Genera el build de producción en `dist/` |
 | `npm run preview` | Previsualiza el build de producción |
 | `npm run lint` | Verifica reglas de calidad de código |
+| `npm test` | Pruebas unitarias con Vitest |
+| `npm run test:coverage` | Pruebas unitarias con cobertura (v8) |
+| `npm run test:e2e` | Pruebas end-to-end con Playwright |
+
+### Pruebas
+
+- **Unitarias:** `npm test` ejecuta Vitest una vez; `npm run test:watch` queda en modo interactivo.
+- **Cobertura:** `npm run test:coverage` aplica los umbrales documentados en [COVERAGE.md](COVERAGE.md).
+- **E2E:** `npm run test:e2e` levanta la app con `npm run dev` (configurado en `playwright.config.ts`) y ejecuta los flujos de `e2e/`.
 
 ---
 
