@@ -94,18 +94,7 @@ Las actualizaciones que impliquen mantenimiento programado se anuncian con al me
 
 ### 2.6 Dependencias y vulnerabilidades
 
-La actualización de dependencias está automatizada con **Dependabot** en [`.github/dependabot.yml`](../.github/dependabot.yml). Cubre todos los ecosistemas del monorepo:
-
-| Ecosistema | Directorio | Qué actualiza | Cadencia | Límite de PRs abiertos |
-|---|---|---|---|---|
-| `pip` | `/backend` | `requirements.txt` | Semanal (lunes 06:00, America/Bogota) | 5 |
-| `npm` | `/frontend` | Web (React/Vite) | Semanal (lunes 06:00) | 5 |
-| `npm` | `/mobile` | App móvil (Expo) | Semanal (lunes 06:00) | 5 |
-| `github-actions` | `/` | Acciones de los workflows | Semanal (lunes 06:00) | 3 |
-| `docker` | `/`, `/backend`, `/frontend`, `/mobile` | Imágenes de Compose y Dockerfiles | Semanal (lunes 06:00) | 3 |
-
-- Las actualizaciones **patch** y **minor** llegan agrupadas en un solo PR por ecosistema; las **major** llegan individuales.
-- Cada PR de Dependabot ejecuta el mismo CI que cualquier cambio (§2.2): `ruff`, pruebas de repositorio, suite con cobertura ≥ 80 % y Quality Gate de SonarCloud.
+La revisión de dependencias es manual y planificada: cada semana se ejecuta `pip-audit` sobre `backend/requirements.txt` y `npm audit` sobre los lockfiles de web y móvil, y cada hallazgo se atiende como un PR normal (§2.2) con su prueba de regresión. Todo PR de actualización ejecuta el mismo CI que cualquier cambio: `ruff`, pruebas de repositorio, suite con cobertura ≥ 80 % y Quality Gate de SonarCloud.
 
 #### Política de fusión de PRs de dependencias
 
@@ -115,14 +104,14 @@ La actualización de dependencias está automatizada con **Dependabot** en [`.gi
 | Actualización mayor (cambio incompatible) | 30 días | Rama `deps/<paquete>-major`, suite completa y E2E en local, revisión de impacto y registro en el CHANGELOG |
 | Vulnerabilidad **crítica** (CVSS ≥ 9.0) | 72 horas | PR prioritario desde `fix/security-*`, parche mínimo, pruebas de regresión y despliegue; si no hay parche, aplicar mitigación y registrar el riesgo |
 | Vulnerabilidad **alta** (7.0–8.9) | 7 días | Igual que la anterior, revisando si la ruta afectada se usa en producción |
-| Vulnerabilidad **media** (4.0–6.9) | 30 días | Incluir en el lote semanal de Dependabot |
+| Vulnerabilidad **media** (4.0–6.9) | 30 días | Incluir en el lote semanal de dependencias |
 | Vulnerabilidad **baja** | Próximo ciclo | Incluir en el lote semanal |
 
 Reglas comunes:
 
 - Nunca se fusiona un PR de dependencias con CI o Quality Gate en rojo, ni se usan `--force` o `--no-verify`.
 - Si un PR no se puede fusionar dentro del plazo, se abre un issue con la justificación y la mitigación aplicada.
-- Las alertas de **Dependabot security updates** se revisan junto con los PRs semanales; una alerta crítica se notifica el mismo día al responsable de backend/calidad.
+- Las alertas de seguridad del repositorio se revisan junto con la auditoría semanal; una alerta crítica se notifica el mismo día al responsable de backend/calidad.
 
 #### Auditoría de vulnerabilidades (2026-11-26)
 
@@ -134,7 +123,7 @@ Herramientas: `pip-audit 2.10.1` sobre `backend/requirements.txt` y `npm audit` 
 | Web (npm) | 0 | 4 | 10 | 0 | `axios` (→ 1.21.1), `react-router-dom` (→ 7.18.7), `vite` (→ 8.4.0) y `postcss` (→ 8.5.33); el resto se resuelve con `npm audit fix` |
 | Móvil (npm) | 1 | 15 | 13 | 0 | `shell-quote 1.10.0` (inyección de comandos en `quote()`, herramienta transitiva del CLI de Expo, no del código que corre en el dispositivo) y 15 altas transitivas de Expo/Metro; hay corrección con `npm audit fix` salvo `expo`, que exige un salto mayor y se planifica aparte |
 
-Conclusión: no hay vulnerabilidades críticas explotables en el código desplegado (backend y web); la única crítica del móvil está en herramientas de compilación y tiene parche disponible. El riesgo residual de `python-jose`/`ecdsa` queda aceptado y documentado, y Dependabot mantendrá visibles las actualizaciones cuando se publiquen.
+Conclusión: no hay vulnerabilidades críticas explotables en el código desplegado (backend y web); la única crítica del móvil está en herramientas de compilación y tiene parche disponible. El riesgo residual de `python-jose`/`ecdsa` queda aceptado y documentado; la próxima auditoría se repite en cada release o ante un incidente de seguridad.
 
 ---
 
@@ -359,7 +348,7 @@ Para autoformación se publican el manual de usuario, la FAQ, la guía rápida y
 Este plan se considera completo cuando las cuatro secciones están incluidas y enlazadas:
 
 - [x] **Actualizaciones** documentadas (§2): versionado, ciclo, tipos, despliegue, rollback y comunicación.
-- [x] **Dependencias** documentadas (§2.6): Dependabot en todos los ecosistemas, política de fusión y auditoría de vulnerabilidades del 2026-11-26.
+- [x] **Dependencias** documentadas (§2.6): auditoría semanal, política de fusión y auditoría de vulnerabilidades del 2026-11-26.
 - [x] **Soporte** documentado (§3): canales, SLA, roles, escalamiento, flujo y ventanas.
 - [x] **Monitoreo** documentado (§4): señales, herramientas, umbrales, rutina e incidentes.
 - [x] **Guía de capacitación para usuarios** incluida (§5): perfiles, materiales, sesiones, práctica, evaluación y evidencias.
@@ -384,5 +373,6 @@ Este plan se considera completo cuando las cuatro secciones están incluidas y e
 
 | Versión | Fecha | Cambio | Autor |
 |---|---|---|---|
-| 1.1.0 | 2026-11-26 | Se agrega §2.6 Dependencias y vulnerabilidades: Dependabot, política de fusión de PRs y auditoría CVE | Equipo LUBIX |
+| 1.1.1 | 2026-11-26 | Se retira la automatización de dependencias; queda la auditoría semanal manual con su política de fusión | Equipo LUBIX |
+| 1.1.0 | 2026-11-26 | Se agrega §2.6 Dependencias y vulnerabilidades: política de fusión de PRs y auditoría CVE | Equipo LUBIX |
 | 1.0.0 | 2026-11-26 | Creación del plan con las secciones de actualizaciones, soporte, monitoreo y capacitación | Equipo LUBIX |
