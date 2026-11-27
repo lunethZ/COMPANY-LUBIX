@@ -2,6 +2,19 @@
 
 Registro de cambios del backend Lubix.
 
+## [1.0.0] - 2026-11
+
+### Added
+- Pipeline de integración continua (CI) en GitHub Actions con umbral de cobertura mínimo del 80 % (pytest), análisis estático en SonarCloud y escaneo de vulnerabilidades con Trivy.
+- Endpoints granulares de monitoreo y disponibilidad (/health, /health/database, /health/storage, /health/internet).
+- Soporte multiproveedor de correo transaccional con Brevo (principal), Resend (respaldo) y Gmail SMTP (contingencia).
+- Scripts de respaldo cifrado de PostgreSQL (scripts/pg_backup.py) y pruebas verificadas de restauración.
+- Roles de base de datos con principio de mínimo privilegio (scripts/seguridad/).
+- Pruebas end-to-end (E2E) con Playwright integradas al flujo de validación.
+
+### Fixed
+- Sincronización de puertos de despliegue local (8002 API, 5435 PostgreSQL, 9100/9101 MinIO) en docker-compose.yml y documentación.
+
 ## [1.1.1b] - 2026-02
 
 ### Added
@@ -22,7 +35,7 @@ Registro de cambios del backend Lubix.
 - Middleware de autenticación
 - Validación de inputs con Pydantic
 
-## [1.0.0] - 2026-02
+## [1.0.0-alpha] - 2026-02
 
 ### Added
 - Estructura inicial del proyecto

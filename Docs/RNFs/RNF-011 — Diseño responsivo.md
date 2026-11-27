@@ -8,7 +8,7 @@
 | Nombre | Diseño responsivo |
 | Categoría | Usabilidad |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -40,3 +40,11 @@ Probar la interfaz en cada breakpoint utilizando las herramientas de responsive 
 ### Dependencias
 - Tailwind CSS configurado con breakpoints personalizados
 - Testing en dispositivos reales o emuladores
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Diseño responsivo con Tailwind CSS verificado en pruebas E2E con Playwright | 2026-11-23 |

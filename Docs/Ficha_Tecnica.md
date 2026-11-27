@@ -7,18 +7,18 @@
 | Campo | Valor |
 |-------|-------|
 | Nombre del sistema | LUBIX — Plataforma de Gestión Empresarial |
-| Repositorio / módulo | Mobil Lubix Authentication |
-| Repositorio (URL) | https://github.com/RehnieyAl/lubix-company.git |
+| Repositorio / módulo | COMPANY-LUBIX (Web, Mobile & Backend) |
+| Repositorio (URL) | https://github.com/lunethZ/COMPANY-LUBIX.git |
 | Versión del sistema | 1.0.0 |
-| Versión Backend | 1.1.1b |
+| Versión Backend | 0.1.0 |
 | Versión Frontend | 0.0.0 |
-| Versión del documento | 0.1.0 (borrador) |
-| Estado | Borrador |
+| Versión del documento | 1.0.0 |
+| Estado | Vigente |
 | Fecha de creación | 2026-10-18 |
-| Última actualización | 2026-10-18 |
-| Autor(es) | <!-- TODO: nombre(s) del autor/responsable --> |
-| Revisado por | <!-- TODO --> |
-| Aprobado por | <!-- TODO --> |
+| Última actualización | 2026-11-27 |
+| Autor(es) | Equipo de Desarrollo LUBIX (Dev A, Dev B, Dev C, José Andrés Armenta Farías - Dev D) |
+| Revisado por | Equipo Técnico LUBIX / Instructor SENA |
+| Aprobado por | Equipo Técnico LUBIX / Instructor SENA |
 | Clasificación de la información | Interno |
 | Entornos cubiertos | Desarrollo · Staging · Producción |
 | Idioma | Español |
@@ -36,7 +36,7 @@ compartiendo la misma base de datos y almacenamiento de objetos.
 - **Base de datos:** PostgreSQL 16 (relacional).
 - **Almacenamiento de archivos:** MinIO (compatible con S3).
 - **Autenticación:** JWT + hash de contraseñas (bcrypt/argon2).
-- **Correo transaccional:** SMTP (Gmail).
+- **Correo transaccional:** API HTTP (Brevo como proveedor principal, Resend como respaldo primario) y SMTP (Gmail como respaldo secundario).
 
 ---
 
@@ -114,7 +114,7 @@ Componentes internos del backend: `routers/` (endpoints), `services/` (lógica d
 | MinIO | `minio/minio` | latest |
 | Contenedores | Docker + Docker Compose | v2 |
 | Gestor de deps (backend) | UV | — |
-| Gestor de deps (frontend) | npm | Node.js 18+ |
+| Gestor de deps (frontend) | npm | Node.js 20+ |
 
 ---
 

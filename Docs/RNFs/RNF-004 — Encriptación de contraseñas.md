@@ -8,7 +8,7 @@
 | Nombre | Encriptación de contraseñas |
 | Categoría | Security |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -40,3 +40,11 @@ Auditoría directa de la tabla de usuarios verificando que todos los hashes corr
 - Biblioteca bcrypt (passlib o equivalente)
 - Política de contraseñas definida en el backend
 - Tokens de recuperación con hash almacenado
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Hashing unidireccional con bcrypt/argon2 verificado en modelos y pruebas unitarias | 2026-11-23 |

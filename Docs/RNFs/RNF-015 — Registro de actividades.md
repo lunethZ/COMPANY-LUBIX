@@ -8,7 +8,7 @@
 | Nombre | Registro de actividades |
 | Categoría | Seguridad |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -41,3 +41,11 @@ Ejecutar peticiones API y verificar aparición en los logs con el formato correc
 - Sistema de logging configurado en FastAPI (structlog o similar)
 - Política de almacenamiento de logs definida
 - Mecanismo de rotación y limpieza de archivos de log
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Registro de auditoría de eventos y actividades en backend/app/docs/AUDITORIA.md | 2026-11-23 |

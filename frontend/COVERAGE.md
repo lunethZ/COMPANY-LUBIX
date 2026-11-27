@@ -13,7 +13,7 @@ npm run test:coverage  # pruebas + reporte de cobertura (carpeta coverage/)
 
 ## Cobertura actual
 
-Resultado de `npm run test:coverage` sobre la rama actual (30 archivos de prueba, 306 pruebas):
+Resultado de `npm run test:coverage` sobre la rama actual (45 archivos de prueba unitaria/integración en rontend/src):
 
 | Statements | Branches | Functions | Lines |
 | ---------- | -------- | --------- | ----- |

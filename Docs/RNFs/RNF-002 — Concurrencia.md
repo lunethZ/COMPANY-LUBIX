@@ -8,7 +8,7 @@
 | Nombre | Concurrencia |
 | Categoría | Scalability |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado (local) |
 
 ---
 
@@ -40,3 +40,10 @@ Pruebas de estrés con Locust simulando incremento progresivo de usuarios. Verif
 - PostgreSQL con configuración de max_connections adecuada
 - FastAPI con workers asíncronos (uvicorn)
 
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado (local) | Pruebas de carga y concurrencia básica en contenedor Docker Compose | 2026-11-24 |

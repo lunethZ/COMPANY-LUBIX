@@ -8,7 +8,7 @@
 | Nombre | Arquitectura modular |
 | Categoría | Mantenibilidad |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -42,3 +42,11 @@ Verificar que cada módulo backend tiene tests unitarios que se ejecutan de form
 - Estructura de directorios definida en el proyecto
 - Framework de testing configurado (pytest, Jest)
 - OpenAPI/Swagger habilitado en FastAPI
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Separación por capas (routers, services, models, schemas) validada en SonarCloud | 2026-11-23 |

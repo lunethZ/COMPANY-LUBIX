@@ -8,7 +8,7 @@
 | Nombre | Tiempo de respuesta |
 | Categoría | Performance |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | No conforme (en mejora) |
 
 ---
 
@@ -39,3 +39,11 @@ Pruebas de carga con herramientas como Locust o k6 midiendo percentiles P50, P95
 - PostgreSQL con índices optimizados
 - MinIO con almacenamiento en disco rápido
 - Infraestructura con ancho de banda suficiente
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| No conforme (en mejora) | Medición en Render: 605 ms promedio frente a meta de 200 ms (registrado en Informe Final de Calidad) | 2026-11-23 |

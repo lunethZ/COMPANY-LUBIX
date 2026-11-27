@@ -8,7 +8,7 @@
 | Nombre | Recuperación ante fallos |
 | Categoría | Disponibilidad |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -39,3 +39,11 @@ Simular caída de cada contenedor y verificar reconexión automática. Restaurar
 - Docker Engine con `restart: unless-stopped` configurado
 - Cron job o herramienta de backup para PostgreSQL
 - Servicio de monitoreo de contenedores operativo
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Simulacro de instalación y prueba de restauración cifrada (19/19 tablas OK) documentados en Evidencias | 2026-11-24 |
