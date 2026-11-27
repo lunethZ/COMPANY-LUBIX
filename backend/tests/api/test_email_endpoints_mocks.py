@@ -106,8 +106,46 @@ def test_register_company_sube_certificado_y_envia_correo(
     email_mocks.smtp.assert_not_called()
 
 
-def test_register_company_commit_fallido_devuelve_500(
-    client, seed, email_mocks, storage_mocks, monkeypatch
+def test_register_company_falla_si_el_certificado_no_se_sube(
+    client, seed, email_mocks, storage_mocks
+):
+    seed.roles("company")
+    storage_mocks.upload.return_value = {
+        "success": False,
+        "code": "AccessDenied",
+        "message": "Access Denied.",
+        "hint": "La Application Key necesita permiso Read and Write sobre el bucket.",
+    }
+
+    response = client.post(
+        "/auth/register-company",
+        data=COMPANY_FORM,
+        files=_company_files(),
+    )
+
+    assert response.status_code == 503
+    detail = response.json()["detail"]
+    assert "No se pudo guardar el certificado" in detail
+    assert "AccessDenied" in detail
+    assert "Application Key" in detail
+    email_mocks.company.assert_not_called()
+
+
+def test_register_company_datos_invalidos_devuelve_400_con_detalle(client, seed):
+    seed.roles("company")
+    data = {**COMPANY_FORM, "companyNIT": "12ab5"}
+
+    response = client.post(
+        "/auth/register-company",
+        data=data,
+        files=_company_files(),
+    )
+
+    assert response.status_code == 400
+    assert "solo números" in response.json()["detail"]
+
+
+def test_register_company_commit_fallido_devuelve_500(    client, seed, email_mocks, storage_mocks, monkeypatch
 ):
     seed.roles("company")
 
