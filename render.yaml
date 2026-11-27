@@ -72,7 +72,7 @@ services:
       - key: MINIO_SECURE
         value: "true"
       - key: MINIO_BUCKET
-        value: uploads
+        sync: false
       - key: MINIO_ROOT_USER
         sync: false
       - key: MINIO_ROOT_PASSWORD

@@ -68,6 +68,7 @@ class config():
     MINIO_SECURE = _env_bool("MINIO_SECURE", False)
     MINIO_BUCKET = os.getenv("MINIO_BUCKET", "uploads")
     MINIO_AUTO_CREATE_BUCKET = _env_bool("MINIO_AUTO_CREATE_BUCKET", True)
+    MINIO_REGION = os.getenv("MINIO_REGION")
 
     ADMIN_DEFAULT = os.getenv("ADMIN_DEFAULT")
     PASSWORD_DEFAULT = os.getenv("PASSWORD_DEFAULT")
