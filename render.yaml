@@ -73,6 +73,7 @@ services:
         value: "true"
       - key: MINIO_BUCKET
         sync: false
+      # Región S3: us-east-005 en B2, auto en R2, vacía en MinIO local.
       - key: MINIO_REGION
         sync: false
       - key: MINIO_ROOT_USER
@@ -81,9 +82,6 @@ services:
         sync: false
       - key: MINIO_AUTO_CREATE_BUCKET
         value: "false"
-      # "auto" para Cloudflare R2; vacío para MinIO propio.
-      - key: MINIO_REGION
-        sync: false
       - key: ADMIN_DEFAULT
         sync: false
       - key: PASSWORD_DEFAULT
