@@ -21,6 +21,18 @@ def _env_bool(name: str, default: bool = False) -> bool:
     return value.strip().lower() in {"1", "true", "yes", "on"}
 
 
+def _env_text(name: str, default: str = "") -> str:
+    return (os.getenv(name) or default).strip()
+
+
+def _normalize_endpoint(value: str) -> str:
+    """Acepta 'https://host:puerto/' y devuelve 'host:puerto'."""
+    endpoint = value.strip()
+    if "://" in endpoint:
+        endpoint = endpoint.split("://", 1)[1]
+    return endpoint.rstrip("/")
+
+
 class config():
     # URL_DATABASE es el nombre usado por el proyecto. DATABASE_URL se acepta
     # como alias para plataformas (Render, Heroku, etc.) que usan ese nombre.
@@ -64,11 +76,11 @@ class config():
 
     MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
     MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
-    MINIO_ENDPOINT = os.getenv("MINIO_ENDPOINT", "minio:9000")
+    MINIO_ENDPOINT = _normalize_endpoint(os.getenv("MINIO_ENDPOINT") or "minio:9000")
     MINIO_SECURE = _env_bool("MINIO_SECURE", False)
-    MINIO_BUCKET = os.getenv("MINIO_BUCKET", "uploads")
+    MINIO_BUCKET = _env_text("MINIO_BUCKET", "uploads") or "uploads"
     MINIO_AUTO_CREATE_BUCKET = _env_bool("MINIO_AUTO_CREATE_BUCKET", True)
-    MINIO_REGION = os.getenv("MINIO_REGION")
+    MINIO_REGION = _env_text("MINIO_REGION") or None
 
     ADMIN_DEFAULT = os.getenv("ADMIN_DEFAULT")
     PASSWORD_DEFAULT = os.getenv("PASSWORD_DEFAULT")

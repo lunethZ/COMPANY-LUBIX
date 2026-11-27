@@ -67,6 +67,7 @@ services:
         sync: false
       - key: RESEND_FROM_EMAIL
         value: "LUBIX <onboarding@resend.dev>"
+      # Host del proveedor S3, sin esquema (B2: s3.us-east-005.backblazeb2.com).
       - key: MINIO_ENDPOINT
         sync: false
       - key: MINIO_SECURE

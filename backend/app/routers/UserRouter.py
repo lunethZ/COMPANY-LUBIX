@@ -7,7 +7,7 @@ from app.models.ModelUser import Users
 from app.models.ModelAddress import Address
 from app.models.ModelOrder import Order, OrderItem
 from app.models.ModelProduct import Product
-from app.services.NasService import subir
+from app.services.NasService import subir, upload_error_detail
 from app.schemas.SchemaUser import (
     UpdateUserProfileRequest,
     ChangePasswordRequest,
@@ -249,7 +249,10 @@ def upload_avatar(request: Request, file: UploadFile = File(...), database: Sess
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     result = subir.upload_file(file, "avatars/")
     if not result or not result.get("success"):
-        raise HTTPException(status_code=500, detail="Error al subir avatar")
+        raise HTTPException(
+            status_code=500,
+            detail=upload_error_detail(result, "Error al subir avatar"),
+        )
     user.avatar = result["object_name"]
     database.commit()
     database.refresh(user)
@@ -262,7 +265,10 @@ def upload_banner(request: Request, file: UploadFile = File(...), database: Sess
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     result = subir.upload_file(file, "banners/")
     if not result or not result.get("success"):
-        raise HTTPException(status_code=500, detail="Error al subir banner")
+        raise HTTPException(
+            status_code=500,
+            detail=upload_error_detail(result, "Error al subir banner"),
+        )
     user.banner = result["object_name"]
     database.commit()
     database.refresh(user)

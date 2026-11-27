@@ -119,6 +119,8 @@ export default function BuyerDashboard() {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [addressForm, setAddressForm] = useState({ label: "", address: "", city: "", department: "", postal_code: "", is_default: false });
   const [profileMsg, setProfileMsg] = useState("");
+  const [imageMsg, setImageMsg] = useState("");
+  const [imageUploading, setImageUploading] = useState(false);
   const [passMsg, setPassMsg] = useState("");
   const [addressMsg, setAddressMsg] = useState("");
 
@@ -451,40 +453,45 @@ export default function BuyerDashboard() {
     })();
   }, [showProfileDrawer]);
 
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+    endpoint: "/user/avatar/upload" | "/user/banner/upload",
+    field: "avatarUrl" | "bannerUrl",
+  ) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setImageMsg("El archivo debe ser una imagen.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setImageMsg("La imagen no debe superar 5 MB.");
+      return;
+    }
     const fd = new FormData();
     fd.append("file", file);
+    setImageMsg("");
+    setImageUploading(true);
     try {
-      const res = await api.post("/user/avatar/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
-      const url = res.data?.url ? resolveFileUrl(res.data.url) : "";
-      setUserData(prev => ({ ...prev, avatarUrl: url || prev.avatarUrl }));
-      // actualizar AuthContext si es necesario
-      if (res.data?.avatar) {
-        const newUrl = resolveFileUrl(res.data.avatar);
-        setUserData(prev => ({ ...prev, avatarUrl: newUrl }));
-      }
+      const res = await api.post(endpoint, fd);
+      const uploaded = res.data?.url ?? res.data?.avatar ?? res.data?.banner;
+      const url = resolveFileUrl(uploaded);
+      setUserData(prev => ({ ...prev, [field]: url || prev[field] }));
+      setImageMsg("Imagen actualizada correctamente.");
       await fetchUserData();
     } catch (err) {
-      console.error("Error uploading avatar:", err);
+      setImageMsg(errorDetailMessage(err, "No se pudo subir la imagen"));
+    } finally {
+      setImageUploading(false);
     }
   };
 
-  const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const fd = new FormData();
-    fd.append("file", file);
-    try {
-      const res = await api.post("/user/banner/upload", fd, { headers: { "Content-Type": "multipart/form-data" } });
-      const url = res.data?.url ? resolveFileUrl(res.data.url) : "";
-      setUserData(prev => ({ ...prev, bannerUrl: url || prev.bannerUrl }));
-      await fetchUserData();
-    } catch (err) {
-      console.error("Error uploading banner:", err);
-    }
-  };
+  const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleImageUpload(e, "/user/avatar/upload", "avatarUrl");
+
+  const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) =>
+    handleImageUpload(e, "/user/banner/upload", "bannerUrl");
 
   const removeFavorite = async (productId: string) => {
     try {
@@ -527,7 +534,17 @@ export default function BuyerDashboard() {
 
         <div className="relative rounded-2xl p-8 mb-8 shadow-xl shadow-blue-500/20 overflow-hidden" style={userData.bannerUrl ? { backgroundImage: `url(${userData.bannerUrl})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: 'linear-gradient(to right, #2563eb, #16a34a)' }}>
           {userData.bannerUrl && <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>}
-          <label className="absolute bottom-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10">
+          {imageMsg && (
+            <p
+              role="status"
+              className={`absolute top-4 left-4 z-10 rounded-lg px-3 py-1.5 text-xs font-medium text-white ${
+                imageMsg.startsWith("Imagen actualizada") ? "bg-green-500/90" : "bg-red-500/90"
+              }`}
+            >
+              {imageMsg}
+            </p>
+          )}
+          <label className={`absolute bottom-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10 ${imageUploading ? "pointer-events-none opacity-60" : ""}`}>
             <CameraIcon className="w-4 h-4" />
             Cambiar banner
             <input type="file" accept="image/*" className="hidden" onChange={handleBannerUpload} />
@@ -541,7 +558,7 @@ export default function BuyerDashboard() {
                   {userData.avatar}
                 </div>
               )}
-              <label className="absolute bottom-0 right-0 w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center shadow-lg cursor-pointer transition">
+              <label className={`absolute bottom-0 right-0 w-8 h-8 bg-blue-500 hover:bg-blue-400 rounded-full flex items-center justify-center shadow-lg cursor-pointer transition ${imageUploading ? "pointer-events-none opacity-60" : ""}`}>
                 <PencilSquareIcon className="w-4 h-4 text-white" />
                 <input type="file" accept="image/*" className="hidden" onChange={handleAvatarUpload} />
               </label>

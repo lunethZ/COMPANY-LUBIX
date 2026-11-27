@@ -73,6 +73,47 @@ def test_health_internet_sin_conexion(client, internet_fail):
     assert response.json() == {"message": "No se pudo establecer conexión a Internet"}
 
 
+def test_health_storage_ok(client, monkeypatch):
+    monkeypatch.setattr(
+        "app.routers.HealthRouter.storage_status",
+        lambda: {
+            "configured": True,
+            "reachable": True,
+            "bucket_exists": True,
+            "endpoint": "s3.us-east-005.backblazeb2.com",
+            "bucket": "lubix",
+            "error_code": None,
+        },
+    )
+
+    response = client.get("/health/storage")
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert payload["status"] == "ok"
+    assert payload["bucket"] == "lubix"
+
+
+def test_health_storage_error_devuelve_503(client, monkeypatch):
+    monkeypatch.setattr(
+        "app.routers.HealthRouter.storage_status",
+        lambda: {
+            "configured": True,
+            "reachable": True,
+            "bucket_exists": False,
+            "endpoint": "s3.us-east-005.backblazeb2.com",
+            "bucket": "nombre-incorrecto",
+            "error_code": "NoSuchBucket",
+        },
+    )
+
+    response = client.get("/health/storage")
+
+    assert response.status_code == 503
+    assert response.json()["status"] == "error"
+    assert response.json()["error_code"] == "NoSuchBucket"
+
+
 def test_health_es_publico_no_requiere_token(client):
     """La middleware deja pasar /health sin Authorization."""
     assert client.get("/health/database").status_code == 200

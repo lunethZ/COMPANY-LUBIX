@@ -399,13 +399,13 @@ describe('DashboardUsuario', () => {
     apiMocks.post.mockResolvedValueOnce({ data: { url: 'users/banner-new.png' } });
     fireEvent.change(fileInputs[0], { target: { files: [new File(['x'], 'banner.png', { type: 'image/png' })] } });
     await waitFor(() => {
-      expect(apiMocks.post).toHaveBeenCalledWith('/user/banner/upload', expect.any(FormData), expect.anything());
+      expect(apiMocks.post).toHaveBeenCalledWith('/user/banner/upload', expect.any(FormData));
     });
 
     apiMocks.post.mockResolvedValueOnce({ data: { url: 'users/avatar-new.png' } });
     fireEvent.change(fileInputs[1], { target: { files: [new File(['x'], 'avatar.png', { type: 'image/png' })] } });
     await waitFor(() => {
-      expect(apiMocks.post).toHaveBeenCalledWith('/user/avatar/upload', expect.any(FormData), expect.anything());
+      expect(apiMocks.post).toHaveBeenCalledWith('/user/avatar/upload', expect.any(FormData));
     });
   });
 });

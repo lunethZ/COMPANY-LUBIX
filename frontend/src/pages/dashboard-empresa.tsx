@@ -231,6 +231,8 @@ export default function SellerDashboard() {
   const [logoUploading, setLogoUploading] = useState(false);
   const [logoError, setLogoError] = useState<string | null>(null);
   const [logoSuccess, setLogoSuccess] = useState<boolean | null>(null);
+  const [bannerError, setBannerError] = useState<string | null>(null);
+  const [bannerSuccess, setBannerSuccess] = useState<boolean | null>(null);
   
   const [form, setForm] = useState<ProductForm>(EMPTY_FORM);
   const [formErrors, setFormErrors] = useState<ProductFormErrors>({});
@@ -399,16 +401,23 @@ export default function SellerDashboard() {
 
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setLogoError("El archivo debe ser una imagen.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setLogoError("La imagen no debe superar 5 MB.");
+      return;
+    }
     setLogoUploading(true);
     setLogoError(null);
     setLogoSuccess(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const res = await api.patch("/company/dashboard/upload-logo", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await api.patch("/company/dashboard/upload-logo", formData);
       setLogoSuccess(true);
       setSellerInfo((prev) => ({ ...prev, logo: res.data.logo || null }));
       setTimeout(() => setLogoSuccess(null), 2000);
@@ -422,15 +431,27 @@ export default function SellerDashboard() {
 
   const handleBannerUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = "";
     if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      setBannerError("El archivo debe ser una imagen.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      setBannerError("La imagen no debe superar 5 MB.");
+      return;
+    }
+    setBannerError(null);
+    setBannerSuccess(null);
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const res = await api.patch("/company/dashboard/upload-banner", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+      const res = await api.patch("/company/dashboard/upload-banner", formData);
       setSellerInfo((prev) => ({ ...prev, banner: res.data.banner || null }));
+      setBannerSuccess(true);
+      setTimeout(() => setBannerSuccess(null), 2000);
     } catch (err: unknown) {
+      setBannerError(errorDetailMessage(err, "Error al subir el banner"));
       console.error("Error uploading banner:", err);
     }
   };
@@ -514,9 +535,7 @@ export default function SellerDashboard() {
   const uploadProductImage = async (file: File): Promise<string> => {
     const fd = new FormData();
     fd.append("file", file);
-    const res = await api.post("/company/products/upload-image", fd, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    const res = await api.post("/company/products/upload-image", fd);
     return res.data?.url || res.data?.path || "";
   };
 
@@ -815,6 +834,16 @@ export default function SellerDashboard() {
           style={sellerInfo.banner ? { backgroundImage: `url(${resolveImageUrl(sellerInfo.banner)})`, backgroundSize: 'cover', backgroundPosition: 'center' } : { background: 'linear-gradient(to right, #16a34a, #2563eb)' }}
         >
           {sellerInfo.banner && <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>}
+          {bannerError && (
+            <p role="alert" className="absolute top-4 left-4 z-10 rounded-lg bg-red-500/90 px-3 py-1.5 text-xs font-medium text-white">
+              {bannerError}
+            </p>
+          )}
+          {bannerSuccess && (
+            <p role="status" className="absolute top-4 left-4 z-10 rounded-lg bg-green-500/90 px-3 py-1.5 text-xs font-medium text-white">
+              Banner actualizado correctamente.
+            </p>
+          )}
           <label className="absolute bottom-4 right-4 bg-black/40 hover:bg-black/60 backdrop-blur-sm text-white px-3 py-1.5 rounded-full text-xs flex items-center gap-1.5 cursor-pointer transition border border-white/20 z-10">
             <CameraIcon className="w-4 h-4" />
             Cambiar banner
