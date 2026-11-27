@@ -11,7 +11,7 @@
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Publicación en Render con PostgreSQL en Neon/Supabase y almacenamiento S3 compatible (Cloudflare R2 y Backblaze B2) |
 | [Estrategia_Hosting_y_Dominio.md](Estrategia_Hosting_y_Dominio.md) | Opciones de hosting, dominio y costos |
 | [Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md](Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) | Plan operativo consolidado: versionado, soporte, monitoreo y capacitación |
-| [Plan_Mantenimiento_Infraestructura.md](Plan_Mantenimiento_Infraestructura.md) | Cronograma de mantenimiento, tabla EOL del stack, escaneo Trivy y parches automáticos |
+| [Plan_Mantenimiento_Infraestructura.md](Plan_Mantenimiento_Infraestructura.md) | Cronograma de mantenimiento, tabla EOL del stack, escaneo Trivy, parches automáticos y rutinas preventivas/correctivas (dependencias, respaldos, rotación de llaves, limpieza y verificación post-despliegue) |
 | [monitoreo.md](monitoreo.md) | Monitoreo de disponibilidad y salud del servicio |
 | [Respaldo_v1_Operativo.md](Respaldo_v1_Operativo.md) | Respaldo cifrado y restauración con `scripts/pg_backup.py` |
 | [Respaldo_v0.md](Respaldo_v0.md) | Versión inicial del plan de respaldos |
@@ -56,7 +56,7 @@
 | [Guia_Rapida_Usuario.md](Guia_Rapida_Usuario.md) | Pasos esenciales por rol |
 | [FAQ_Usuarios.md](FAQ_Usuarios.md) | Preguntas frecuentes consolidadas |
 | [Manual Tecnico De Usuario/](Manual%20Tecnico%20De%20Usuario/) | Manual técnico por capítulos |
-| [Plan_Capacitacion.md](Plan_Capacitacion.md) | Plan de capacitación por roles |
+| [Plan_Capacitacion.md](Plan_Capacitacion.md) | Plan de capacitación por roles, buenas prácticas de uso, errores comunes y rutina del administrador/operador |
 | [Sesion_Simulada_Capacitacion.md](Sesion_Simulada_Capacitacion.md) | Guion de la sesión de capacitación |
 | [Entrega_Final_Capacitacion.md](Entrega_Final_Capacitacion.md) | Entregable final: plan, guía, FAQ y evidencias |
 | [Ficha_Tecnica.md](Ficha_Tecnica.md) | Ficha técnica resumida del sistema |
