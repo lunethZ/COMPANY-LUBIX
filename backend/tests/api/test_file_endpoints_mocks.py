@@ -194,12 +194,12 @@ def test_get_file_invoca_mock_de_lectura(client, storage_mocks):
 
 
 def test_get_file_usa_el_bucket_configurado(client, storage_mocks):
-    with patch("app.services.NasService.subir.bucket", "lubix-uploads-prod"):
+    with patch("app.services.NasService.subir.bucket", "lubix-media"):
         response = client.get("/files/products/producto.jpg")
 
     assert response.status_code == 200
     storage_mocks.get_object.assert_called_once_with(
-        "lubix-uploads-prod", "products/producto.jpg"
+        "lubix-media", "products/producto.jpg"
     )
 
 

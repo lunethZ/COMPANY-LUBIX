@@ -5,6 +5,7 @@
 **Criterios asociados:** T7-7 (capacitación y validación con cliente)
 **Fecha de elaboración:** 2026-11-22
 **Ejecución prevista:** 24 al 26 de noviembre de 2026
+**Documento marco:** [`Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md`](./Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) §5
 
 ---
 
@@ -37,6 +38,28 @@ No incluye los requisitos fuera de alcance de esta entrega (inicio de sesión co
 
 ## 4. Objetivos de aprendizaje por rol
 
+### 4.1 Módulos por rol
+
+| Módulo | Contenido | Usuario final | Empresa | Administrador | Mesa de ayuda | Duración |
+|---|---|---|---|---|---|---|
+| M1. Acceso y cuenta | Pestañas, verificación, recuperación y contraseña | ✅ | ✅ | ✅ | ✅ | 20 min |
+| M2. Compra | Catálogo, carrito, checkout y pedido | ✅ | — | — | ✅ | 40 min |
+| M3. Pedidos y PQRS | Mis pedidos, PQRS y seguimiento | ✅ | ✅ | ✅ | ✅ | 30 min |
+| M4. Panel de empresa | Productos, pedidos, estadísticas y perfil | — | ✅ | — | ✅ | 40 min |
+| M5. Administración | Empresas, usuarios, PQRS y resumen | — | — | ✅ | ✅ | 40 min |
+| M6. Mesa de ayuda | Triage, severidad, evidencia y escalamiento | — | — | — | ✅ | 30 min |
+
+**Rutas sugeridas:**
+
+- Usuario final: M1 → M2 → M3.
+- Empresa: M1 → M3 → M4.
+- Administrador: M1 → M3 → M5.
+- Mesa de ayuda: M1 → M6.
+
+La guía rápida de cada módulo está en [`Guia_Rapida_Usuario.md`](./Guia_Rapida_Usuario.md) y las dudas frecuentes en [`FAQ_Usuarios.md`](./FAQ_Usuarios.md).
+
+### 4.2 Objetivos de aprendizaje por rol
+
 **Usuario Final**
 
 1. Ingresar por la pestaña **Usuario** y reconocer cuándo debe usar **Empresa**.
@@ -65,7 +88,9 @@ No incluye los requisitos fuera de alcance de esta entrega (inicio de sesión co
 | Funciones de Usuario, Empresa y Administrador | Manual 1.1.7 |
 | Canal de soporte, tiempos de atención y escalamiento | Manual 1.1.8 |
 | Mensajes de error y qué hacer ante cada uno | Manual 1.1.9 |
-| Dudas frecuentes | Manual 1.1.10 (FAQ) |
+| Dudas frecuentes | Manual 1.1.10 (FAQ) y [`FAQ_Usuarios.md`](./FAQ_Usuarios.md) |
+| Guía rápida por rol | [`Guia_Rapida_Usuario.md`](./Guia_Rapida_Usuario.md) |
+| Entregable final consolidado | [`Entrega_Final_Capacitacion.md`](./Entrega_Final_Capacitacion.md) |
 | Guion de la sesión | `Docs/Sesion_Simulada_Capacitacion.md` |
 | Casos de aceptación | `Docs/Pruebas_Aceptacion_Cliente_Simulado.md` |
 
@@ -129,6 +154,8 @@ La capacitación se considera cumplida cuando existan:
 4. Resultados del cuestionario y de la práctica por rol.
 5. Casos de aceptación ejecutados y firmados.
 6. Informe final de verificación de calidad con los resultados consolidados.
+7. Guía rápida probada por un compañero, con registro en [`Evidencias/Prueba_Guia_Rapida_2026-11-26.md`](./Evidencias/Prueba_Guia_Rapida_2026-11-26.md).
+8. Entregable final consolidado en [`Entrega_Final_Capacitacion.md`](./Entrega_Final_Capacitacion.md).
 
 ## 11. Riesgos y contingencias
 

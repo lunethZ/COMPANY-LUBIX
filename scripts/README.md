@@ -1,10 +1,19 @@
-# Scripts de respaldo — LUBIX
+# Scripts operativos — LUBIX
 
-Herramienta operativa para respaldar, cifrar, restaurar y **probar** PostgreSQL.
+Herramientas de operación: respaldo cifrado de PostgreSQL y creación de roles con mínimo privilegio.
 
-- Código: [`pg_backup.py`](./pg_backup.py)
+- Respaldo: [`pg_backup.py`](./pg_backup.py)
 - Guía completa: [`Docs/Respaldo_v1_Operativo.md`](../Docs/Respaldo_v1_Operativo.md)
 - Evidencia de prueba: [`Docs/Evidencias/Prueba_Restauracion_2026-11-19.md`](../Docs/Evidencias/Prueba_Restauracion_2026-11-19.md)
+
+## Roles de PostgreSQL
+
+| Archivo | Uso |
+|---|---|
+| [`seguridad/roles_postgresql.sql`](./seguridad/roles_postgresql.sql) | PostgreSQL propio (Docker/local): crea `lubix_owner` (DDL/migraciones), `lubix_app` (solo DML para la API) y `lubix_backup` (solo lectura para respaldos) |
+| [`seguridad/roles_postgresql_neon.sql`](./seguridad/roles_postgresql_neon.sql) | Neon: conserva el rol dueño del proyecto y crea solo `lubix_app` y `lubix_backup`; requiere reemplazar los placeholders de contraseña |
+
+Ambos scripts son idempotentes y se ejecutan con el rol administrador correspondiente. El procedimiento completo está en [`Docs/Seguridad_Servidor.md`](../Docs/Seguridad_Servidor.md).
 
 ## Requisitos
 

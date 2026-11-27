@@ -57,6 +57,9 @@ src/navigation/            RootStack, MainTabs (5 tabs), CheckoutStack (4 pasos)
 src/screens/               Pantallas públicas, usuario y checkout
 src/components/            ProductCard, AppHeader, CheckoutHeader, ui
 src/store/secureStore.ts   Tokens/sesión persistidos en AsyncStorage
+src/constants/             Paleta de colores y textos del comercio
 src/utils/                 formatCOP, categorías (emoji), eventos de auth
 src/types/                 Tipos de producto, usuario, carrito y pedido
+.env.example               Plantilla de EXPO_PUBLIC_API_URL
+Dockerfile                 Imagen de la app
 ```
