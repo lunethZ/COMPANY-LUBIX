@@ -231,7 +231,7 @@ const ProductoDetalle: React.FC = () => {
         },
         quantity
       );
-      navigate("/pago");
+      await navigate("/pago");
     } finally {
       setBuying(false);
     }
