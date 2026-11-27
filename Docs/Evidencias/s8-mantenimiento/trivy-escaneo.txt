@@ -1,0 +1,45 @@
+# Escaneo de imágenes con Trivy — 2026-11-26
+
+Comando equivalente al job `Security scan` de `.github/workflows/security.yml`:
+
+```bash
+docker build -t lubix-backend:scan backend
+docker build -t lubix-frontend:scan frontend
+docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest \
+  image --severity CRITICAL,HIGH --ignore-unfixed --no-progress lubix-backend:scan
+docker run --rm -v //var/run/docker.sock:/var/run/docker.sock aquasec/trivy:latest \
+  image --severity CRITICAL,HIGH --ignore-unfixed --no-progress lubix-frontend:scan
+```
+
+## Resultados (herramientas y bibliotecas, solo con parche disponible)
+
+| Imagen | Base | CRITICAL | HIGH | ¿Gate CRITICAL? |
+|---|---|---|---|---|
+| `lubix-backend` | Debian 13 (trixie) · Python 3.13 | 0 | 6 (1 SO + 5 Python) | Pasa |
+| `lubix-frontend` | Alpine 3.23 · Node 20 | 1 (exceptuado) | 39 (7 SO + 32 Node) | Pasa con `.trivyignore` |
+
+Salida del gate (`--severity CRITICAL --ignorefile .trivyignore --exit-code 1`):
+
+```
+lubix-backend:scan  gate-exit: 0
+lubix-frontend:scan gate-exit: 0
+```
+
+Sin el archivo de excepciones el frontend devuelve `exit 1` por:
+
+```
+tar 6.2.1 (node-pkg) — CVE-2026-59873 — CRITICAL — corregido en 7.5.19
+tar: node-tar: Denial of Service via crafted gzip bomb
+```
+
+Esa versión de `tar` viene empaquetada en la imagen base `node:20-alpine` (EOL desde
+2026-04-30); se elimina de `.trivyignore` cuando el Dockerfile del frontend migre a
+Node 24 LTS (acción registrada en `Docs/Plan_Mantenimiento_Infraestructura.md` §2).
+
+## Vulnerabilidades HIGH de referencia
+
+- Backend: `msgpack 1.1.2` (2 CVEs), `setuptools 70.3.0`, `urllib3 2.7.0` (2 CVEs) y 1 en el SO base.
+- Frontend: `tar` (5 CVEs), `vite 8.0.14` (CVE-2026-112942), dependencias de desarrollo del árbol npm y 7 en Alpine.
+
+Las HIGH no bloquean el pipeline: se registran en SARIF (pestaña Security) y en el
+artefacto `trivy-<componente>`, y se atienden dentro del ciclo mensual.
