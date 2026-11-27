@@ -8,7 +8,7 @@
 | Nombre | Protección contra ataques |
 | Categoría | Security |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado (parcial) |
 
 ---
 
@@ -29,8 +29,8 @@ Prevenir las vulnerabilidades OWASP Top 10 mediante controles técnicos en el ba
 |----------|---------------|
 | SQL Injection | Prevenido via SQLAlchemy ORM (parametrización automática) |
 | XSS (Cross-Site Scripting) | Sanitización de entradas y salidas en React |
-| CSRF | Tokens de protección en formularios |
-| Rate limiting | Implementado en FastAPI (slowapi o equivalente) |
+| CSRF | No aplica (arquitectura stateless con JWT en cabecera Authorization: Bearer, sin cookies de sesión automáticas) |
+| Rate limiting | Mitigación perimetral recomendada en proxy inverso / plataforma cloud (pendiente middleware nativo en API) |
 | Validación de entradas | Pydantic schemas en todos los endpoints |
 
 ### Estrategia de validación
@@ -41,3 +41,11 @@ Pruebas de seguridad automatizadas (OWASP ZAP, Bandit). Revisiones de código en
 - Pydantic para validación de esquemas
 - slowapi o equivalente para rate limiting
 - CORS configurado correctamente en FastAPI
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado (parcial) | ORM SQLAlchemy, validación Pydantic, CORS restringido y escaneo Trivy en CI; rate limiting nativo como deuda técnica | 2026-11-27 |

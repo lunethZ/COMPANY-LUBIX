@@ -41,7 +41,7 @@ assignees: ""
 
 ## Requisito relacionado
 
-<!-- Ejemplo: RF-050, RNF-001 -->
+<!-- Ejemplo: RF-042, RNF-001 -->
 
 ## Criterio de cierre
 

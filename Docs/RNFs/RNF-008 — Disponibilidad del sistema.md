@@ -8,7 +8,7 @@
 | Nombre | Disponibilidad del sistema |
 | Categoría | Availability |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -28,7 +28,7 @@ El sistema debe estar disponible al menos el 99.5% del tiempo en un período men
 | Criterio | Valor objetivo |
 |----------|---------------|
 | Uptime mensual | >= 99.5% |
-| Endpoints de health check | /health y /readiness disponibles |
+| Endpoints de health check | /health, /health/database, /health/storage y /health/internet operativos |
 | Manejo de errores | Errores 500 devuelven respuesta graceful |
 | Reinicio automático | Docker restart policy: always |
 | Tiempo de recuperación ante caída | < 2 minutos |
@@ -40,3 +40,11 @@ Monitoreo continuo con herramientas como UptimeRobot o Prometheus Alertmanager. 
 - Docker con restart policy configurada
 - Health check endpoints implementados en FastAPI
 - Monitoreo de infraestructura activo
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Endpoints /health, /health/database, /health/storage y /health/internet activos + políticas restart en Docker | 2026-11-27 |

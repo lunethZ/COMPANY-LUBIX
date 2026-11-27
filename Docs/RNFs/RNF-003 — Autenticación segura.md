@@ -8,7 +8,7 @@
 | Nombre | Autenticación segura |
 | Categoría | Security |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -40,3 +40,11 @@ Revisiones de seguridad periódicas. Verificación de que no existan contraseña
 - Biblioteca bcrypt para hashing
 - JWT (PyJWT o python-jose) para tokens
 - Certificado SSL/TLS configurado en el servidor de producción
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Autenticación JWT con expiración y refresh token verificada por suite pytest | 2026-11-23 |

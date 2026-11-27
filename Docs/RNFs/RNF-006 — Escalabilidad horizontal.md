@@ -8,7 +8,7 @@
 | Nombre | Escalabilidad horizontal |
 | Categoría | Scalability |
 | Prioridad | Media |
-| Estado | Definido |
+| Estado | Verificado (arquitectura) |
 
 ---
 
@@ -41,3 +41,11 @@ Despliegue de al menos 2 instancias del backend detrás de un load balancer. Ver
 - PostgreSQL con soporte de réplicas
 - MinIO configurado en modo distribuido
 - Variables de entorno centralizadas (sin estado local)
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado (arquitectura) | Backend stateless contenedorizado preparado para réplicas horizontales | 2026-11-24 |

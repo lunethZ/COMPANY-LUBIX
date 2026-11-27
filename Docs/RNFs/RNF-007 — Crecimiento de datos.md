@@ -8,7 +8,7 @@
 | Nombre | Crecimiento de datos |
 | Categoría | Maintainability |
 | Prioridad | Media |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -40,3 +40,11 @@ Pruebas de volumen con datasets grandes. Monitoreo de tiempos de consulta en ent
 - PostgreSQL con estrategia de indexación definida
 - MinIO para almacenamiento escalable de archivos
 - Estrategia de retención y archivado de datos
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Esquema relacional PostgreSQL 16 con índices y migraciones Alembic | 2026-11-24 |

@@ -8,7 +8,7 @@
 | Nombre | Facilidad de uso |
 | Categoría | Usabilidad |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -40,3 +40,11 @@ Realizar pruebas de usabilidad con usuarios reales en los tres tamaños de panta
 - Framework CSS responsivo configurado (Tailwind)
 - Variables CSS para temas oscuro/claro
 - Componentes de formulario reutilizables
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Validación funcional con pruebas de aceptación PA-01 a PA-06 y sesión de capacitación | 2026-11-26 |

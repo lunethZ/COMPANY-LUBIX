@@ -1,6 +1,6 @@
 # Estrategia de hosting y dominio
 
-Tarea S3. Define dónde se aloja Lubix, con qué dominio se publica y cómo se obtiene HTTPS. También deja registrado dónde vive el umbral de cobertura del CI (50 % backend, 40 % frontend).
+Tarea S3 (documento histórico de diseño inicial). Define la estrategia de alojamiento con Caddy + DuckDNS y el umbral inicial de cobertura del CI (50 % backend, 40 % frontend), el cual fue elevado posteriormente al **80 % vigente** en ackend/pyproject.toml, rontend/vite.config.ts y .github/workflows/ci.yml.
 
 ## 1. Punto de partida
 

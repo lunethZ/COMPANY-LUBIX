@@ -8,7 +8,7 @@
 | Nombre | Compatibilidad móvil |
 | Categoría | Portabilidad |
 | Prioridad | Alta |
-| Estado | Definido |
+| Estado | Verificado (compilación) |
 
 ---
 
@@ -41,3 +41,11 @@ Compilar y ejecutar la app en dispositivos iOS y Android reales o emuladores. Ej
 - Entorno de desarrollo React Native/Expo configurado
 - API REST compatible con múltiples clientes
 - Dispositivos o emuladores para pruebas
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado (compilación) | Cliente móvil Expo SDK 54 / React Native sincronizado con la API REST | 2026-11-24 |

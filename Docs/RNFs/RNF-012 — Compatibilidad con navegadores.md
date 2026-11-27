@@ -8,7 +8,7 @@
 | Nombre | Compatibilidad con navegadores |
 | Categoría | Portabilidad |
 | Prioridad | Media |
-| Estado | Definido |
+| Estado | Verificado |
 
 ---
 
@@ -40,3 +40,11 @@ Ejecutar suite de pruebas automatizadas (Playwright o Cypress) en los 4 navegado
 ### Dependencias
 - Herramienta de testing automatizado de navegadores configurada
 - Polyfills para funcionalidades no soportadas en versiones anteriores
+
+---
+
+## Estado de verificación
+
+| Estado actual | Método / Evidencia | Fecha |
+|---------------|--------------------|-------|
+| Verificado | Pruebas automatizadas en Chromium/Firefox/WebKit mediante Playwright | 2026-11-23 |
