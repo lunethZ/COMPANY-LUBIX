@@ -92,6 +92,50 @@ El pipeline vive en [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) y 
 
 Las actualizaciones que impliquen mantenimiento programado se anuncian con al menos **48 horas** de anticipación y se ejecutan en ventana de baja actividad (ver §3.6).
 
+### 2.6 Dependencias y vulnerabilidades
+
+La actualización de dependencias está automatizada con **Dependabot** en [`.github/dependabot.yml`](../.github/dependabot.yml). Cubre todos los ecosistemas del monorepo:
+
+| Ecosistema | Directorio | Qué actualiza | Cadencia | Límite de PRs abiertos |
+|---|---|---|---|---|
+| `pip` | `/backend` | `requirements.txt` | Semanal (lunes 06:00, America/Bogota) | 5 |
+| `npm` | `/frontend` | Web (React/Vite) | Semanal (lunes 06:00) | 5 |
+| `npm` | `/mobile` | App móvil (Expo) | Semanal (lunes 06:00) | 5 |
+| `github-actions` | `/` | Acciones de los workflows | Semanal (lunes 06:00) | 3 |
+| `docker` | `/`, `/backend`, `/frontend`, `/mobile` | Imágenes de Compose y Dockerfiles | Semanal (lunes 06:00) | 3 |
+
+- Las actualizaciones **patch** y **minor** llegan agrupadas en un solo PR por ecosistema; las **major** llegan individuales.
+- Cada PR de Dependabot ejecuta el mismo CI que cualquier cambio (§2.2): `ruff`, pruebas de repositorio, suite con cobertura ≥ 80 % y Quality Gate de SonarCloud.
+
+#### Política de fusión de PRs de dependencias
+
+| Escenario | Plazo máximo | Procedimiento |
+|---|---|---|
+| Parche o menor sin cambios de contrato | 7 días | Revisar las notas del paquete; si CI y Quality Gate están verdes, fusionar a `Develop` y luego `Develop → main` con smoke test |
+| Actualización mayor (cambio incompatible) | 30 días | Rama `deps/<paquete>-major`, suite completa y E2E en local, revisión de impacto y registro en el CHANGELOG |
+| Vulnerabilidad **crítica** (CVSS ≥ 9.0) | 72 horas | PR prioritario desde `fix/security-*`, parche mínimo, pruebas de regresión y despliegue; si no hay parche, aplicar mitigación y registrar el riesgo |
+| Vulnerabilidad **alta** (7.0–8.9) | 7 días | Igual que la anterior, revisando si la ruta afectada se usa en producción |
+| Vulnerabilidad **media** (4.0–6.9) | 30 días | Incluir en el lote semanal de Dependabot |
+| Vulnerabilidad **baja** | Próximo ciclo | Incluir en el lote semanal |
+
+Reglas comunes:
+
+- Nunca se fusiona un PR de dependencias con CI o Quality Gate en rojo, ni se usan `--force` o `--no-verify`.
+- Si un PR no se puede fusionar dentro del plazo, se abre un issue con la justificación y la mitigación aplicada.
+- Las alertas de **Dependabot security updates** se revisan junto con los PRs semanales; una alerta crítica se notifica el mismo día al responsable de backend/calidad.
+
+#### Auditoría de vulnerabilidades (2026-11-26)
+
+Herramientas: `pip-audit 2.10.1` sobre `backend/requirements.txt` y `npm audit` sobre `frontend/package-lock.json` y `mobile/package-lock.json`.
+
+| Ecosistema | Críticas | Altas | Medias | Bajas | Detalle y mitigación |
+|---|---|---|---|---|---|
+| Backend (pip) | 0 | 1 | 1 | 0 | `python-jose 3.5.0` (PYSEC-2026-4298 / CVE-2024-33663, confusión de algoritmos, sin parche publicado) y `ecdsa 0.19.2` (PYSEC-2026-1325, ataque de tiempo sobre P-256). Mitigación: los tokens se firman y verifican solo con `HS256` y `algorithms=[ALGORITHM]` explícito en `JWTService.verify_token`, así que no se aceptan claves asimétricas ni se usa la ruta ECDSA |
+| Web (npm) | 0 | 4 | 10 | 0 | `axios` (→ 1.21.1), `react-router-dom` (→ 7.18.7), `vite` (→ 8.4.0) y `postcss` (→ 8.5.33); el resto se resuelve con `npm audit fix` |
+| Móvil (npm) | 1 | 15 | 13 | 0 | `shell-quote 1.10.0` (inyección de comandos en `quote()`, herramienta transitiva del CLI de Expo, no del código que corre en el dispositivo) y 15 altas transitivas de Expo/Metro; hay corrección con `npm audit fix` salvo `expo`, que exige un salto mayor y se planifica aparte |
+
+Conclusión: no hay vulnerabilidades críticas explotables en el código desplegado (backend y web); la única crítica del móvil está en herramientas de compilación y tiene parche disponible. El riesgo residual de `python-jose`/`ecdsa` queda aceptado y documentado, y Dependabot mantendrá visibles las actualizaciones cuando se publiquen.
+
 ---
 
 ## 3. Soporte
@@ -315,6 +359,7 @@ Para autoformación se publican el manual de usuario, la FAQ, la guía rápida y
 Este plan se considera completo cuando las cuatro secciones están incluidas y enlazadas:
 
 - [x] **Actualizaciones** documentadas (§2): versionado, ciclo, tipos, despliegue, rollback y comunicación.
+- [x] **Dependencias** documentadas (§2.6): Dependabot en todos los ecosistemas, política de fusión y auditoría de vulnerabilidades del 2026-11-26.
 - [x] **Soporte** documentado (§3): canales, SLA, roles, escalamiento, flujo y ventanas.
 - [x] **Monitoreo** documentado (§4): señales, herramientas, umbrales, rutina e incidentes.
 - [x] **Guía de capacitación para usuarios** incluida (§5): perfiles, materiales, sesiones, práctica, evaluación y evidencias.
@@ -339,4 +384,5 @@ Este plan se considera completo cuando las cuatro secciones están incluidas y e
 
 | Versión | Fecha | Cambio | Autor |
 |---|---|---|---|
+| 1.1.0 | 2026-11-26 | Se agrega §2.6 Dependencias y vulnerabilidades: Dependabot, política de fusión de PRs y auditoría CVE | Equipo LUBIX |
 | 1.0.0 | 2026-11-26 | Creación del plan con las secciones de actualizaciones, soporte, monitoreo y capacitación | Equipo LUBIX |
