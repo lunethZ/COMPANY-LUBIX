@@ -19,7 +19,7 @@ def get_file(file_path: str):
         ctype, _ = mimetypes.guess_type(file_path)
         if not ctype:
             ctype = "application/octet-stream"
-        response = subir.client.get_object("uploads", file_path)
+        response = subir.client.get_object(subir.bucket, file_path)
         data = response.read()
         return StreamingResponse(
             iter([data]),
