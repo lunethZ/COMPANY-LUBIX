@@ -8,7 +8,7 @@
 
 | Documento | Contenido |
 |---|---|
-| [DEPLOYMENT.md](DEPLOYMENT.md) | Publicación en Render con PostgreSQL en Neon/Supabase y almacenamiento S3 compatible (incluye Cloudflare R2) |
+| [DEPLOYMENT.md](DEPLOYMENT.md) | Publicación en Render con PostgreSQL en Neon/Supabase y almacenamiento S3 compatible (Cloudflare R2 y Backblaze B2) |
 | [Estrategia_Hosting_y_Dominio.md](Estrategia_Hosting_y_Dominio.md) | Opciones de hosting, dominio y costos |
 | [Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md](Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) | Plan operativo consolidado: versionado, soporte, monitoreo y capacitación |
 | [monitoreo.md](monitoreo.md) | Monitoreo de disponibilidad y salud del servicio |
