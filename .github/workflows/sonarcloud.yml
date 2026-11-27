@@ -54,7 +54,7 @@ jobs:
           sed -i -E 's|^SF:(.*/)?frontend/src/|SF:frontend/src/|; s|^SF:(\./)?src/|SF:frontend/src/|' frontend/coverage/lcov.info
 
       - name: Configurar Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.13"
           cache: pip
