@@ -1,0 +1,32 @@
+# Prueba de unattended-upgrades — 2026-11-26 22:16
+# Contenedor Debian 13 (trixie-slim) con la configuración de deploy/unattended-upgrades
+SO: Debian GNU/Linux 13 (trixie)
+
+== APT::Periodic ==
+APT::Periodic "";
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";
+
+== unattended-upgrade --dry-run --debug ==
+loading plugins from ['/etc/unattended-upgrades/plugins/', '/usr/share/unattended-upgrades/plugins']
+Checking if system is running on battery is skipped. Please install powermgmt-base package to check power status and skip installing updates when the system is running on battery.
+Starting unattended upgrades script
+Allowed origins are: o=Debian,a=trixie, o=Debian,a=trixie-security, o=Debian,a=trixie-updates, o=DebianESMApps,a=trixie-apps-security, o=DebianESM,a=trixie-infra-security
+Initial blacklist: 
+Initial whitelist (not strict): 
+Using (^linux-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^kfreebsd-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^gnumach-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-modules-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-kernel-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^linux-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^kfreebsd-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^gnumach-.*-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-modules-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$|^.*-kernel-[1-9][0-9]*\.[0-9]+\.[0-9]+-[0-9]+(-.+)?$) regexp to find kernel packages
+Using (^linux-.*-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^kfreebsd-.*-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^gnumach-.*-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^.*-modules-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^.*-kernel-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^linux-.*-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^kfreebsd-.*-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^gnumach-.*-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^.*-modules-6\.18\.33\.1\-microsoft\-standard\-WSL2$|^.*-kernel-6\.18\.33\.1\-microsoft\-standard\-WSL2$) regexp to find running kernel packages
+Checking: libzstd1=1.5.7+dfsg-1+deb13u1 ([<Origin component:'main' archive:'stable-security' origin:'Debian' label:'Debian-Security' site:'deb.debian.org' isTrusted:True>])
+adjusting candidate to version libzstd1=1.5.7+dfsg-1 in allowed origin [<Origin component:'main' archive:'stable' origin:'Debian' label:'Debian' site:'deb.debian.org' isTrusted:True>, <Origin component:'now' archive:'now' origin:'' label:'' site:'' isTrusted:False>]
+Checking: login.defs=1:4.17.4-2+deb13u1 ([<Origin component:'main' archive:'stable-security' origin:'Debian' label:'Debian-Security' site:'deb.debian.org' isTrusted:True>])
+adjusting candidate to version login.defs=1:4.17.4-2 in allowed origin [<Origin component:'main' archive:'stable' origin:'Debian' label:'Debian' site:'deb.debian.org' isTrusted:True>, <Origin component:'now' archive:'now' origin:'' label:'' site:'' isTrusted:False>]
+Checking: passwd=1:4.17.4-2+deb13u1 ([<Origin component:'main' archive:'stable-security' origin:'Debian' label:'Debian-Security' site:'deb.debian.org' isTrusted:True>])
+adjusting candidate to version passwd=1:4.17.4-2 in allowed origin [<Origin component:'main' archive:'stable' origin:'Debian' label:'Debian' site:'deb.debian.org' isTrusted:True>, <Origin component:'now' archive:'now' origin:'' label:'' site:'' isTrusted:False>]
+pkgs that look like they should be upgraded: 
+Fetched 0 B in 0s (0 B/s)                                                       
+fetch.run() result: 0
+Packages blacklist due to conffile prompts: []
+No packages found that can be upgraded unattended and no pending auto-removals
+The list of kept packages can't be calculated in dry-run mode.
+upgrade result: True No packages found that can be upgraded unattended and no pending auto-removals

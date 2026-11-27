@@ -1,0 +1,5 @@
+// Activa la actualización periódica de índices y la instalación automática de
+// parches de seguridad (unattended-upgrades).
+APT::Periodic::Update-Package-Lists "1";
+APT::Periodic::Unattended-Upgrade "1";
+APT::Periodic::AutocleanInterval "7";

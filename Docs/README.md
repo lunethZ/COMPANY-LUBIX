@@ -11,6 +11,7 @@
 | [DEPLOYMENT.md](DEPLOYMENT.md) | Publicación en Render con PostgreSQL en Neon/Supabase y almacenamiento S3 compatible (Cloudflare R2 y Backblaze B2) |
 | [Estrategia_Hosting_y_Dominio.md](Estrategia_Hosting_y_Dominio.md) | Opciones de hosting, dominio y costos |
 | [Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md](Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) | Plan operativo consolidado: versionado, soporte, monitoreo y capacitación |
+| [Plan_Mantenimiento_Infraestructura.md](Plan_Mantenimiento_Infraestructura.md) | Cronograma de mantenimiento, tabla EOL del stack, escaneo Trivy y parches automáticos |
 | [monitoreo.md](monitoreo.md) | Monitoreo de disponibilidad y salud del servicio |
 | [Respaldo_v1_Operativo.md](Respaldo_v1_Operativo.md) | Respaldo cifrado y restauración con `scripts/pg_backup.py` |
 | [Respaldo_v0.md](Respaldo_v0.md) | Versión inicial del plan de respaldos |
