@@ -1,0 +1,6 @@
+# Excepciones de seguridad aceptadas (vulnerabilidad, motivo, condición de salida).
+# Se revisan en cada ciclo de mantenimiento: Docs/Plan_Mantenimiento_Infraestructura.md §2.
+
+# tar 6.2.1 empaquetado en la imagen base node:20-alpine (EOL desde 2026-04-30).
+# Se elimina al migrar el Dockerfile del frontend a Node 24 LTS.
+CVE-2026-59873
