@@ -8,9 +8,9 @@ greenlet==3.3.2
 httpx==0.28.1
 minio==7.2.20
 passlib==1.7.4
-psycopg2-binary==2.9.11
+psycopg2-binary==2.9.13
 pydantic==2.12.5
-python-dotenv==1.2.2
+python-dotenv==1.2.4
 python-jose==3.5.0
 python-multipart>=0.0.27
 requests==2.33.1
