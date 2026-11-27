@@ -191,10 +191,10 @@ Configura estas variables en **Render → tu servicio → Environment**. Las mar
 | `GMAIL_APP_PASSWORD` | Para correos | App Password de Gmail | No uses la contraseña normal de la cuenta. |
 | `MINIO_ENDPOINT` | Para archivos | `storage.example.com:9000` | Host:puerto del MinIO/S3 externo, sin `http://`. |
 | `MINIO_SECURE` | Para archivos | `true` | Usa TLS hacia el almacenamiento. |
-| `MINIO_REGION` | Para archivos | `auto` en R2 | Región del proveedor S3. Si se omite, el SDK intenta descubrirla. |
-| `MINIO_BUCKET` | Para archivos | `uploads` | Bucket de archivos. |
-| `MINIO_ROOT_USER` | Para archivos | Usuario del storage | Credencial de acceso. |
-| `MINIO_ROOT_PASSWORD` | Para archivos | Contraseña del storage | Credencial de acceso. |
+| `MINIO_REGION` | Para archivos | `auto` en R2; `us-east-005` en B2 | Región del proveedor S3. Si se omite, el SDK intenta descubrirla. |
+| `MINIO_BUCKET` | Para archivos | `uploads` en local | Nombre real del bucket en producción. |
+| `MINIO_ROOT_USER` | Para archivos | keyID en B2 / Access Key en R2 | Credencial de acceso. |
+| `MINIO_ROOT_PASSWORD` | Para archivos | applicationKey en B2 / Secret Key en R2 | Credencial de acceso. |
 | `MINIO_AUTO_CREATE_BUCKET` | Para archivos | `false` en producción | Evita bloquear el arranque si el bucket ya existe o el storage no responde. |
 | `WEB_CONCURRENCY` | Opcional | `1` | Número de workers de Uvicorn. En el plan free deja `1`. |
 
@@ -208,14 +208,14 @@ python -c "import secrets; print(secrets.token_urlsafe(64))"
 
 El backend usa el SDK de MinIO para imágenes, logos, banners y certificados. Render no provee un MinIO administrado. Tienes dos opciones:
 
-1. **Usar un MinIO/S3 externo** y configurar `MINIO_ENDPOINT`, `MINIO_SECURE`, `MINIO_BUCKET`, `MINIO_ROOT_USER` y `MINIO_ROOT_PASSWORD`.
+1. **Usar un MinIO/S3 externo** y configurar `MINIO_ENDPOINT`, `MINIO_SECURE`, `MINIO_REGION`, `MINIO_BUCKET`, `MINIO_ROOT_USER` y `MINIO_ROOT_PASSWORD`.
 2. **No configurar almacenamiento** para una primera validación de la API. El servicio arrancará igual porque `NasService` captura el error de conexión; los endpoints de archivos fallarán, pero autenticación, catálogo, PQRS y salud seguirán funcionando.
 
 En producción se recomienda la opción 1. Nunca uses el filesystem efímero de Render para guardar archivos.
 
-### 4.4 Cloudflare R2 (recomendado)
+### 4.4 Cloudflare R2
 
-R2 es compatible con S3 y no cobra salida de datos. El backend ya usa el SDK de MinIO, así que no requiere cambios de código.
+R2 es compatible con S3 y no cobra salida de datos, pero exige un método de pago aunque uses el plan gratuito. Si no tienes tarjeta, usa [Backblaze B2](#45-backblaze-b2-sin-tarjeta). El backend ya usa el SDK de MinIO y acepta cualquier bucket configurado en `MINIO_BUCKET`.
 
 1. En el panel de Cloudflare entra a **R2** y activa el servicio (pide tarjeta aunque uses el plan gratuito de 10 GB).
 2. Crea un bucket con nombre único, por ejemplo `lubix-produccion`, en ubicación automática.
@@ -235,6 +235,31 @@ MINIO_AUTO_CREATE_BUCKET=false
 
 El bucket puede quedar privado: el backend sirve los archivos a través de `/files/...`, no se exponen directamente. No hace falta CORS ni dominio personalizado; un dominio público solo sería útil si más adelante quieres servirlos por CDN.
 
+**Verificación:** sube una imagen desde el dashboard de empresa y confirma que `https://<API>/files/products/<archivo>` responde 200. En los logs no deben aparecer errores `S3Error` ni `SignatureDoesNotMatch`.
+
+### 4.5 Backblaze B2 (sin tarjeta)
+
+B2 ofrece 10 GB gratis, egreso gratuito hasta 3× lo almacenado y API compatible con S3, sin pedir tarjeta. Los nombres de bucket son **únicos a nivel global**, así que usa uno propio (por ejemplo `lubix-media`).
+
+1. Crea la cuenta en [Backblaze B2](https://www.backblaze.com/sign-up/cloud-storage) y activa **B2 Cloud Storage**.
+2. Crea un bucket **privado** con un nombre único de al menos 6 caracteres. Anota su **Endpoint** (`s3.<region>.backblazeb2.com`) y su **Region** (`us-east-005`, `eu-central-003`, etc.).
+3. En **Application Keys → Add a New Application Key** crea una key limitada a ese bucket con permiso **Read and Write**. No uses la Master Key. Guarda el **keyID** (Access Key) y la **applicationKey** (Secret Key): esta última solo se muestra una vez.
+4. Configura en Render:
+
+```
+MINIO_ENDPOINT=s3.<region>.backblazeb2.com
+MINIO_SECURE=true
+MINIO_REGION=<region>
+MINIO_BUCKET=<nombre-del-bucket>
+MINIO_ROOT_USER=<keyID>
+MINIO_ROOT_PASSWORD=<applicationKey>
+MINIO_AUTO_CREATE_BUCKET=false
+```
+
+5. Guarda y haz **Manual Deploy**. El bucket debe existir antes del despliegue porque la creación automática queda desactivada.
+
+El bucket permanece privado y el backend sirve los archivos por `/files/...`; no hace falta CORS. Errores típicos: `SignatureDoesNotMatch` (secreto con espacios o key revocada), `NoSuchBucket` (nombre de bucket incorrecto) y errores de firma por región incorrecta.
+
 ---
 
 ## 5. Crear el Web Service en Render
@@ -253,6 +278,8 @@ El bucket puede quedar privado: el backend sirve los archivos a través de `/fil
    - `GMAIL_USERNAME`
    - `GMAIL_APP_PASSWORD`
    - `MINIO_ENDPOINT`
+   - `MINIO_REGION`
+   - `MINIO_BUCKET`
    - `MINIO_ROOT_USER`
    - `MINIO_ROOT_PASSWORD`
    - `ADMIN_DEFAULT`
@@ -575,7 +602,9 @@ alembic upgrade head
 - Usa `MINIO_SECURE=true` si el proveedor exige TLS.
 - Crea el bucket manualmente y deja `MINIO_AUTO_CREATE_BUCKET=false`.
 - En R2 usa `MINIO_REGION=auto` y el endpoint sin `http://` ni barra final.
+- En B2 usa el endpoint `s3.<region>.backblazeb2.com`, `MINIO_REGION=<region>` y una Application Key con permiso **Read and Write** sobre el bucket (la Master Key no sirve para S3).
 - Si aparece `AuthorizationHeaderMalformed` o errores de firma, revisa la región y que el token tenga permiso sobre el bucket correcto.
+- Si aparece `NoSuchBucket` o 503 al abrir `/files/...`, confirma que `MINIO_BUCKET` coincide exactamente con el nombre del bucket (en B2 no se puede inferir del ID).
 - Si no necesitas archivos para la validación inicial, deja el storage sin configurar: la API arranca y solo fallan los endpoints de archivos.
 
 ### El correo no se envía
