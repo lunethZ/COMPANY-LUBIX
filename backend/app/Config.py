@@ -74,8 +74,8 @@ class config():
     URL_FRONTEND = os.getenv("URL_FRONTEND")
     CORS_ORIGINS = os.getenv("CORS_ORIGINS", "")
 
-    MINIO_ROOT_USER = os.getenv("MINIO_ROOT_USER")
-    MINIO_ROOT_PASSWORD = os.getenv("MINIO_ROOT_PASSWORD")
+    MINIO_ROOT_USER = _env_text("MINIO_ROOT_USER") or None
+    MINIO_ROOT_PASSWORD = _env_text("MINIO_ROOT_PASSWORD") or None
     MINIO_ENDPOINT = _normalize_endpoint(os.getenv("MINIO_ENDPOINT") or "minio:9000")
     MINIO_SECURE = _env_bool("MINIO_SECURE", False)
     MINIO_BUCKET = _env_text("MINIO_BUCKET", "uploads") or "uploads"
