@@ -82,6 +82,36 @@ function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+const onlyLetters = (value: string, max: number) =>
+  value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, "").slice(0, max);
+
+const onlyAddress = (value: string, max: number) =>
+  value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s#\-,.°]/g, "").slice(0, max);
+
+function cleanEnvioValue(name: string, value: string): string {
+  switch (name) {
+    case "nombre":
+      return onlyLetters(value, 80);
+    case "ciudad":
+    case "departamento":
+      return onlyLetters(value, 60);
+    case "documento":
+      return value.replace(/\D/g, "").slice(0, 15);
+    case "telefono":
+      return value.replace(/[^\d+\s-]/g, "").slice(0, 20);
+    case "direccion":
+      return onlyAddress(value, 120);
+    case "codigoPostal":
+      return value.replace(/\D/g, "").slice(0, 6);
+    case "email":
+      return value.replace(/\s/g, "").slice(0, 120);
+    case "notas":
+      return value.slice(0, 200);
+    default:
+      return value;
+  }
+}
+
 function isValidExpiry(exp: string): boolean {
   const m = exp.match(/^(\d{2})\/(\d{2})$/);
   if (!m) return false;
@@ -169,7 +199,8 @@ const PagarPage = () => {
   const total = subtotal - descuentoPromo + baseEnvio;
 
   const handleEnvioChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEnvio({ ...envio, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setEnvio({ ...envio, [name]: cleanEnvioValue(name, value) });
   };
 
   const handleTarjetaChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -191,12 +222,17 @@ const PagarPage = () => {
     if (!envio.email.trim()) e.email = "El correo es obligatorio";
     else if (!isValidEmail(envio.email)) e.email = "Correo no válido";
     if (!envio.telefono.trim()) e.telefono = "El teléfono es obligatorio";
-    else if (envio.telefono.replace(/\D/g, "").length < 7) e.telefono = "Teléfono inválido";
+    else {
+      const telefono = envio.telefono.replace(/\D/g, "");
+      if (telefono.length < 7 || telefono.length > 15) e.telefono = "Teléfono inválido";
+    }
     if (!envio.documento.trim()) e.documento = "El documento es obligatorio";
+    else if (envio.documento.length < 5) e.documento = "Documento inválido";
     if (!envio.direccion.trim()) e.direccion = "La dirección es obligatoria";
     if (!envio.ciudad.trim()) e.ciudad = "La ciudad es obligatoria";
     if (!envio.departamento.trim()) e.departamento = "El departamento es obligatorio";
     if (!envio.codigoPostal.trim()) e.codigoPostal = "El código postal es obligatorio";
+    else if (envio.codigoPostal.length !== 6) e.codigoPostal = "Código postal inválido";
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -326,7 +362,7 @@ const PagarPage = () => {
               Volver al inicio
             </button>
             <button
-              onClick={() => navigate("/dashboard-usuario")}
+              onClick={() => navigate("/dashboard-usuario?tab=orders")}
               className="text-sm text-muted hover:text-accent transition"
             >
               Ver mis pedidos
@@ -436,47 +472,47 @@ const PagarPage = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="label-base">Nombre completo *</label>
-                    <input name="nombre" value={envio.nombre} onChange={handleEnvioChange} className="input-base" placeholder="Juan Pérez" />
+                    <input name="nombre" value={envio.nombre} onChange={handleEnvioChange} maxLength={80} className="input-base" placeholder="Juan Pérez" />
                     {errors.nombre && <p className="text-xs text-red-500 mt-1">{errors.nombre}</p>}
                   </div>
                   <div>
                     <label className="label-base">Documento de identidad *</label>
-                    <input name="documento" value={envio.documento} onChange={handleEnvioChange} className="input-base" placeholder="CC / NIT" />
+                    <input name="documento" value={envio.documento} onChange={handleEnvioChange} maxLength={15} inputMode="numeric" className="input-base" placeholder="CC / NIT" />
                     {errors.documento && <p className="text-xs text-red-500 mt-1">{errors.documento}</p>}
                   </div>
                   <div>
                     <label className="label-base">Email *</label>
-                    <input type="email" name="email" value={envio.email} onChange={handleEnvioChange} className="input-base" placeholder="tu@email.com" />
+                    <input type="email" name="email" value={envio.email} onChange={handleEnvioChange} maxLength={120} className="input-base" placeholder="tu@email.com" />
                     {errors.email && <p className="text-xs text-red-500 mt-1">{errors.email}</p>}
                   </div>
                   <div>
                     <label className="label-base">Teléfono *</label>
-                    <input name="telefono" value={envio.telefono} onChange={handleEnvioChange} className="input-base" placeholder="300 123 4567" />
+                    <input name="telefono" value={envio.telefono} onChange={handleEnvioChange} maxLength={20} inputMode="tel" className="input-base" placeholder="300 123 4567" />
                     {errors.telefono && <p className="text-xs text-red-500 mt-1">{errors.telefono}</p>}
                   </div>
                   <div className="sm:col-span-2">
                     <label className="label-base">Dirección de entrega *</label>
-                    <input name="direccion" value={envio.direccion} onChange={handleEnvioChange} className="input-base" placeholder="Calle 123 #45-67" />
+                    <input name="direccion" value={envio.direccion} onChange={handleEnvioChange} maxLength={120} className="input-base" placeholder="Calle 123 #45-67" />
                     {errors.direccion && <p className="text-xs text-red-500 mt-1">{errors.direccion}</p>}
                   </div>
                   <div>
                     <label className="label-base">Ciudad *</label>
-                    <input name="ciudad" value={envio.ciudad} onChange={handleEnvioChange} className="input-base" placeholder="Bogotá" />
+                    <input name="ciudad" value={envio.ciudad} onChange={handleEnvioChange} maxLength={60} className="input-base" placeholder="Bogotá" />
                     {errors.ciudad && <p className="text-xs text-red-500 mt-1">{errors.ciudad}</p>}
                   </div>
                   <div>
                     <label className="label-base">Departamento *</label>
-                    <input name="departamento" value={envio.departamento} onChange={handleEnvioChange} className="input-base" placeholder="Cundinamarca" />
+                    <input name="departamento" value={envio.departamento} onChange={handleEnvioChange} maxLength={60} className="input-base" placeholder="Cundinamarca" />
                     {errors.departamento && <p className="text-xs text-red-500 mt-1">{errors.departamento}</p>}
                   </div>
                   <div>
                     <label className="label-base">Código postal *</label>
-                    <input name="codigoPostal" value={envio.codigoPostal} onChange={handleEnvioChange} className="input-base" placeholder="110111" />
+                    <input name="codigoPostal" value={envio.codigoPostal} onChange={handleEnvioChange} maxLength={6} inputMode="numeric" className="input-base" placeholder="110111" />
                     {errors.codigoPostal && <p className="text-xs text-red-500 mt-1">{errors.codigoPostal}</p>}
                   </div>
                   <div>
                     <label className="label-base">Notas de entrega</label>
-                    <input name="notas" value={envio.notas} onChange={handleEnvioChange} className="input-base" placeholder="Referencias, horarios..." />
+                    <input name="notas" value={envio.notas} onChange={handleEnvioChange} maxLength={200} className="input-base" placeholder="Referencias, horarios..." />
                   </div>
                 </div>
 

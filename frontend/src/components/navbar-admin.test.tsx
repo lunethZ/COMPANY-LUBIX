@@ -75,11 +75,11 @@ describe('Navbar de administración', () => {
     expect(screen.getByText('Admin')).toBeInTheDocument();
   });
 
-  it('navega al inicio desde el botón Inicio', async () => {
+  it('navega al inicio desde la marca', async () => {
     loginAsAdmin();
     renderNavbar();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Inicio' }));
+    await userEvent.click(screen.getByTitle('Ir al inicio'));
 
     expect(screen.getByTestId('location')).toHaveTextContent('/');
   });

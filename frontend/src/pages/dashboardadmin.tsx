@@ -179,7 +179,7 @@ export default function DashboardAdminPage() {
 
   if (loading) {
     return (
-      <div className="bg-[#030712] min-h-screen text-slate-100 flex flex-col font-sans">
+      <div className="bg-gray-100 dark:bg-[#030712] min-h-screen text-gray-900 dark:text-slate-100 flex flex-col font-sans">
         <NavbarAdmin />
         <div className="flex-1 flex items-center justify-center">
           <div className="w-10 h-10 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
@@ -189,22 +189,22 @@ export default function DashboardAdminPage() {
   }
 
   return (
-    <div className="bg-[#030712] min-h-screen text-slate-100 flex flex-col font-sans">
+    <div className="bg-gray-100 dark:bg-[#030712] min-h-screen text-gray-900 dark:text-slate-100 flex flex-col font-sans">
       <NavbarAdmin />
 
       <main className="p-4 sm:p-6 flex-1 max-w-7xl w-full mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white tracking-tight">Panel de Administración</h1>
-            <p className="text-sm text-slate-400 mt-1">Gestión de usuarios y empresas registradas en el sistema.</p>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white tracking-tight">Panel de Administración</h1>
+            <p className="text-sm text-gray-600 dark:text-slate-400 mt-1">Gestión de usuarios y empresas registradas en el sistema.</p>
           </div>
-          <span className="text-sm text-slate-400">
+          <span className="text-sm text-gray-600 dark:text-slate-400">
             {user?.name ? `Sesión: ${user.name}` : ""}
           </span>
         </div>
 
         {error && (
-          <div className="bg-rose-950/60 border border-rose-900/50 text-rose-300 text-sm px-4 py-3 rounded-xl">
+          <div className="bg-rose-50 dark:bg-rose-950/60 border border-rose-200 dark:border-rose-900/50 text-rose-700 dark:text-rose-300 text-sm px-4 py-3 rounded-xl">
             {error}
           </div>
         )}
@@ -217,7 +217,7 @@ export default function DashboardAdminPage() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all ${
                 tab === t.id
                   ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
-                  : 'bg-slate-800 text-gray-400 hover:text-gray-200 hover:bg-slate-700'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-700'
               }`}
             >
               {t.label}
@@ -229,10 +229,10 @@ export default function DashboardAdminPage() {
           <div className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               {kpis.map((kpi, idx) => (
-                <div key={idx} className="bg-slate-900 p-5 rounded-xl border border-slate-800 shadow-md">
-                  <span className="text-xs text-slate-400 block uppercase font-mono tracking-wider">{kpi.title}</span>
+                <div key={idx} className="bg-white dark:bg-slate-900 p-5 rounded-xl border border-gray-200 dark:border-slate-800 shadow-md">
+                  <span className="text-xs text-gray-600 dark:text-slate-400 block uppercase font-mono tracking-wider">{kpi.title}</span>
                   <div className="flex items-baseline justify-between mt-2">
-                    <span className="text-2xl font-bold text-white tracking-tight">
+                    <span className="text-2xl font-bold text-gray-900 dark:text-white tracking-tight">
                       {kpi.value.toLocaleString('es-CO')}
                     </span>
                     <span className="text-lg">{kpi.icon}</span>
@@ -241,19 +241,19 @@ export default function DashboardAdminPage() {
               ))}
             </div>
 
-            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
               <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-bold text-white">Empresas por validar ({pendingCompanies.length})</h2>
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">Empresas por validar ({pendingCompanies.length})</h2>
                 <button
                   onClick={() => setTab('empresas')}
-                  className="text-sm text-green-400 hover:text-green-300 transition"
+                  className="text-sm text-green-600 dark:text-green-400 hover:text-green-700 dark:hover:text-green-300 transition"
                 >
                   Ver todas
                 </button>
               </div>
 
               {pendingCompanies.length === 0 ? (
-                <div className="text-center py-12 text-gray-400">
+                <div className="text-center py-12 text-gray-600 dark:text-gray-400">
                   <span className="block text-3xl mb-2">✅</span>
                   <p className="font-medium">No hay empresas pendientes de validación</p>
                   <p className="text-sm mt-1">Cuando una empresa se registre, aparecerá aquí para que la valides.</p>
@@ -263,17 +263,17 @@ export default function DashboardAdminPage() {
                   {pendingCompanies.map((company) => (
                     <div
                       key={company.id}
-                      className="flex flex-col md:flex-row md:items-center gap-4 p-4 bg-slate-800/60 rounded-xl border border-slate-700"
+                      className="flex flex-col md:flex-row md:items-center gap-4 p-4 bg-gray-50/60 dark:bg-slate-800/60 rounded-xl border border-gray-300 dark:border-slate-700"
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="font-semibold text-white truncate">{company.nameCompany}</span>
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 whitespace-nowrap">
+                          <span className="font-semibold text-gray-900 dark:text-white truncate">{company.nameCompany}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap">
                             Pendiente
                           </span>
                         </div>
-                        <p className="text-gray-400 text-sm truncate mt-1">{company.email}</p>
-                        <p className="text-gray-500 text-xs mt-1">NIT: {company.nit}-{company.nitDV} · {company.addressCompany}</p>
+                        <p className="text-gray-600 dark:text-gray-400 text-sm truncate mt-1">{company.email}</p>
+                        <p className="text-gray-600 dark:text-gray-500 text-xs mt-1">NIT: {company.nit}-{company.nitDV} · {company.addressCompany}</p>
                       </div>
                       <button
                         onClick={() => handleValidate(company)}
@@ -298,11 +298,11 @@ export default function DashboardAdminPage() {
         )}
 
         {tab === 'empresas' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-            <h2 className="text-xl font-bold text-white mb-6">Empresas registradas ({companies.length})</h2>
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Empresas registradas ({companies.length})</h2>
 
             {companies.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
+              <div className="text-center py-16 text-gray-600 dark:text-gray-400">
                 <span className="block text-3xl mb-2">🏢</span>
                 <p className="text-lg font-medium">No hay empresas registradas</p>
                 <p className="text-sm mt-1">Las empresas que se registren aparecerán aquí.</p>
@@ -311,7 +311,7 @@ export default function DashboardAdminPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-slate-700 text-gray-400 text-xs uppercase tracking-wider">
+                    <tr className="border-b border-gray-300 dark:border-slate-700 text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">
                       <th className="py-3 pr-4">Empresa</th>
                       <th className="py-3 pr-4">NIT</th>
                       <th className="py-3 pr-4">Contacto</th>
@@ -322,26 +322,26 @@ export default function DashboardAdminPage() {
                   </thead>
                   <tbody>
                     {companies.map((company) => (
-                      <tr key={company.id} className="border-b border-slate-800 last:border-0">
+                      <tr key={company.id} className="border-b border-gray-200 dark:border-slate-800 last:border-0">
                         <td className="py-3 pr-4">
-                          <p className="text-white font-medium">{company.nameCompany}</p>
-                          <p className="text-gray-500 text-xs">{company.addressCompany}</p>
+                          <p className="text-gray-900 dark:text-white font-medium">{company.nameCompany}</p>
+                          <p className="text-gray-600 dark:text-gray-500 text-xs">{company.addressCompany}</p>
                         </td>
-                        <td className="py-3 pr-4 text-gray-300">{company.nit}-{company.nitDV}</td>
+                        <td className="py-3 pr-4 text-gray-700 dark:text-gray-300">{company.nit}-{company.nitDV}</td>
                         <td className="py-3 pr-4">
-                          <p className="text-gray-300">{company.email}</p>
-                          <p className="text-gray-500 text-xs">{company.ownerName} · {company.ownerTell}</p>
+                          <p className="text-gray-700 dark:text-gray-300">{company.email}</p>
+                          <p className="text-gray-600 dark:text-gray-500 text-xs">{company.ownerName} · {company.ownerTell}</p>
                         </td>
-                        <td className="py-3 pr-4 text-gray-400">
+                        <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">
                           {new Date(company.memberSince).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
                         </td>
                         <td className="py-3">
                           {company.verified ? (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 whitespace-nowrap">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 whitespace-nowrap">
                               Validada
                             </span>
                           ) : (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 whitespace-nowrap">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 whitespace-nowrap">
                               Pendiente
                             </span>
                           )}
@@ -352,8 +352,8 @@ export default function DashboardAdminPage() {
                             disabled={deletingId === company.id}
                             className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 whitespace-nowrap ${
                               company.isActive
-                                ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
-                                : 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20'
+                                ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+                                : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 hover:bg-green-500/20'
                             }`}
                           >
                             {deletingId === company.id ? (
@@ -376,11 +376,11 @@ export default function DashboardAdminPage() {
         )}
 
         {tab === 'usuarios' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-            <h2 className="text-xl font-bold text-white mb-6">Usuarios registrados ({users.length})</h2>
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Usuarios registrados ({users.length})</h2>
 
             {users.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
+              <div className="text-center py-16 text-gray-600 dark:text-gray-400">
                 <span className="block text-3xl mb-2">👤</span>
                 <p className="text-lg font-medium">No hay usuarios registrados</p>
               </div>
@@ -388,7 +388,7 @@ export default function DashboardAdminPage() {
               <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                   <thead>
-                    <tr className="border-b border-slate-700 text-gray-400 text-xs uppercase tracking-wider">
+                    <tr className="border-b border-gray-300 dark:border-slate-700 text-gray-600 dark:text-gray-400 text-xs uppercase tracking-wider">
                       <th className="py-3 pr-4">Usuario</th>
                       <th className="py-3 pr-4">Email</th>
                       <th className="py-3 pr-4">Teléfono</th>
@@ -400,35 +400,35 @@ export default function DashboardAdminPage() {
                   </thead>
                   <tbody>
                     {users.map((u) => (
-                      <tr key={u.id} className="border-b border-slate-800 last:border-0">
-                        <td className="py-3 pr-4 text-white font-medium">{u.fullName}</td>
-                        <td className="py-3 pr-4 text-gray-300">{u.email}</td>
-                        <td className="py-3 pr-4 text-gray-400">{u.tell}</td>
+                      <tr key={u.id} className="border-b border-gray-200 dark:border-slate-800 last:border-0">
+                        <td className="py-3 pr-4 text-gray-900 dark:text-white font-medium">{u.fullName}</td>
+                        <td className="py-3 pr-4 text-gray-700 dark:text-gray-300">{u.email}</td>
+                        <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">{u.tell}</td>
                         <td className="py-3 pr-4">
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-400 border border-blue-500/20 capitalize">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 capitalize">
                             {u.role}
                           </span>
                         </td>
-                        <td className="py-3 pr-4 text-gray-400">
+                        <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">
                           {new Date(u.memberSince).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
                         </td>
                         <td className="py-3">
                           {u.isActive ? (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-400 border border-green-500/20 whitespace-nowrap">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 whitespace-nowrap">
                               Activo
                             </span>
                           ) : (
-                            <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-400 border border-red-500/20 whitespace-nowrap">
+                            <span className="text-xs px-2 py-0.5 rounded-full bg-red-500/10 text-red-600 dark:text-red-400 border border-red-500/20 whitespace-nowrap">
                               Inactivo
                             </span>
                           )}
                         </td>
-                        <td className="py-3 pr-4 text-gray-400">
+                        <td className="py-3 pr-4 text-gray-600 dark:text-gray-400">
                           {new Date(u.memberSince).toLocaleDateString("es-CO", { day: "numeric", month: "short", year: "numeric" })}
                         </td>
                         <td className="py-3">
                           {u.role === 'admin' ? (
-                            <span className="text-xs px-3 py-1.5 rounded-lg bg-gray-500/10 text-gray-500 border border-gray-500/20 whitespace-nowrap cursor-not-allowed">
+                            <span className="text-xs px-3 py-1.5 rounded-lg bg-gray-200 dark:bg-gray-500/10 text-gray-600 dark:text-gray-500 border border-gray-300 dark:border-gray-500/20 whitespace-nowrap cursor-not-allowed">
                               Admin
                             </span>
                           ) : (
@@ -437,8 +437,8 @@ export default function DashboardAdminPage() {
                               disabled={deletingId === u.id}
                               className={`text-xs px-3 py-1.5 rounded-lg transition disabled:opacity-50 whitespace-nowrap ${
                                 u.isActive
-                                  ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
-                                  : 'bg-green-500/10 text-green-400 border border-green-500/20 hover:bg-green-500/20'
+                                  ? 'bg-rose-500/10 text-rose-600 dark:text-rose-400 border border-rose-500/20 hover:bg-rose-500/20'
+                                  : 'bg-green-500/10 text-green-600 dark:text-green-400 border border-green-500/20 hover:bg-green-500/20'
                               }`}
                             >
                               {deletingId === u.id ? (
@@ -462,11 +462,11 @@ export default function DashboardAdminPage() {
         )}
 
         {tab === 'pqrs' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-            <h2 className="text-xl font-bold text-white mb-6">PQRS recibidas ({pqrsList.length})</h2>
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">PQRS recibidas ({pqrsList.length})</h2>
 
             {pqrsList.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
+              <div className="text-center py-16 text-gray-600 dark:text-gray-400">
                 <span className="block text-3xl mb-2">📋</span>
                 <p className="text-lg font-medium">No hay PQRS registradas</p>
                 <p className="text-sm mt-1">Las peticiones, quejas, reclamos y sugerencias aparecerán aquí.</p>
@@ -479,18 +479,18 @@ export default function DashboardAdminPage() {
                     className={`border rounded-xl p-4 transition-colors ${
                       item.status === 'resolved'
                         ? 'border-green-500/30 bg-green-500/5'
-                        : 'border-slate-700 hover:border-slate-600'
+                        : 'border-gray-300 dark:border-slate-700 hover:border-gray-400 dark:hover:border-slate-600'
                     }`}
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-2 flex-wrap">
                           <span className={`text-xs px-2 py-0.5 rounded-full font-medium border ${
-                            item.type === 'peticion' ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' :
-                            item.type === 'queja' ? 'bg-red-500/10 border-red-500/30 text-red-400' :
-                            item.type === 'reclamo' ? 'bg-orange-500/10 border-orange-500/30 text-orange-400' :
-                            item.type === 'sugerencia' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400' :
-                            'bg-gray-500/10 border-gray-500/30 text-gray-400'
+                            item.type === 'peticion' ? 'bg-blue-500/10 border-blue-500/30 text-blue-600 dark:text-blue-400' :
+                            item.type === 'queja' ? 'bg-red-500/10 border-red-500/30 text-red-600 dark:text-red-400' :
+                            item.type === 'reclamo' ? 'bg-orange-500/10 border-orange-500/30 text-orange-600 dark:text-orange-400' :
+                            item.type === 'sugerencia' ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-700 dark:text-yellow-400' :
+                            'bg-gray-200 dark:bg-gray-500/10 border-gray-300 dark:border-gray-500/30 text-gray-600 dark:text-gray-400'
                           }`}>
                             {item.type === 'peticion' ? 'Petición' :
                              item.type === 'queja' ? 'Queja' :
@@ -500,18 +500,18 @@ export default function DashboardAdminPage() {
                           </span>
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${
                             item.status === 'pending'
-                              ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-400'
-                              : 'bg-green-500/10 border-green-500/30 text-green-400'
+                              ? 'bg-yellow-500/10 border-yellow-500/30 text-yellow-700 dark:text-yellow-400'
+                              : 'bg-green-500/10 border-green-500/30 text-green-600 dark:text-green-400'
                           }`}>
                             {item.status === 'pending' ? 'Pendiente' : 'Resuelta'}
                           </span>
-                          <span className="text-xs px-2 py-0.5 rounded-full bg-slate-700 text-gray-300 border border-slate-600 capitalize">
+                          <span className="text-xs px-2 py-0.5 rounded-full bg-gray-200 dark:bg-slate-700 text-gray-700 dark:text-gray-300 border border-gray-400 dark:border-slate-600 capitalize">
                             {item.user_role === 'empresa' ? 'Empresa' : 'Usuario'}
                           </span>
                         </div>
-                        <h3 className="text-white font-semibold text-sm mb-1">{item.subject}</h3>
-                        <p className="text-gray-400 text-xs mb-2 line-clamp-2">{item.description}</p>
-                        <div className="flex items-center gap-4 text-xs text-gray-500">
+                        <h3 className="text-gray-900 dark:text-white font-semibold text-sm mb-1">{item.subject}</h3>
+                        <p className="text-gray-600 dark:text-gray-400 text-xs mb-2 line-clamp-2">{item.description}</p>
+                        <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-500">
                           <span>{item.user_name} ({item.user_email})</span>
                           <span>{new Date(item.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })}</span>
                         </div>

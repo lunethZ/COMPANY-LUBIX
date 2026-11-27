@@ -181,7 +181,7 @@ describe('CartProvider invitado', () => {
     expect(mockedApi.getCart).not.toHaveBeenCalled();
   });
 
-  it('guarda el carrito local al cerrar sesión', async () => {
+  it('limpia el carrito al cerrar sesión', async () => {
     seedAuth();
     mockedApi.getCart.mockResolvedValue(cartResponse([product({ quantity: 3, line_total: 1500000 })]));
 
@@ -194,7 +194,8 @@ describe('CartProvider invitado', () => {
     await waitFor(() => {
       expect(screen.getByTestId('auth')).toHaveTextContent('false');
     });
-    expect(JSON.parse(localStorage.getItem('cart') as string)[0].quantity).toBe(3);
+    expect(screen.getByTestId('items')).toHaveTextContent('vacio');
+    expect(localStorage.getItem('cart')).toBeNull();
   });
 });
 

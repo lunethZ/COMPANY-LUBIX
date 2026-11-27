@@ -66,11 +66,11 @@ describe('Navbar público', () => {
     expect(screen.getByText('Lubix')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Buscar...')).toBeInTheDocument();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Login' }));
-    await userEvent.click(screen.getByRole('button', { name: 'Register' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Ingresar' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Registrarse' }));
 
     // No hay sesión, así que sigue mostrando las acciones públicas.
-    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeInTheDocument();
   });
 
   it('busca productos y navega a /buscar con el término', async () => {
@@ -144,8 +144,8 @@ describe('Navbar público', () => {
 
     const panel = document.getElementById('navbar-publico-movil') as HTMLElement;
     expect(panel).toBeInTheDocument();
-    expect(within(panel).getByRole('button', { name: 'Login' })).toBeInTheDocument();
-    expect(within(panel).getByRole('button', { name: 'Register' })).toBeInTheDocument();
+    expect(within(panel).getByRole('button', { name: 'Ingresar' })).toBeInTheDocument();
+    expect(within(panel).getByRole('button', { name: 'Registrarse' })).toBeInTheDocument();
     expect(within(panel).getByRole('button', { name: /Modo (oscuro|claro)/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Cerrar menú' })).toHaveAttribute(
       'aria-expanded',
@@ -173,7 +173,7 @@ describe('Navbar público', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'Abrir menú' }));
     const panel = document.getElementById('navbar-publico-movil') as HTMLElement;
-    await userEvent.click(within(panel).getByRole('button', { name: 'Login' }));
+    await userEvent.click(within(panel).getByRole('button', { name: 'Ingresar' }));
 
     expect(document.getElementById('navbar-publico-movil')).not.toBeInTheDocument();
   });

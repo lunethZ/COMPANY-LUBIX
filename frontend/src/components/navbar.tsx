@@ -116,13 +116,13 @@ export default function Navbar() {
         ) : (
           <>
             <button onClick={openLogin} className="hover:text-green-400 transition">
-              Login
+              Ingresar
             </button>
             <button
               onClick={openRegister}
               className="bg-green-500 text-black font-bold px-4 py-2 rounded-full hover:bg-green-600 transition"
             >
-              Register
+              Registrarse
             </button>
           </>
         )}
@@ -195,13 +195,13 @@ export default function Navbar() {
                 onClick={() => { setMobileOpen(false); openLogin(); }}
                 className="w-full border border-green-500 text-green-400 py-2.5 rounded-lg font-semibold hover:bg-green-500/10 transition"
               >
-                Login
+                Ingresar
               </button>
               <button
                 onClick={() => { setMobileOpen(false); openRegister(); }}
                 className="w-full bg-green-500 text-black font-bold py-2.5 rounded-lg hover:bg-green-600 transition"
               >
-                Register
+                Registrarse
               </button>
             </div>
           )}
