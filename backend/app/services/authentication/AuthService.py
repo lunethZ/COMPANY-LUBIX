@@ -69,10 +69,16 @@ def register_user_service(user: createUser, database: Session, background_tasks:
         logger.exception("Error al registrar usuario")
         raise HTTPException(status_code=500, detail="Error al crear cuenta")
 
-def register_company_service(user: createUser, company: createCompany, certificate_result: str, database: Session, background_tasks: BackgroundTasks | None = None):
+def register_company_service(user: createUser, company: createCompany, certificate_result: dict, database: Session, background_tasks: BackgroundTasks | None = None):
     company_role = database.query(Role).filter(Role.name == "company").first()
     exists_NIT = database.query(Company).filter(Company.CompanyNIT == company.companyNIT).first()
     exists_email = database.query(Users).filter(Users.email == user.email).first()
+
+    if not certificate_result or not certificate_result.get("path") or certificate_result.get("success") is False:
+        raise HTTPException(
+            status_code=503,
+            detail="No se pudo guardar el certificado de la empresa en el almacenamiento",
+        )
 
     if not company_role:
         raise HTTPException(status_code=409, detail="Ups no hay rol para empresa")

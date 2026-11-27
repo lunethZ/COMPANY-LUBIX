@@ -43,6 +43,30 @@ def test_upload_avatar_con_fallo_de_almacenamiento_devuelve_500(
     _assert_upload(storage_mocks.upload, "avatars/", "avatar.png")
 
 
+def test_upload_avatar_expone_codigo_y_pista_del_almacenamiento(
+    client, seed, storage_mocks
+):
+    user = seed.user()
+    storage_mocks.upload.return_value = {
+        "success": False,
+        "code": "NoSuchBucket",
+        "message": "The specified bucket does not exist",
+        "hint": "MINIO_BUCKET debe ser el nombre del bucket, no el ID.",
+    }
+
+    response = client.post(
+        "/user/avatar/upload",
+        files={"file": ("avatar.png", b"contenido", "image/png")},
+        headers=seed.headers(user),
+    )
+
+    assert response.status_code == 500
+    detail = response.json()["detail"]
+    assert "NoSuchBucket" in detail
+    assert "The specified bucket does not exist" in detail
+    assert "MINIO_BUCKET" in detail
+
+
 def test_upload_banner_invoca_mock_de_almacenamiento(client, seed, storage_mocks):
     user = seed.user()
 

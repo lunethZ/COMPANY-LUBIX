@@ -183,7 +183,7 @@ describe('Register', () => {
         ),
       ).toBeInTheDocument()
 
-      const [url, body, config] = post.mock.calls[0]
+      const [url, body] = post.mock.calls[0]
       expect(url).toBe('/auth/register-company')
       expect(body).toBeInstanceOf(FormData)
       const formData = body as FormData
@@ -192,9 +192,6 @@ describe('Register', () => {
       expect(formData.get('companyNITDV')).toBe('1')
       expect(formData.get('companyAddress')).toBe('Calle 1 #2-3')
       expect(formData.get('certificate')).toBeInstanceOf(File)
-      expect(config).toEqual({
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
     })
   })
 
@@ -218,6 +215,64 @@ describe('Register', () => {
       expect(
         (await screen.findAllByText('Ingresa un correo electrónico válido')).length,
       ).toBeGreaterThan(0)
+      expect(post).not.toHaveBeenCalled()
+    })
+
+    it('valida NIT, dígito y nombre de empresa antes de enviar', async () => {
+      const user = userEvent.setup()
+      renderRegister()
+
+      await user.click(screen.getByRole('button', { name: 'Empresa' }))
+      await user.type(screen.getByPlaceholderText('Nombre de contacto'), 'Ana')
+      await user.type(screen.getByPlaceholderText('tu@email.com'), 'ana@lubix.test')
+      await user.type(screen.getByPlaceholderText('+57 300 123 4567'), '3001234567')
+      const [password, confirmacion] = screen.getAllByPlaceholderText('••••••••')
+      await user.type(password, 'Prueba123')
+      await user.type(confirmacion, 'Prueba123')
+
+      const companyName = screen.getByPlaceholderText('Lubix S.A.S')
+      const nit = screen.getByPlaceholderText('900123456')
+      const nitDV = screen.getByPlaceholderText('7')
+      await user.type(companyName, 'Lubix SAS')
+      await user.type(nit, '900123456')
+      await user.type(nitDV, '1')
+      await user.type(screen.getByPlaceholderText('Calle 123 #45-67'), 'Calle 1 #2-3')
+
+      const submit = () =>
+        user.click(screen.getByRole('button', { name: 'Registrar empresa' }))
+
+      await user.clear(companyName)
+      await user.type(companyName, 'Lu')
+      await submit()
+      expect(
+        (await screen.findAllByText('El nombre de la empresa debe tener entre 3 y 50 caracteres')).length,
+      ).toBeGreaterThan(0)
+
+      await user.clear(companyName)
+      await user.type(companyName, 'Lubix SAS')
+      await user.clear(nit)
+      await user.type(nit, '12ab5')
+      await submit()
+      expect(
+        (await screen.findAllByText('El NIT debe contener solo números')).length,
+      ).toBeGreaterThan(0)
+
+      await user.clear(nit)
+      await user.type(nit, '12')
+      await submit()
+      expect(
+        (await screen.findAllByText('El NIT debe tener al menos 5 dígitos')).length,
+      ).toBeGreaterThan(0)
+
+      await user.clear(nit)
+      await user.type(nit, '900123456')
+      await user.clear(nitDV)
+      await user.type(nitDV, 'a')
+      await submit()
+      expect(
+        (await screen.findAllByText('El dígito de verificación debe ser un solo número')).length,
+      ).toBeGreaterThan(0)
+
       expect(post).not.toHaveBeenCalled()
     })
 

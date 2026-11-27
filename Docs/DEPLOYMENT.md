@@ -438,6 +438,29 @@ Conectividad a internet (útil para diagnosticar salida de red):
 curl -i https://lubix-api.onrender.com/health/internet
 ```
 
+Almacenamiento (credenciales, endpoint y bucket; no expone secretos):
+
+```bash
+curl -i https://lubix-api.onrender.com/health/storage
+```
+
+Respuesta esperada (HTTP 200):
+
+```json
+{
+  "status": "ok",
+  "configured": true,
+  "reachable": true,
+  "bucket_exists": true,
+  "endpoint": "s3.us-east-005.backblazeb2.com",
+  "bucket": "lubix-media",
+  "region": "us-east-005",
+  "secure": true
+}
+```
+
+Si responde 503, revisa `error_code`, `error_message` y `hint`: indican si falta una variable, si el endpoint es incorrecto o si el bucket no existe.
+
 ### 7.2 Documentación interactiva
 
 Abre en el navegador:

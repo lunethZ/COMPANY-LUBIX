@@ -1,7 +1,7 @@
 # Este router se encarga de manejar las rutas relacionadas 
 # con la autenticación de usuarios, incluyendo registro, inicio de sesión,
 # verificación de correo electrónico, recuperación de contraseña y cierre de sesión.
-from fastapi import APIRouter,Depends, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter,Depends, UploadFile, File, Form, BackgroundTasks, HTTPException
 from app.services.authentication.AuthService import (
     register_user_service,
     register_company_service,
@@ -27,13 +27,24 @@ from app.schemas.SchemaAuthUser import (
     LogoutRequest
 )
 from app.schemas.SchemaAuthCompany import createCompany, LoginCompany
-from app.services.NasService import subir
+from app.services.NasService import subir, upload_error_detail
 
 
 router = APIRouter(
     prefix=("/auth"),   
     tags=["auth"]
 )
+
+
+def _validation_detail(exc: ValueError) -> str:
+    """Extrae los mensajes de Pydantic para devolverlos al cliente."""
+    errors = getattr(exc, "errors", None)
+    if callable(errors):
+        messages = [str(item.get("msg", item)) for item in errors()]
+        if messages:
+            return "Datos inválidos: " + "; ".join(messages)
+    return str(exc) or "Datos inválidos."
+
 
 @router.post("/register-user")
 def registerUser(user: createUser, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):
@@ -70,27 +81,27 @@ def registerCompany(
             companyNIT=companyNIT,
             companyNITDV=companyNITDV
         )
-        path = f"companies/{companyNIT}/certificates/"
-        certificate_result = subir.upload_file(certificate, path)
-        
-        return register_company_service(
-            user,
-            company,
-            certificate_result,
-            database,
-            background_tasks=background_tasks,
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=_validation_detail(exc))
+
+    path = f"companies/{companyNIT}/certificates/"
+    certificate_result = subir.upload_file(certificate, path)
+    if not certificate_result or not certificate_result.get("success"):
+        raise HTTPException(
+            status_code=503,
+            detail=upload_error_detail(
+                certificate_result,
+                "No se pudo guardar el certificado de la empresa",
+            ),
         )
-    except Exception as e:
-        # Re-lanzar HTTPExceptions (errores de validación de Pydantic o del servicio)
-        from fastapi import HTTPException
-        if isinstance(e, HTTPException):
-            raise e
-        # Para otros errores, retornar un error genérico
-        from fastapi.responses import JSONResponse
-        return JSONResponse(
-            status_code=400,
-            content={"detail": "Error en los datos de registro. Verifica la información ingresada."}
-        )
+
+    return register_company_service(
+        user,
+        company,
+        certificate_result,
+        database,
+        background_tasks=background_tasks,
+    )
 
 @router.post("/verify-email-user")
 def verify_email(code: verifyEmail, background_tasks: BackgroundTasks, database: Session = Depends(get_db)):

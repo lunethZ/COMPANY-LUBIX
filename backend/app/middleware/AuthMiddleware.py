@@ -27,6 +27,7 @@ PUBLIC_ROUTES = [
     "/health",
     "/health/database",
     "/health/internet",
+    "/health/storage",
     "/products/search",
     "/docs",
     "/openapi.json",

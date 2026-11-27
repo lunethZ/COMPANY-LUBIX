@@ -112,6 +112,10 @@ def upload_product_image(request: Request, file: UploadFile = File(...), databas
         raise HTTPException(status_code=403, detail="No tienes una empresa registrada")
     result = subir.upload_file(file, "products/")
     if not result or not result.get("success"):
-        raise HTTPException(status_code=500, detail=result.get("message", "Error al subir la imagen") if result else "Error al subir la imagen")
+        from app.services.NasService import upload_error_detail
+        raise HTTPException(
+            status_code=500,
+            detail=upload_error_detail(result, "Error al subir la imagen"),
+        )
     object_name = result["object_name"]
     return {"success": True, "path": object_name, "url": f"/files/{object_name}", "object_name": object_name}

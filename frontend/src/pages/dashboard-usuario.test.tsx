@@ -515,9 +515,11 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/avatar/upload',
         expect.any(FormData),
-        { headers: { 'Content-Type': 'multipart/form-data' } },
       );
     });
+    expect(
+      await screen.findByText('Imagen actualizada correctamente.'),
+    ).toBeInTheDocument();
 
     const bannerFile = new File(['banner'], 'banner.png', { type: 'image/png' });
     fireEvent.change(inputs()[0], { target: { files: [bannerFile] } });
@@ -525,9 +527,34 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/banner/upload',
         expect.any(FormData),
-        { headers: { 'Content-Type': 'multipart/form-data' } },
       );
     });
+  });
+
+  it('valida tipo y tamaño antes de subir la imagen', async () => {
+    seedUser();
+    mockGet();
+    const { container } = renderWithProviders(<BuyerDashboard />);
+
+    await screen.findByRole('heading', { name: 'Ana Gómez' });
+    const inputs = () =>
+      container.querySelectorAll<HTMLInputElement>('input[type="file"]');
+
+    fireEvent.change(inputs()[1], {
+      target: { files: [new File(['x'], 'datos.txt', { type: 'text/plain' })] },
+    });
+    expect(
+      await screen.findByText('El archivo debe ser una imagen.'),
+    ).toBeInTheDocument();
+    expect(apiMocks.post).not.toHaveBeenCalled();
+
+    const grande = new File(['x'], 'grande.png', { type: 'image/png' });
+    Object.defineProperty(grande, 'size', { value: 6 * 1024 * 1024 });
+    fireEvent.change(inputs()[1], { target: { files: [grande] } });
+    expect(
+      await screen.findByText('La imagen no debe superar 5 MB.'),
+    ).toBeInTheDocument();
+    expect(apiMocks.post).not.toHaveBeenCalled();
   });
 
   it('maneja errores de carga y de las acciones del perfil', async () => {
@@ -745,7 +772,6 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/avatar/upload',
         expect.any(FormData),
-        expect.anything(),
       );
     });
 
@@ -758,7 +784,6 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/banner/upload',
         expect.any(FormData),
-        expect.anything(),
       );
     });
 

@@ -287,11 +287,14 @@ def company_upload_logo_service(user_id: str, file, database: Session):
     if not user or not user.company:
         raise HTTPException(status_code=404, detail="Empresa no encontrada")
 
-    from app.services.NasService import subir
+    from app.services.NasService import subir, upload_error_detail
 
     result = subir.upload_file(file, "company-logos/")
     if not result or not result.get("success"):
-        raise HTTPException(status_code=500, detail="Error al subir la imagen")
+        raise HTTPException(
+            status_code=500,
+            detail=upload_error_detail(result, "Error al subir la imagen"),
+        )
 
     company = user.company
     company.CompanyLogo = result["object_name"]
@@ -309,11 +312,14 @@ def company_upload_banner_service(user_id: str, file, database: Session):
     if not user or not user.company:
         raise HTTPException(status_code=404, detail="Empresa no encontrada")
 
-    from app.services.NasService import subir
+    from app.services.NasService import subir, upload_error_detail
 
     result = subir.upload_file(file, "company-banners/")
     if not result or not result.get("success"):
-        raise HTTPException(status_code=500, detail="Error al subir la imagen")
+        raise HTTPException(
+            status_code=500,
+            detail=upload_error_detail(result, "Error al subir la imagen"),
+        )
 
     company = user.company
     company.CompanyBanner = result["object_name"]

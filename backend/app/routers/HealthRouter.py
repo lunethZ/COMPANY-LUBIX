@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from app.Config import config
 from app.services.health.HealthService import HealthService
+from app.services.NasService import storage_status
 from app.utils.CheckNetwork import check_internet_connection
 from app.utils.TestDatabase import database_is_available, db_test
 
@@ -27,6 +28,14 @@ def health(service: HealthService = Depends(get_health_service)):
 @router.get("/database")
 def healthDatabase():
     return db_test()
+
+
+@router.get("/storage")
+def healthStorage():
+    status = storage_status()
+    healthy = status["configured"] and status["reachable"] and status["bucket_exists"]
+    status["status"] = "ok" if healthy else "error"
+    return JSONResponse(status_code=200 if healthy else 503, content=status)
 
 
 @router.get("/internet")
