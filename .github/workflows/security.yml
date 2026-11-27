@@ -31,7 +31,7 @@ jobs:
           tags: lubix-${{ matrix.component }}:scan
 
       - name: Escanear imagen (SARIF, CRITICAL y HIGH)
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: lubix-${{ matrix.component }}:scan
           format: sarif
@@ -41,7 +41,7 @@ jobs:
           exit-code: "0"
 
       - name: Bloquear si hay CRITICAL con parche
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: lubix-${{ matrix.component }}:scan
           format: table
