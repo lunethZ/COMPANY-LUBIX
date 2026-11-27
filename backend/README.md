@@ -31,10 +31,35 @@ backend/
 │   ├── utils/               # Utilidades
 │   └── docs/                # Documentación interna
 ├── alembic/                 # Migraciones
-├── pyproject.toml           # Dependencias
+├── tests/                   # Pruebas automatizadas (pytest)
+├── scripts/                 # Utilidades internas (p. ej. init_test_db.py)
+├── pyproject.toml           # Dependencias y configuración (UV)
+├── requirements.txt         # Dependencias para instalación con pip
+├── pytest.ini               # Configuración de pruebas y cobertura
+├── start.sh                 # Arranque en producción (migraciones + Uvicorn)
 ├── Dockerfile               # Contenedor
 └── alembic.ini              # Config Alembic
 ```
+
+El punto de entrada es `app/main.py` (instancia `app` de FastAPI).
+
+## Variables de entorno
+
+Se cargan desde `backend/.env` (o desde el entorno del contenedor). La plantilla completa está en el [`.env.example`](../.env.example) de la raíz; estos son los grupos principales:
+
+| Variable | Uso |
+|----------|-----|
+| `URL_DATABASE` / `DATABASE_URL` | Cadena de conexión a PostgreSQL |
+| `DATABASE_URL_UNPOOLED` | Conexión directa para Alembic (Neon) |
+| `SECRET_KEY`, `ALGORITHM` | Firma de tokens JWT |
+| `ACCESS_TOKEN_EXPIRE_MINUTES`, `REFRESH_TOKEN_DAYS` | Vigencia de tokens |
+| `ENVIRONMENT`, `DB_SSL_MODE`, `DB_POOL_SIZE`, `DB_MAX_OVERFLOW`, `DB_POOL_RECYCLE` | Entorno y pool de conexiones |
+| `URL_FRONTEND`, `CORS_ORIGINS` | Orígenes permitidos |
+| `MINIO_ENDPOINT`, `MINIO_SECURE`, `MINIO_BUCKET`, `MINIO_REGION`, `MINIO_ROOT_USER`, `MINIO_ROOT_PASSWORD`, `MINIO_AUTO_CREATE_BUCKET` | Almacenamiento S3 compatible (MinIO o Cloudflare R2) |
+| `BREVO_API_KEY`, `BREVO_SENDER_EMAIL`, `BREVO_SENDER_NAME` | Correo transaccional principal |
+| `RESEND_API_KEY`, `RESEND_FROM_EMAIL` | Respaldo de correo |
+| `GMAIL_USERNAME`, `GMAIL_APP_PASSWORD` | Último respaldo SMTP |
+| `ADMIN_DEFAULT`, `PASSWORD_DEFAULT`, `RUN_SEED` | Seed inicial de roles y administrador |
 
 ## Endpoints principales
 

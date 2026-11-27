@@ -218,24 +218,26 @@ En producción se recomienda la opción 1. Nunca uses el filesystem efímero de 
 R2 es compatible con S3 y no cobra salida de datos, pero exige un método de pago aunque uses el plan gratuito. Si no tienes tarjeta, usa [Backblaze B2](#45-backblaze-b2-sin-tarjeta). El backend ya usa el SDK de MinIO y acepta cualquier bucket configurado en `MINIO_BUCKET`.
 
 1. En el panel de Cloudflare entra a **R2** y activa el servicio (pide tarjeta aunque uses el plan gratuito de 10 GB).
-2. Crea un bucket con nombre único, por ejemplo `lubix-produccion`, en ubicación automática.
+2. Crea un bucket con un nombre único (por ejemplo `lubix-produccion`), en ubicación automática y sin acceso público. Ese nombre será tu `MINIO_BUCKET`.
 3. En **R2 → Manage R2 API Tokens → Create API Token** crea un token con permiso **Object Read & Write** limitado a ese bucket.
-4. Guarda el **Access Key ID**, el **Secret Access Key** y el **endpoint** con formato `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
-5. Configura en Render:
+4. Guarda el **Access Key ID**, el **Secret Access Key** y el **endpoint** con formato `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`. El secreto solo se muestra una vez.
+5. Configura en Render (Dashboard → servicio `lubix-api` → Environment):
 
 ```
 MINIO_ENDPOINT=<ACCOUNT_ID>.r2.cloudflarestorage.com
 MINIO_SECURE=true
 MINIO_REGION=auto
-MINIO_BUCKET=lubix-produccion
+MINIO_BUCKET=<nombre-del-bucket>
 MINIO_ROOT_USER=<Access Key ID>
 MINIO_ROOT_PASSWORD=<Secret Access Key>
 MINIO_AUTO_CREATE_BUCKET=false
 ```
 
+6. Guarda los cambios y haz **Manual Deploy** para reiniciar el servicio con las nuevas variables.
+
 El bucket puede quedar privado: el backend sirve los archivos a través de `/files/...`, no se exponen directamente. No hace falta CORS ni dominio personalizado; un dominio público solo sería útil si más adelante quieres servirlos por CDN.
 
-**Verificación:** sube una imagen desde el dashboard de empresa y confirma que `https://<API>/files/products/<archivo>` responde 200. En los logs no deben aparecer errores `S3Error` ni `SignatureDoesNotMatch`.
+**Verificación:** sube una imagen desde el dashboard de empresa, confirma que aparece y que `https://<API>/files/products/<archivo>` responde 200. En los logs del servicio no deben aparecer errores `S3Error` ni `SignatureDoesNotMatch`.
 
 ### 4.5 Backblaze B2 (sin tarjeta)
 
@@ -605,6 +607,7 @@ alembic upgrade head
 - En B2 usa el endpoint `s3.<region>.backblazeb2.com`, `MINIO_REGION=<region>` y una Application Key con permiso **Read and Write** sobre el bucket (la Master Key no sirve para S3).
 - Si aparece `AuthorizationHeaderMalformed` o errores de firma, revisa la región y que el token tenga permiso sobre el bucket correcto.
 - Si aparece `NoSuchBucket` o 503 al abrir `/files/...`, confirma que `MINIO_BUCKET` coincide exactamente con el nombre del bucket (en B2 no se puede inferir del ID).
+- Si el secreto se copió con espacios o saltos de línea, el proveedor responde `SignatureDoesNotMatch`; vuelve a crear la key/token y pega los valores sin espacios.
 - Si no necesitas archivos para la validación inicial, deja el storage sin configurar: la API arranca y solo fallan los endpoints de archivos.
 
 ### El correo no se envía

@@ -73,6 +73,7 @@ services:
         value: "true"
       - key: MINIO_BUCKET
         sync: false
+      # Región S3: us-east-005 en B2, auto en R2, vacía en MinIO local.
       - key: MINIO_REGION
         sync: false
       - key: MINIO_ROOT_USER

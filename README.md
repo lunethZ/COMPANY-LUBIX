@@ -155,62 +155,101 @@ Esta infraestructura modular garantiza escalabilidad horizontal, alta disponibil
 ```text
 LUBIX-COMPANY/
 ├── docker-compose.yml                 # Orquestación de infraestructura Docker
-├── render.yaml                        # Definición del servicio en Render
+├── docker-compose.prod.yml            # Superposición para producción
+├── docker-compose.test.yml            # Superposición para pruebas
+├── render.yaml                        # Definición de los servicios en Render
+├── sonar-project.properties           # Configuración de análisis SonarCloud
 ├── .env.example                       # Plantilla de variables de entorno
 ├── README.md                          # Este archivo - Documentación principal
-├── docs/                              # Recursos visuales de documentación
+├── .github/workflows/                 # CI (backend, frontend, E2E) y SonarCloud
+├── docs/                              # Assets del README (ruta versionada en minúsculas)
 │   └── assets/
-│       └── lubix-banner.svg           # Banner principal del README
+│       └── lubix-banner.png           # Banner principal del README
 ├── Docs/                              # Documentación oficial del proyecto
-│   ├── DEPLOYMENT.md                  # Guía de despliegue Render + Neon/Supabase
+│   ├── README.md                      # Índice de la documentación
+│   ├── DEPLOYMENT.md                  # Guía de despliegue Render + Neon/Supabase/R2
 │   ├── HUs/                           # Historias de Usuario por módulo
 │   ├── RFs/                           # Especificación de Requisitos Funcionales
-│   └── RNFs/                          # Especificación de Requisitos No Funcionales
+│   ├── RNFs/                          # Especificación de Requisitos No Funcionales
+│   ├── Evidencias/                    # Capturas y evidencias de pruebas
+│   ├── Diagramas/                     # Diagramas del sistema
+│   ├── herramientas/                  # Scripts de apoyo a la documentación
+│   └── ...                            # Informes, planes, guías y entregables
 ├── backend/                           # API REST (FastAPI)
-│   ├── main.py                        # Punto de entrada de la aplicación
-│   ├── pyproject.toml                 # Configuración de dependencias (UV)
-│   ├── alembic.ini                    # Configuración de migraciones
-│   ├── Dockerfile                     # Definición de contenedor Backend
-│   ├── README.md                      # Documentación del backend
-│   ├── CHANGELOG.md                   # Histórico de cambios
+│   ├── app/
+│   │   ├── main.py                    # Punto de entrada de la aplicación
+│   │   ├── Config.py                  # Configuración global
+│   │   ├── database/                  # Conectividad de datos
+│   │   ├── models/                    # Modelos de dominio (SQLAlchemy)
+│   │   ├── schemas/                   # Esquemas de validación (Pydantic)
+│   │   ├── routers/                   # Controladores y rutas (Endpoints)
+│   │   ├── services/                  # Lógica de negocio
+│   │   ├── middleware/                # Autenticación y CORS
+│   │   ├── utils/                     # Utilidades, seguridad y seeders
+│   │   └── docs/                      # ENDPOINTS.md y AUDITORIA.md
 │   ├── alembic/                       # Migraciones (Alembic)
-│   │   ├── env.py
-│   │   ├── script.py.mako
-│   │   └── versions/
-│   └── app/                           # Código fuente de la API
-│       ├── Config.py                  # Configuración global
-│       ├── database/                  # Conectividad de datos (Connection.py)
-│       ├── models/                    # Modelos de dominio (SQLAlchemy)
-│       ├── schemas/                   # Esquemas de validación (Pydantic)
-│       ├── routers/                   # Controladores y rutas (Endpoints)
-│       ├── services/                  # Lógica de negocio core
-│       │   ├── authentication/        # AuthService.py y JWTService.py
-│       │   ├── email/                 # EmailService.py y plantillas
-│       │   ├── CompanyServices/       # Dashboard y productos
-│       │   └── NasService.py          # Gestión de MinIO
-│       ├── middleware/                # Interceptores (Autenticación, CORS)
-│       ├── utils/                     # Utilidades, seguridad y seeders
-│       └── docs/                      # ENDPOINTS.md y AUDITORIA.md
-├── frontend/                          # Aplicación Cliente (React)
-│   ├── package.json                   # Configuración y dependencias NPM
-│   ├── vite.config.ts                 # Configuración del empaquetador
-│   ├── tailwind.config.js             # Configuración de sistema de diseño
-│   ├── tsconfig.json                  # Configuración TypeScript
-│   ├── index.html                     # HTML principal
-│   ├── Dockerfile                     # Definición de contenedor Frontend
-│   ├── README.md                      # Documentación del frontend
-│   ├── COVERAGE.md                    # Cobertura y umbrales de pruebas
-│   └── src/                           # Código fuente del cliente
-│       ├── components/                # Componentes de UI reutilizables
-│       ├── pages/                     # Vistas y pantallas principales
-│       ├── context/                   # Gestión de estado global (Context API)
-│       ├── services/                  # Integración HTTP con Backend
-│       ├── types/                     # Definiciones de tipado TypeScript
-│       ├── constants/                 # Valores globales
-│       ├── assets/                    # Recursos multimedia
-│       └── api/                       # Cliente HTTP
-└── mobile/                            # Cliente móvil
+│   ├── tests/                         # Pruebas automatizadas (pytest)
+│   ├── scripts/                       # Scripts internos del backend
+│   ├── pyproject.toml                 # Dependencias y configuración (UV)
+│   ├── requirements.txt               # Dependencias para instalación con pip
+│   ├── pytest.ini                     # Configuración de pruebas y cobertura
+│   ├── alembic.ini                    # Configuración de migraciones
+│   ├── start.sh                       # Arranque en producción (migraciones + Uvicorn)
+│   ├── Dockerfile
+│   ├── README.md
+│   └── CHANGELOG.md
+├── frontend/                          # Aplicación web (React)
+│   ├── src/
+│   │   ├── components/                # Componentes de UI reutilizables
+│   │   ├── pages/                     # Vistas y pantallas principales
+│   │   ├── context/                   # Estado global (Context API)
+│   │   ├── api/                       # Cliente HTTP y servicios REST
+│   │   ├── hooks/                     # Hooks personalizados
+│   │   ├── utils/                     # Funciones auxiliares
+│   │   ├── types/                     # Tipos de TypeScript
+│   │   ├── data/                      # Datos estáticos
+│   │   ├── mocks/                     # Mocks para pruebas
+│   │   ├── test/                      # Configuración de pruebas
+│   │   └── assets/                    # Recursos multimedia
+│   ├── e2e/                           # Pruebas end-to-end (Playwright)
+│   ├── public/                        # Archivos estáticos servidos por Vite
+│   ├── package.json
+│   ├── vite.config.ts
+│   ├── playwright.config.ts           # Configuración de Playwright
+│   ├── tailwind.config.js
+│   ├── tsconfig.json
+│   ├── index.html
+│   ├── Dockerfile
+│   ├── README.md
+│   └── COVERAGE.md                    # Cobertura y umbrales de pruebas
+├── mobile/                            # Cliente móvil (React Native / Expo)
+│   ├── src/
+│   │   ├── api/                       # Cliente HTTP y refresco de tokens
+│   │   ├── components/                # Componentes reutilizables
+│   │   ├── screens/                   # Pantallas de la app
+│   │   ├── navigation/                # Navegación entre pantallas
+│   │   ├── context/                   # Estado global
+│   │   ├── store/                     # Almacenamiento local
+│   │   ├── constants/                 # Valores globales
+│   │   ├── types/                     # Tipos de TypeScript
+│   │   └── utils/                     # Funciones auxiliares
+│   ├── App.tsx
+│   ├── app.json
+│   ├── Dockerfile
+│   ├── .env.example                   # Plantilla de EXPO_PUBLIC_API_URL
+│   └── README.md
+├── scripts/                           # Respaldos cifrados y SQL de roles
+│   ├── pg_backup.py
+│   ├── seguridad/                     # roles_postgresql*.sql
+│   └── README.md
+└── tools/                             # Utilidades de desarrollo (ajenas a la app)
+    └── neon/                          # Configuración y cliente de Neon
+        ├── neon.ts
+        ├── package.json
+        └── README.md
 ```
+
+> En Windows, `docs/` y `Docs/` apuntan a la misma carpeta del disco; git versiona el banner como `docs/assets/...` en minúsculas y la documentación como `Docs/...`.
 
 ---
 
@@ -303,7 +342,10 @@ MINIO_ENDPOINT=minio:9000
 MINIO_SECURE=false
 MINIO_BUCKET=uploads
 MINIO_AUTO_CREATE_BUCKET=true
+MINIO_REGION=
 ```
+
+> `MINIO_REGION` se deja vacío con MinIO local y se usa `auto` con Cloudflare R2. El procedimiento completo está en la [guía de despliegue](Docs/DEPLOYMENT.md#44-cloudflare-r2-recomendado).
 
 #### Correo (SMTP Gmail - usar App Password)
 
@@ -510,8 +552,12 @@ La arquitectura de LUBIX implementa medidas defensivas estándar de la industria
 
 | Recurso | Contenido |
 | :--- | :--- |
-| [Backend](backend/README.md) | Estructura de carpetas, modelos, servicios y configuración |
-| [Frontend](frontend/README.md) | Sistema de colores y temas, componentes, Context API y guía de estilos |
+| [Índice de documentación](Docs/README.md) | Punto de entrada a toda la documentación oficial |
+| [Backend](backend/README.md) | Estructura de carpetas, variables de entorno, pruebas y configuración |
+| [Frontend](frontend/README.md) | Componentes, Context API, pruebas unitarias/E2E y guía de estilos |
+| [Mobile](mobile/README.md) | App Expo, configuración de `EXPO_PUBLIC_API_URL` y pantallas |
+| [Scripts](scripts/README.md) | Respaldos cifrados de PostgreSQL y SQL de roles |
+| [Tooling de Neon](tools/neon/README.md) | Configuración de ramas de Neon para desarrollo |
 | [Endpoints de API](backend/app/docs/ENDPOINTS.md) | Listado completo de endpoints, parámetros y ejemplos |
 | [Auditoría del sistema](backend/app/docs/AUDITORIA.md) | Registro de actividades e historial de cambios |
 | [Despliegue](Docs/DEPLOYMENT.md) | Publicación en Render con PostgreSQL en Neon/Supabase |
