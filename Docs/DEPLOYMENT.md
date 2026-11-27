@@ -189,8 +189,9 @@ Configura estas variables en **Render → tu servicio → Environment**. Las mar
 | `RUN_SEED` | Primer despliegue | `true` y luego `false` | Crea roles y administrador. Es idempotente, pero debe apagarse tras el primer arranque. |
 | `GMAIL_USERNAME` | Para correos | `tu_correo@gmail.com` | Cuenta SMTP. |
 | `GMAIL_APP_PASSWORD` | Para correos | App Password de Gmail | No uses la contraseña normal de la cuenta. |
-| `MINIO_ENDPOINT` | Para archivos | `storage.example.com:9000` | Host:puerto del MinIO/S3 externo. |
+| `MINIO_ENDPOINT` | Para archivos | `storage.example.com:9000` | Host:puerto del MinIO/S3 externo, sin `http://`. |
 | `MINIO_SECURE` | Para archivos | `true` | Usa TLS hacia el almacenamiento. |
+| `MINIO_REGION` | Para archivos | `auto` en R2 | Región del proveedor S3. Si se omite, el SDK intenta descubrirla. |
 | `MINIO_BUCKET` | Para archivos | `uploads` | Bucket de archivos. |
 | `MINIO_ROOT_USER` | Para archivos | Usuario del storage | Credencial de acceso. |
 | `MINIO_ROOT_PASSWORD` | Para archivos | Contraseña del storage | Credencial de acceso. |
@@ -211,6 +212,28 @@ El backend usa el SDK de MinIO para imágenes, logos, banners y certificados. Re
 2. **No configurar almacenamiento** para una primera validación de la API. El servicio arrancará igual porque `NasService` captura el error de conexión; los endpoints de archivos fallarán, pero autenticación, catálogo, PQRS y salud seguirán funcionando.
 
 En producción se recomienda la opción 1. Nunca uses el filesystem efímero de Render para guardar archivos.
+
+### 4.4 Cloudflare R2 (recomendado)
+
+R2 es compatible con S3 y no cobra salida de datos. El backend ya usa el SDK de MinIO, así que no requiere cambios de código.
+
+1. En el panel de Cloudflare entra a **R2** y activa el servicio (pide tarjeta aunque uses el plan gratuito de 10 GB).
+2. Crea un bucket con nombre único, por ejemplo `lubix-produccion`, en ubicación automática.
+3. En **R2 → Manage R2 API Tokens → Create API Token** crea un token con permiso **Object Read & Write** limitado a ese bucket.
+4. Guarda el **Access Key ID**, el **Secret Access Key** y el **endpoint** con formato `https://<ACCOUNT_ID>.r2.cloudflarestorage.com`.
+5. Configura en Render:
+
+```
+MINIO_ENDPOINT=<ACCOUNT_ID>.r2.cloudflarestorage.com
+MINIO_SECURE=true
+MINIO_REGION=auto
+MINIO_BUCKET=lubix-produccion
+MINIO_ROOT_USER=<Access Key ID>
+MINIO_ROOT_PASSWORD=<Secret Access Key>
+MINIO_AUTO_CREATE_BUCKET=false
+```
+
+El bucket puede quedar privado: el backend sirve los archivos a través de `/files/...`, no se exponen directamente. No hace falta CORS ni dominio personalizado; un dominio público solo sería útil si más adelante quieres servirlos por CDN.
 
 ---
 
@@ -551,6 +574,8 @@ alembic upgrade head
 - Verifica `MINIO_ENDPOINT` (host:puerto, sin `http://`).
 - Usa `MINIO_SECURE=true` si el proveedor exige TLS.
 - Crea el bucket manualmente y deja `MINIO_AUTO_CREATE_BUCKET=false`.
+- En R2 usa `MINIO_REGION=auto` y el endpoint sin `http://` ni barra final.
+- Si aparece `AuthorizationHeaderMalformed` o errores de firma, revisa la región y que el token tenga permiso sobre el bucket correcto.
 - Si no necesitas archivos para la validación inicial, deja el storage sin configurar: la API arranca y solo fallan los endpoints de archivos.
 
 ### El correo no se envía
