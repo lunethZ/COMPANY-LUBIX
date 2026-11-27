@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import SellerDashboard from './dashboard-empresa';
 import { renderWithProviders } from '../test/utils';
@@ -942,6 +942,9 @@ describe('Panel de empresa', () => {
       );
     }
     expect(await screen.findByAltText('Banner')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Banner actualizado correctamente.'),
+    ).toBeInTheDocument();
 
     expect(apiMocks.patch).toHaveBeenCalledWith(
       '/company/dashboard/upload-logo',
@@ -979,6 +982,60 @@ describe('Panel de empresa', () => {
 
     expect(
       await screen.findByText('No se pudo subir la imagen'),
+    ).toBeInTheDocument();
+  });
+
+  it('valida tipo y tamaño y muestra el error al subir el banner', async () => {
+    seedCompany();
+    mockDashboard();
+    apiMocks.patch.mockRejectedValue({
+      response: { data: { detail: 'No se pudo subir el banner' } },
+    });
+    const user = userEvent.setup();
+    renderWithProviders(<SellerDashboard />);
+
+    await screen.findByRole('heading', { name: 'TechStore' });
+    await openProfileDrawer(user);
+
+    const logoInput = screen
+      .getByText('Cambiar logo')
+      .closest('label')
+      ?.querySelector('input[type="file"]') as HTMLInputElement | null;
+    const bannerInput = screen
+      .getByText('Subir banner')
+      .closest('label')
+      ?.querySelector('input[type="file"]') as HTMLInputElement | null;
+    expect(logoInput).not.toBeNull();
+    expect(bannerInput).not.toBeNull();
+
+    if (logoInput) {
+      fireEvent.change(logoInput, {
+        target: { files: [new File(['x'], 'datos.txt', { type: 'text/plain' })] },
+      });
+    }
+    expect(
+      await screen.findByText('El archivo debe ser una imagen.'),
+    ).toBeInTheDocument();
+    expect(apiMocks.patch).not.toHaveBeenCalled();
+
+    const grande = new File(['x'], 'grande.png', { type: 'image/png' });
+    Object.defineProperty(grande, 'size', { value: 6 * 1024 * 1024 });
+    if (logoInput) {
+      fireEvent.change(logoInput, { target: { files: [grande] } });
+    }
+    expect(
+      await screen.findByText('La imagen no debe superar 5 MB.'),
+    ).toBeInTheDocument();
+    expect(apiMocks.patch).not.toHaveBeenCalled();
+
+    if (bannerInput) {
+      await user.upload(
+        bannerInput,
+        new File(['banner'], 'banner.png', { type: 'image/png' }),
+      );
+    }
+    expect(
+      await screen.findByText('No se pudo subir el banner'),
     ).toBeInTheDocument();
   });
 

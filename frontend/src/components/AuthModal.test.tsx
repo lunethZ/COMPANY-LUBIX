@@ -470,6 +470,47 @@ describe('AuthModal', () => {
     expect(post).not.toHaveBeenCalled();
   });
 
+  it('valida el formato de NIT, dígito y nombre de empresa', async () => {
+    const user = userEvent.setup();
+    renderModal();
+    await openRegister(user);
+    await user.click(screen.getByRole('button', { name: 'Empresa' }));
+    await fillCompanyRegister(user);
+
+    const companyName = screen.getByPlaceholderText('Lubix S.A.S');
+    const nit = screen.getByPlaceholderText('900123456');
+    const nitDV = screen.getByPlaceholderText('7');
+
+    await user.clear(companyName);
+    await user.type(companyName, 'Lu');
+    submitForm();
+    expect(
+      await screen.findByText('El nombre de la empresa debe tener entre 3 y 50 caracteres'),
+    ).toBeInTheDocument();
+
+    await user.clear(companyName);
+    await user.type(companyName, 'Lubix S.A.S');
+    await user.clear(nit);
+    await user.type(nit, '1234');
+    submitForm();
+    expect(await screen.findByText('El NIT debe tener al menos 5 dígitos')).toBeInTheDocument();
+
+    await user.clear(nit);
+    await user.type(nit, '900123456');
+    await user.clear(nitDV);
+    submitForm();
+    expect(
+      await screen.findByText('Dígito de verificación obligatorio'),
+    ).toBeInTheDocument();
+
+    await user.type(nitDV, 'a');
+    submitForm();
+    expect(
+      await screen.findByText('El dígito de verificación debe ser un solo número'),
+    ).toBeInTheDocument();
+    expect(post).not.toHaveBeenCalled();
+  });
+
   it('registra una empresa enviando FormData y navega al login', async () => {
     post.mockResolvedValue({ data: {} });
     const user = userEvent.setup();
