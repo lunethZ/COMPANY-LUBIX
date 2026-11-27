@@ -4,6 +4,7 @@
 **Carril:** D · josearmenta2163
 **Criterios asociados:** T7-7 (capacitación y validación con cliente)
 **Fecha de elaboración:** 2026-11-22
+**Revisión:** 2026-11-26 · se añaden buenas prácticas, errores comunes y rutina del administrador/operador (§4.3–§4.5)
 **Ejecución prevista:** 24 al 26 de noviembre de 2026
 **Documento marco:** [`Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md`](./Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) §5
 
@@ -79,6 +80,69 @@ La guía rápida de cada módulo está en [`Guia_Rapida_Usuario.md`](./Guia_Rapi
 1. Ingresar por la pestaña **Usuario** con credenciales administrativas.
 2. Validar una empresa pendiente y habilitar o inhabilitar cuentas.
 3. Resolver una PQRS pendiente.
+
+### 4.3 Buenas prácticas de uso
+
+**Todos los perfiles**
+
+- Usar siempre el frontend oficial (`https://lubix-frontend.onrender.com`) y comprobar el candado TLS; no ingresar por enlaces de correos o mensajes no verificados.
+- No compartir contraseñas, códigos de verificación ni tokens. El equipo de LUBIX nunca los solicita por correo, teléfono o mensajería.
+- Usar una contraseña única de 12 o más caracteres con mayúscula, minúscula, número y símbolo; no reutilizarla en otros servicios.
+- Cerrar sesión al terminar en equipos compartidos; cerrar solo la pestaña no elimina la sesión.
+- Reportar un error con módulo, hora, pasos, mensaje exacto y captura; no reintentar en bucle ni crear solicitudes duplicadas.
+- No subir documentos sensibles que no sean necesarios para la operación; el pago de esta versión es simulado y no se deben ingresar datos reales de tarjeta.
+
+**Usuario final**
+
+- Revisar cantidades, dirección y total antes de confirmar el pedido y guardar la referencia.
+- Mantener el correo actualizado y revisar spam cuando se soliciten códigos de verificación o recuperación.
+- Radicar la PQRS con la referencia del pedido y adjuntar evidencia cuando aplique.
+
+**Empresa**
+
+- Publicar precios mayores que cero, stock real y descripciones verificables; una imagen obligatoria por producto.
+- Para logo, banner, avatar e imágenes de producto usar archivos de imagen de máximo **5 MB** (JPG/PNG); si no carga, revisar tipo y tamaño antes de reintentar.
+- Actualizar el estado de los pedidos a medida que se atienden y responder por el canal disponible cuando un pedido no pueda cumplirse.
+- No compartir la cuenta de empresa entre varias personas: cada operador debe tener su propio acceso.
+
+**Administrador y operador**
+
+- Aplicar el **mínimo privilegio**: usar cuentas nominativas y no compartir la cuenta administradora.
+- Validar una empresa con la información y el certificado disponibles; registrar el motivo cuando se rechace o inhabilite una cuenta.
+- No intentar inhabilitar una cuenta administradora: la plataforma lo impide por diseño.
+- Responder las PQRS con lenguaje claro, sin incluir datos personales de terceros, y cerrar solo cuando exista respuesta y trazabilidad.
+- No modificar la base de datos directamente salvo procedimiento autorizado, con respaldo previo y registro del cambio.
+- Tratar los logs y capturas como información interna: no reenviarlos fuera de los canales de soporte.
+
+### 4.4 Errores comunes y qué hacer
+
+| Perfil | Mensaje o síntoma | Causa probable | Acción |
+|---|---|---|---|
+| Todos | La plataforma tarda en abrir | *Cold start* del plan gratuito de Render (~39 s) | Esperar y recargar una vez; si persiste, reportar como P2 |
+| Todos | `Credenciales inválidas` | Correo/contraseña incorrectos o pestaña equivocada | Verificar pestaña (**Usuario** o **Empresa**) y reintentar |
+| Todos | La sesión se cierra sola | Token expirado o sesión invalidada | Iniciar sesión de nuevo y usar **Cerrar sesión** al terminar |
+| Usuario / Empresa | No llega el código de verificación | Correo mal escrito, spam o demora del proveedor | Revisar spam, confirmar el correo y solicitar un código nuevo |
+| Empresa | `Cuenta de empresa no encontrada o no verificada por Lubix` | Correo sin verificar o empresa pendiente de validación | Verificar el correo y solicitar validación a soporte |
+| Empresa | La imagen no cambia o aparece un error al subirla | Archivo no es imagen, supera 5 MB o el almacenamiento no responde | Usar JPG/PNG ≤ 5 MB; si persiste, reportar hora y mensaje exacto |
+| Usuario | `No se pudo cancelar el pedido.` | El estado del pedido no permite cancelación | Radicar PQRS con el número de pedido |
+| Administrador | No puede inhabilitar a otro administrador | Regla de protección de cuentas administrativas | No insistir; escalar a revisión técnica si el caso lo requiere |
+| Administrador | Una PQRS sigue pendiente fuera del SLA | Caso sin asignar o con información incompleta | Revisar la cola, pedir los datos faltantes y escalar según severidad |
+| Operador | `503` al guardar o registrar | Dependencia externa (por ejemplo almacenamiento) no disponible | Capturar `detail`, revisar `/health/storage` y escalar; no reintentar en bucle |
+
+El detalle de cada mensaje está en el manual 1.1.9 y en [`FAQ_Usuarios.md`](./FAQ_Usuarios.md); los tiempos de atención, en §6 de este plan y en [`Guia_Rapida_Usuario.md`](./Guia_Rapida_Usuario.md) §8.
+
+### 4.5 Rutina del administrador y operador
+
+| Frecuencia | Actividad | Evidencia |
+|---|---|---|
+| Diaria | Revisar `/health`, `/health/database` y `/health/storage`; cola de PQRS; empresas pendientes; errores 5xx en Render | Captura o reporte del estado |
+| Diaria | Confirmar que el último respaldo automático se ejecutó | Reporte de `pg_backup.py` / panel de Render |
+| Semanal | Revisar usuarios inactivos o accesos anómalos, pedidos estancados y novedades de la FAQ | Registro de revisión |
+| Mensual | Revisar roles y accesos, archivos huérfanos del bucket y dependencias pendientes | Checklist de mantenimiento (§3 del [`Plan_Mantenimiento_Infraestructura.md`](./Plan_Mantenimiento_Infraestructura.md)) |
+| Antes y después de un release | Ejecutar la verificación post-despliegue y comunicar cambios a usuarios y empresas | Checklist post-despliegue firmada |
+| Ante un incidente P1 | Mitigar, comunicar, registrar línea de tiempo y causa raíz | Issue o informe del incidente |
+
+**Lo que no se debe hacer:** compartir credenciales, validar empresas sin revisar la información, cerrar PQRS sin respuesta, borrar datos en producción sin respaldo ni aprobación, ni usar `--force`/`--no-verify` para saltar controles.
 
 ## 5. Contenidos y materiales
 
@@ -166,3 +230,10 @@ La capacitación se considera cumplida cuando existan:
 | El catálogo no carga en una sesión que no es de empresa | Reportarlo como defecto P2 y continuar con el recorrido por el inicio y el detalle del producto |
 | Falta de una empresa o PQRS pendiente para el panel admin | Preparar los registros antes de la sesión 2 |
 | Pago real no habilitado | Explicar que el pago es simulado, tal como lo declara el manual |
+
+## 12. Control de cambios
+
+| Versión | Fecha | Cambio | Autor |
+|---|---|---|---|
+| 1.1.0 | 2026-11-26 | Se añaden buenas prácticas por perfil (§4.3), errores comunes (§4.4) y rutina del administrador/operador (§4.5) | Equipo LUBIX |
+| 1.0.0 | 2026-11-22 | Creación del plan de capacitación por roles | @josearmenta2163 |

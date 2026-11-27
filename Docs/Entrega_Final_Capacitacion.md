@@ -6,8 +6,9 @@
 | Campo | Valor |
 |---|---|
 | Actividad | S8 — Capacitación, ayudas en línea y ensamblaje del plan |
-| Versión | 1.0.0 |
+| Versión | 1.1.0 |
 | Fecha | 2026-11-26 |
+| Revisión | 2026-11-26 · se incorporan buenas prácticas, errores comunes y rutina del operador |
 | Responsable de ensamblaje | @nacoooobit |
 | Revisión | @lunethZ · @juanpineda |
 | Estado | Listo para revisión |
@@ -62,6 +63,7 @@ Contenido:
 - Publicación de productos, pedidos, estadísticas y perfil de empresa.
 - Validación de empresas, usuarios y PQRS del administrador.
 - Triage y evidencia para la mesa de ayuda.
+- Buenas prácticas de uso por perfil, errores comunes y rutina diaria del administrador/operador ([`Plan_Capacitacion.md`](./Plan_Capacitacion.md) §4.3–§4.5).
 - Tabla de errores comunes y tiempos de soporte.
 - Checklist rápido de cierre.
 
@@ -156,4 +158,5 @@ La sección 9 de este entregable se integró en [`BC-Implantacion.md`](./BC-Impl
 
 | Versión | Fecha | Cambio | Autor |
 |---|---|---|---|
+| 1.1.0 | 2026-11-26 | Se incorporan buenas prácticas por perfil, errores comunes y rutina del administrador/operador al entregable | Equipo LUBIX |
 | 1.0.0 | 2026-11-26 | Creación del entregable final y consolidación de aportes | @nacoooobit |
