@@ -81,6 +81,9 @@ services:
         sync: false
       - key: MINIO_AUTO_CREATE_BUCKET
         value: "false"
+      # "auto" para Cloudflare R2; vacío para MinIO propio.
+      - key: MINIO_REGION
+        sync: false
       - key: ADMIN_DEFAULT
         sync: false
       - key: PASSWORD_DEFAULT

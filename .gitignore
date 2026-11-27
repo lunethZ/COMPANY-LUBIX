@@ -17,8 +17,8 @@ htmlcov/
 coverage.xml
 .mypy_cache/
 .ruff_cache/
-.coverage
 backend/.coverage
+*.egg-info/
 opencode.jsonc
 
 # Node, Vite, Expo and package-manager output
@@ -31,6 +31,9 @@ web-build/
 *.local
 test-results/
 playwright-report/
+.playwright/
+coverage/
+*.tsbuildinfo
 
 # Local databases and logs
 *.db
