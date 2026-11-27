@@ -39,6 +39,7 @@ interface CheckoutContextType {
   discount: number;
   shipping: number;
   total: number;
+  orderSummary: { total: number; items: number };
   submitting: boolean;
   submit: () => Promise<string>;
 }
@@ -60,6 +61,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>("tarjeta");
   const [promo, setPromo] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [orderSummary, setOrderSummary] = useState({ total: 0, items: 0 });
 
   const promoApplied = useMemo(
     () => promo.trim().toUpperCase() === PROMO_CODE && subtotal > 0,
@@ -75,6 +77,9 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
       throw new Error("Falta la dirección de envío");
     }
     setSubmitting(true);
+    // Se captura antes de vaciar el carrito: con el carrito vacío, el total
+    // se recalcula en $0 y la pantalla de confirmación mostraría un monto erróneo.
+    setOrderSummary({ total, items: items.reduce((acc, item) => acc + item.quantity, 0) });
     try {
       const result = await createOrder({
         items: items.map((item) => ({
@@ -116,6 +121,7 @@ export function CheckoutProvider({ children }: { children: ReactNode }) {
         discount,
         shipping,
         total,
+        orderSummary,
         submitting,
         submit,
       }}

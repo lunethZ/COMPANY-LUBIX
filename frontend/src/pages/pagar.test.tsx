@@ -329,6 +329,8 @@ describe('Página de pago', () => {
 
     expect(await screen.findByText('¡Pago exitoso!')).toBeInTheDocument();
     expect(screen.getByText('LUBX-123')).toBeInTheDocument();
+    // El total pagado debe reflejar el monto de la compra, no el envío restante.
+    expect(screen.getByText('$100.000')).toBeInTheDocument();
     expect(apiMocks.post).toHaveBeenCalledWith(
       '/user/orders',
       expect.objectContaining({
