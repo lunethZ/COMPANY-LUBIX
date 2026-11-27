@@ -126,7 +126,12 @@ export const Register = () => {
             const nit = form.nit.trim();
             const nitDV = form.nitDV.trim();
             const companyName = form.companyName.trim();
-            if (!/^\d{5,}$/.test(nit)) {
+            if (!/^\d+$/.test(nit)) {
+                setFieldErrors({ nit: "El NIT debe contener solo números" });
+                showPopup("El NIT debe contener solo números", "error");
+                return;
+            }
+            if (nit.length < 5) {
                 setFieldErrors({ nit: "El NIT debe tener al menos 5 dígitos" });
                 showPopup("El NIT debe tener al menos 5 dígitos", "error");
                 return;
