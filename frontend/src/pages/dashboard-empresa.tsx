@@ -478,13 +478,13 @@ export default function SellerDashboard() {
 
   const orderStatusColor = (status: string) => {
     const map: Record<string, string> = {
-      pending: "bg-yellow-500/20 border-yellow-500/40 text-yellow-300",
-      confirmed: "bg-blue-500/20 border-blue-500/40 text-blue-300",
-      shipped: "bg-purple-500/20 border-purple-500/40 text-purple-300",
-      delivered: "bg-green-500/20 border-green-500/40 text-green-300",
-      cancelled: "bg-red-500/20 border-red-500/40 text-red-300",
+      pending: "bg-yellow-500/20 border-yellow-500/40 text-yellow-700 dark:text-yellow-300",
+      confirmed: "bg-blue-500/20 border-blue-500/40 text-blue-700 dark:text-blue-300",
+      shipped: "bg-purple-500/20 border-purple-500/40 text-purple-700 dark:text-purple-300",
+      delivered: "bg-green-500/20 border-green-500/40 text-green-700 dark:text-green-300",
+      cancelled: "bg-red-500/20 border-red-500/40 text-red-700 dark:text-red-300",
     };
-    return map[status] || "bg-gray-500/20 border-gray-500/40 text-gray-300";
+    return map[status] || "bg-gray-200 dark:bg-gray-500/20 border-gray-300 dark:border-gray-500/40 text-gray-700 dark:text-gray-300";
   };
 
   const resolveImageUrl = (img?: string) => {
@@ -798,11 +798,11 @@ export default function SellerDashboard() {
 
   const getLevelColor = (level: string) => {
     switch (level) {
-      case 'Diamond': return 'bg-cyan-500/20 border-cyan-500/40 text-cyan-300';
-      case 'Platinum': return 'bg-purple-500/20 border-purple-500/40 text-purple-300';
-      case 'Gold': return 'bg-yellow-500/20 border-yellow-500/40 text-yellow-300';
-      case 'Silver': return 'bg-gray-400/20 border-gray-400/40 text-gray-300';
-      default: return 'bg-orange-500/20 border-orange-500/40 text-orange-300';
+      case 'Diamond': return 'bg-cyan-500/20 border-cyan-500/40 text-cyan-700 dark:text-cyan-300';
+      case 'Platinum': return 'bg-purple-500/20 border-purple-500/40 text-purple-700 dark:text-purple-300';
+      case 'Gold': return 'bg-yellow-500/20 border-yellow-500/40 text-yellow-700 dark:text-yellow-300';
+      case 'Silver': return 'bg-gray-200 dark:bg-gray-400/20 border-gray-300 dark:border-gray-400/40 text-gray-700 dark:text-gray-300';
+      default: return 'bg-orange-500/20 border-orange-500/40 text-orange-700 dark:text-orange-300';
     }
   };
 
@@ -818,14 +818,14 @@ export default function SellerDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-100 dark:bg-slate-950 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950">
+    <div className="min-h-screen bg-gray-100 dark:bg-slate-950">
       <Navbar />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
@@ -851,7 +851,7 @@ export default function SellerDashboard() {
           </label>
           <div className="relative flex flex-col md:flex-row items-center md:items-start gap-6">
             <div className="relative">
-              <div className="w-24 h-24 bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-green-500 shadow-lg border-4 border-white/20 overflow-hidden">
+              <div className="w-24 h-24 bg-white dark:bg-slate-900 rounded-full flex items-center justify-center text-4xl font-bold text-green-600 dark:text-green-500 shadow-lg border-4 border-white/20 overflow-hidden">
                 {sellerInfo.logo ? (
                   <img src={resolveImageUrl(sellerInfo.logo)} alt="Logo" className="w-full h-full object-cover" />
                 ) : (
@@ -873,7 +873,7 @@ export default function SellerDashboard() {
                 </div>
               )}
               {logoSuccess && (
-                <div className="absolute top-0 left-0 w-full h-full bg-green-500/20 rounded-full flex items-center justify-center text-green-400 text-sm z-10">
+                <div className="absolute top-0 left-0 w-full h-full bg-green-500/20 rounded-full flex items-center justify-center text-green-600 dark:text-green-400 text-sm z-10">
                   Foto de perfil actualizada
                 </div>
               )}
@@ -881,7 +881,7 @@ export default function SellerDashboard() {
             <div className="flex-1 text-center md:text-left">
               <div className="flex items-center gap-2 justify-center md:justify-start mb-1">
                 <h1 className="text-3xl font-bold text-white">{sellerInfo.name}</h1>
-                <span className="bg-green-500/20 border border-green-500/40 text-green-300 text-xs px-2 py-0.5 rounded-full font-medium">Vendedor</span>
+                <span className="bg-green-500/20 border border-green-500/40 text-green-700 dark:text-green-300 text-xs px-2 py-0.5 rounded-full font-medium">Vendedor</span>
               </div>
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-green-100 mt-2">
                 <div className="flex items-center gap-1">
@@ -914,7 +914,7 @@ export default function SellerDashboard() {
               className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-medium whitespace-nowrap transition-all ${
                 activeTab === tab.id
                   ? 'bg-green-500 text-white shadow-lg shadow-green-500/30'
-                  : 'bg-slate-800 text-gray-400 hover:text-gray-200 hover:bg-slate-700'
+                  : 'bg-gray-50 dark:bg-slate-800 text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-slate-700'
               }`}
             >
               {tab.icon}
@@ -926,7 +926,7 @@ export default function SellerDashboard() {
         {activeTab === 'products' && (
           <div>
             <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold text-white">Mis Productos <span className="text-gray-500 font-normal text-base">({products.length})</span></h2>
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white">Mis Productos <span className="text-gray-600 dark:text-gray-500 font-normal text-base">({products.length})</span></h2>
               <button
                 onClick={() => { setFormErrors({}); setShowAddModal(true); }}
                 className="flex items-center gap-2 bg-green-500 hover:bg-green-400 text-white px-5 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-green-500/30 hover:shadow-green-500/50"
@@ -937,7 +937,7 @@ export default function SellerDashboard() {
             </div>
 
             {products.length === 0 ? (
-              <div className="text-center py-20 text-gray-400">
+              <div className="text-center py-20 text-gray-600 dark:text-gray-400">
                 <CubeIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
                 <p className="text-lg font-medium">No tienes productos aún</p>
                 <p className="text-sm mt-1">Agrega tu primer producto para empezar a vender</p>
@@ -954,13 +954,13 @@ export default function SellerDashboard() {
                 {products.map((product) => (
                   <div
                     key={product.id}
-                    className={`bg-slate-900 rounded-xl border transition-all overflow-hidden ${
+                    className={`bg-white dark:bg-slate-900 rounded-xl border transition-all overflow-hidden ${
                       product.active
-                        ? 'border-slate-800 hover:border-green-500/40 hover:shadow-lg hover:shadow-green-500/10'
-                        : 'border-slate-700 opacity-60'
+                        ? 'border-gray-200 dark:border-slate-800 hover:border-green-500/40 hover:shadow-lg hover:shadow-green-500/10'
+                        : 'border-gray-300 dark:border-slate-700 opacity-60'
                     }`}
                   >
-                    <div className="relative aspect-square bg-slate-800">
+                    <div className="relative aspect-square bg-gray-50 dark:bg-slate-800">
                       <img
                         src={resolveImageUrl(product.image)}
                         alt={product.name}
@@ -968,26 +968,26 @@ export default function SellerDashboard() {
                       />
                       <div className={`absolute top-2 left-2 text-xs font-semibold px-2 py-0.5 rounded-full border ${
                         product.active
-                          ? 'bg-green-500/20 border-green-500/40 text-green-300'
-                          : 'bg-red-500/20 border-red-500/40 text-red-300'
+                          ? 'bg-green-500/20 border-green-500/40 text-green-700 dark:text-green-300'
+                          : 'bg-red-500/20 border-red-500/40 text-red-700 dark:text-red-300'
                       }`}>
                         {product.active ? 'Activo' : 'Inactivo'}
                       </div>
-                      <div className="absolute top-2 right-2 bg-slate-900/90 backdrop-blur-sm px-2 py-0.5 rounded-lg text-xs font-semibold text-green-400 border border-slate-700">
+                      <div className="absolute top-2 right-2 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm px-2 py-0.5 rounded-lg text-xs font-semibold text-green-600 dark:text-green-400 border border-gray-300 dark:border-slate-700">
                         Stock: {product.stock}
                       </div>
                     </div>
 
                     <div className="p-4">
                       <Link to={`/producto/${product.id}`} className="block mb-2">
-                        <h3 className="text-gray-200 font-semibold line-clamp-2 h-11 hover:text-green-400 transition-colors text-sm">
+                        <h3 className="text-gray-800 dark:text-gray-200 font-semibold line-clamp-2 h-11 hover:text-green-600 dark:hover:text-green-400 transition-colors text-sm">
                           {product.name}
                         </h3>
                       </Link>
-                      <div className="text-green-400 font-bold mb-3">
+                      <div className="text-green-600 dark:text-green-400 font-bold mb-3">
                         ${product.price.toLocaleString('es-CO')}
                       </div>
-                      <div className="flex items-center justify-between text-xs text-gray-400 mb-4">
+                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400 mb-4">
                         <div className="flex items-center gap-1">
                           <ArrowTrendingUpIcon className="w-3.5 h-3.5" />
                           <span>{product.sold} vendidos</span>
@@ -995,7 +995,7 @@ export default function SellerDashboard() {
                         {product.rating > 0 && (
                           <div className="flex items-center gap-1">
                             <StarIcon className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                            <span className="text-gray-300">{product.rating}</span>
+                            <span className="text-gray-700 dark:text-gray-300">{product.rating}</span>
                           </div>
                         )}
                       </div>
@@ -1005,26 +1005,26 @@ export default function SellerDashboard() {
                           onClick={() => toggleActive(product.id)}
                           className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${
                             product.active
-                              ? 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-400 hover:bg-yellow-500/20'
-                              : 'bg-green-500/10 border border-green-500/30 text-green-400 hover:bg-green-500/20'
+                              ? 'bg-yellow-500/10 border border-yellow-500/30 text-yellow-700 dark:text-yellow-400 hover:bg-yellow-500/20'
+                              : 'bg-green-500/10 border border-green-500/30 text-green-600 dark:text-green-400 hover:bg-green-500/20'
                           }`}
                           title={product.active ? 'Desactivar' : 'Activar'}
                         >
-                          <span className={`w-6 h-3.5 flex items-center bg-slate-700 rounded-full p-0.5 duration-300 ease-in-out ${product.active ? 'bg-yellow-500/40' : 'bg-green-500/40'}`}>
+                          <span className={`w-6 h-3.5 flex items-center bg-gray-200 dark:bg-slate-700 rounded-full p-0.5 duration-300 ease-in-out ${product.active ? 'bg-yellow-500/40' : 'bg-green-500/40'}`}>
                             <span className={`bg-white w-2.5 h-2.5 rounded-full shadow-md transform duration-300 ease-in-out ${product.active ? 'translate-x-0' : 'translate-x-2.5'}`}></span>
                           </span>
                           {product.active ? 'Desactivar' : 'Activar'}
                         </button>
                         <button
                           onClick={() => openEditModal(product.id)}
-                          className="w-9 h-9 flex items-center justify-center bg-blue-500/10 border border-blue-500/30 text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all"
+                          className="w-9 h-9 flex items-center justify-center bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 rounded-lg transition-all"
                           title="Editar producto"
                         >
                           <PencilSquareIcon className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => setShowDeleteConfirm(product.id)}
-                          className="w-9 h-9 flex items-center justify-center bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-lg transition-all"
+                          className="w-9 h-9 flex items-center justify-center bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/20 rounded-lg transition-all"
                           title="Eliminar producto"
                         >
                           <TrashIcon className="w-4 h-4" />
@@ -1039,10 +1039,10 @@ export default function SellerDashboard() {
         )}
 
         {activeTab === 'orders' && (
-          <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-            <h2 className="text-xl font-bold text-white mb-6">Pedidos recibidos ({companyOrders.length})</h2>
+          <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">Pedidos recibidos ({companyOrders.length})</h2>
             {companyOrders.length === 0 ? (
-              <div className="text-center py-16 text-gray-400">
+              <div className="text-center py-16 text-gray-600 dark:text-gray-400">
                 <ShoppingBagIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
                 <p className="text-lg font-medium">No tienes pedidos aún</p>
                 <p className="text-sm mt-1">Los pedidos de tus productos aparecerán aquí</p>
@@ -1050,44 +1050,44 @@ export default function SellerDashboard() {
             ) : (
               <div className="space-y-4">
                 {companyOrders.map((order) => (
-                  <div key={order.id} className="border border-slate-800 rounded-xl overflow-hidden">
+                  <div key={order.id} className="border border-gray-200 dark:border-slate-800 rounded-xl overflow-hidden">
                     <button
                       onClick={() => setSelectedOrder(selectedOrder === order.id ? null : order.id)}
-                      className="w-full flex items-center gap-4 p-4 hover:bg-slate-800/60 transition-colors"
+                      className="w-full flex items-center gap-4 p-4 hover:bg-gray-50/60 dark:hover:bg-slate-800/60 transition-colors"
                     >
                       <div className="flex-1 text-left min-w-0">
                         <div className="flex items-center gap-3">
-                          <p className="text-white font-bold text-sm truncate">{order.id.slice(0, 8)}...</p>
+                          <p className="text-gray-900 dark:text-white font-bold text-sm truncate">{order.id.slice(0, 8)}...</p>
                           <span className={`text-xs px-2 py-0.5 rounded-full border ${orderStatusColor(order.status)}`}>
                             {orderStatusLabel(order.status)}
                           </span>
                         </div>
-                        <p className="text-gray-500 text-xs mt-1">
+                        <p className="text-gray-600 dark:text-gray-500 text-xs mt-1">
                           {order.buyer_name || order.buyer_email} · {new Date(order.created_at).toLocaleDateString("es-CO", { day: "numeric", month: "long", year: "numeric" })}
                         </p>
                       </div>
                       <div className="text-right">
-                        <p className="text-green-400 font-bold">${order.total.toLocaleString("es-CO")}</p>
-                        <p className="text-gray-500 text-xs">{order.items.length} producto(s)</p>
+                        <p className="text-green-600 dark:text-green-400 font-bold">${order.total.toLocaleString("es-CO")}</p>
+                        <p className="text-gray-600 dark:text-gray-500 text-xs">{order.items.length} producto(s)</p>
                       </div>
-                      <ChevronRightIcon className={`w-5 h-5 text-gray-400 transition-transform ${selectedOrder === order.id ? "rotate-90" : ""}`} />
+                      <ChevronRightIcon className={`w-5 h-5 text-gray-600 dark:text-gray-400 transition-transform ${selectedOrder === order.id ? "rotate-90" : ""}`} />
                     </button>
 
                     {selectedOrder === order.id && (
-                      <div className="border-t border-slate-800 p-5 bg-slate-950/50 space-y-5">
+                      <div className="border-t border-gray-200 dark:border-slate-800 p-5 bg-gray-100/50 dark:bg-slate-950/50 space-y-5">
                         <div>
-                          <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3">Productos</h3>
+                          <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-3">Productos</h3>
                           <div className="space-y-2">
                             {order.items.map((item) => (
                               <div key={item.id} className="flex items-center gap-3">
-                                <div className="w-10 h-10 rounded-lg bg-slate-800 flex items-center justify-center text-gray-500">
+                                <div className="w-10 h-10 rounded-lg bg-gray-50 dark:bg-slate-800 flex items-center justify-center text-gray-600 dark:text-gray-500">
                                   <CubeIcon className="w-4 h-4" />
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-white text-sm font-medium">{item.name}</p>
-                                  <p className="text-gray-500 text-xs">Cantidad: {item.quantity}</p>
+                                  <p className="text-gray-900 dark:text-white text-sm font-medium">{item.name}</p>
+                                  <p className="text-gray-600 dark:text-gray-500 text-xs">Cantidad: {item.quantity}</p>
                                 </div>
-                                <p className="text-white text-sm font-semibold">${(item.price * item.quantity).toLocaleString("es-CO")}</p>
+                                <p className="text-gray-900 dark:text-white text-sm font-semibold">${(item.price * item.quantity).toLocaleString("es-CO")}</p>
                               </div>
                             ))}
                           </div>
@@ -1095,16 +1095,16 @@ export default function SellerDashboard() {
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                           <div>
-                            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Resumen</h3>
+                            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">Resumen</h3>
                             <div className="space-y-1 text-sm">
-                              <div className="flex justify-between"><span className="text-gray-500">Subtotal</span><span className="text-white">${order.subtotal.toLocaleString("es-CO")}</span></div>
-                              <div className="flex justify-between"><span className="text-gray-500">Envío</span><span className="text-white">{order.shipping === 0 ? 'GRATIS' : `$${order.shipping.toLocaleString("es-CO")}`}</span></div>
-                              <div className="flex justify-between pt-2 border-t border-slate-800"><span className="text-gray-300 font-semibold">Total</span><span className="text-green-400 font-bold">${order.total.toLocaleString("es-CO")}</span></div>
+                              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-500">Subtotal</span><span className="text-gray-900 dark:text-white">${order.subtotal.toLocaleString("es-CO")}</span></div>
+                              <div className="flex justify-between"><span className="text-gray-600 dark:text-gray-500">Envío</span><span className="text-gray-900 dark:text-white">{order.shipping === 0 ? 'GRATIS' : `$${order.shipping.toLocaleString("es-CO")}`}</span></div>
+                              <div className="flex justify-between pt-2 border-t border-gray-200 dark:border-slate-800"><span className="text-gray-700 dark:text-gray-300 font-semibold">Total</span><span className="text-green-600 dark:text-green-400 font-bold">${order.total.toLocaleString("es-CO")}</span></div>
                             </div>
                           </div>
                           <div>
-                            <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-2">Envío y pago</h3>
-                            <div className="space-y-1 text-sm text-gray-400">
+                            <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-2">Envío y pago</h3>
+                            <div className="space-y-1 text-sm text-gray-600 dark:text-gray-400">
                               <p>{order.recipient} · {order.address}, {order.city}</p>
                               <p>Pago: {order.payment_method === "tarjeta" ? "Tarjeta" : order.payment_method === "pse" ? "PSE" : order.payment_method}</p>
                             </div>
@@ -1112,13 +1112,13 @@ export default function SellerDashboard() {
                         </div>
 
                         {order.status !== 'delivered' && order.status !== 'cancelled' && (
-                          <div className="flex gap-2 pt-2 border-t border-slate-800">
+                          <div className="flex gap-2 pt-2 border-t border-gray-200 dark:border-slate-800">
                             {order.status === 'pending' && (
                               <>
                                 <button onClick={() => handleOrderStatus(order.id, 'confirmed')} className="px-4 py-2 bg-blue-500 hover:bg-blue-400 text-white rounded-lg text-sm font-semibold transition">
                                   Confirmar pedido
                                 </button>
-                                <button onClick={() => handleOrderStatus(order.id, 'cancelled')} className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 rounded-lg text-sm font-semibold transition">
+                                <button onClick={() => handleOrderStatus(order.id, 'cancelled')} className="px-4 py-2 bg-red-500/10 border border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/20 rounded-lg text-sm font-semibold transition">
                                   Rechazar
                                 </button>
                               </>
@@ -1148,25 +1148,25 @@ export default function SellerDashboard() {
           <div className="space-y-6">
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
               {[
-                { label: 'Productos activos', value: activeProducts.length, icon: <CubeIcon className="w-5 h-5 text-green-400" /> },
-                { label: 'Ventas totales', value: products.reduce((a, p) => a + p.sold, 0), icon: <ArrowTrendingUpIcon className="w-5 h-5 text-blue-400" /> },
+                { label: 'Productos activos', value: activeProducts.length, icon: <CubeIcon className="w-5 h-5 text-green-600 dark:text-green-400" /> },
+                { label: 'Ventas totales', value: products.reduce((a, p) => a + p.sold, 0), icon: <ArrowTrendingUpIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" /> },
                 { label: 'Ingresos totales', value: `$${(totalRevenue / 1000000).toFixed(1)}M`, icon: <CurrencyDollarIcon className="w-5 h-5 text-yellow-400" /> },
                 { label: 'Calificación', value: sellerInfo.rating > 0 ? sellerInfo.rating : 'N/A', icon: <StarIcon className="w-5 h-5 text-yellow-400 fill-yellow-400" /> },
               ].map((stat) => (
-                <div key={stat.label} className="bg-slate-900 rounded-xl border border-slate-800 p-5">
+                <div key={stat.label} className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-5">
                   <div className="flex items-center justify-between mb-3">
-                    <span className="text-gray-400 text-sm">{stat.label}</span>
+                    <span className="text-gray-600 dark:text-gray-400 text-sm">{stat.label}</span>
                     {stat.icon}
                   </div>
-                  <p className="text-2xl font-bold text-white">{stat.value}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{stat.value}</p>
                 </div>
               ))}
             </div>
 
-            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-              <h2 className="text-lg font-bold text-white mb-5">Rendimiento por producto</h2>
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-5">Rendimiento por producto</h2>
               {products.length === 0 ? (
-                <p className="text-gray-400 text-center py-8">No hay productos para mostrar</p>
+                <p className="text-gray-600 dark:text-gray-400 text-center py-8">No hay productos para mostrar</p>
               ) : (
                 <div className="space-y-4">
                   {products.map((p) => {
@@ -1176,10 +1176,10 @@ export default function SellerDashboard() {
                         <img src={resolveImageUrl(p.image)} alt={p.name} className="w-10 h-10 rounded-lg object-cover flex-shrink-0" />
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-1">
-                            <span className="text-white text-sm font-medium line-clamp-1">{p.name}</span>
-                            <span className="text-gray-400 text-xs ml-2 flex-shrink-0">{p.sold} vendidos</span>
+                            <span className="text-gray-900 dark:text-white text-sm font-medium line-clamp-1">{p.name}</span>
+                            <span className="text-gray-600 dark:text-gray-400 text-xs ml-2 flex-shrink-0">{p.sold} vendidos</span>
                           </div>
-                          <div className="w-full bg-slate-800 rounded-full h-2">
+                          <div className="w-full bg-gray-50 dark:bg-slate-800 rounded-full h-2">
                             <div
                               className="bg-gradient-to-r from-green-500 to-blue-500 h-2 rounded-full transition-all"
                               style={{ width: `${(p.sold / maxSold) * 100}%` }}
@@ -1197,27 +1197,27 @@ export default function SellerDashboard() {
 
         {activeTab === 'profile' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-              <h2 className="text-lg font-bold text-white mb-5 flex items-center gap-2">
-                <ShieldCheckIcon className="w-5 h-5 text-green-400" /> Información del vendedor
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-5 flex items-center gap-2">
+                <ShieldCheckIcon className="w-5 h-5 text-green-600 dark:text-green-400" /> Información del vendedor
               </h2>
               <div className="space-y-4">
                 {[
-                  { id: 'name', label: 'Nombre de tienda', value: sellerInfo.name, icon: <CubeIcon className="w-4 h-4 text-gray-400" /> },
-                  { id: 'email', label: 'Correo electrónico', value: sellerInfo.email, icon: <EnvelopeIcon className="w-4 h-4 text-gray-400" /> },
-                  { id: 'phone', label: 'Teléfono', value: sellerInfo.phone, icon: <PhoneIcon className="w-4 h-4 text-gray-400" /> },
-                  { id: 'date', label: 'Miembro desde', value: sellerInfo.memberSince, icon: <CalendarIcon className="w-4 h-4 text-gray-400" /> },
+                  { id: 'name', label: 'Nombre de tienda', value: sellerInfo.name, icon: <CubeIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" /> },
+                  { id: 'email', label: 'Correo electrónico', value: sellerInfo.email, icon: <EnvelopeIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" /> },
+                  { id: 'phone', label: 'Teléfono', value: sellerInfo.phone, icon: <PhoneIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" /> },
+                  { id: 'date', label: 'Miembro desde', value: sellerInfo.memberSince, icon: <CalendarIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" /> },
                 ].map((field) => (
-                  <div key={field.label} className="flex items-center gap-3 p-3 bg-slate-800 rounded-lg">
+                  <div key={field.label} className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
                     {field.icon}
                     <div className="flex-1">
-                      <p className="text-gray-500 text-xs">{field.label}</p>
-                      <p className="text-white text-sm font-medium">{field.value}</p>
+                      <p className="text-gray-600 dark:text-gray-500 text-xs">{field.label}</p>
+                      <p className="text-gray-900 dark:text-white text-sm font-medium">{field.value}</p>
                     </div>
                     {field.id !== 'date' && (
                       <button 
                         onClick={openEditProfile}
-                        className="text-gray-500 hover:text-green-400 transition-colors"
+                        className="text-gray-600 dark:text-gray-500 hover:text-green-600 dark:hover:text-green-400 transition-colors"
                       >
                         <PencilSquareIcon className="w-4 h-4" />
                       </button>
@@ -1233,37 +1233,37 @@ export default function SellerDashboard() {
               </button>
             </div>
 
-            <div className="bg-slate-900 rounded-xl border border-slate-800 p-6">
-              <h2 className="text-lg font-bold text-white mb-4 flex items-center gap-2">
+            <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-6">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <StarIcon className="w-5 h-5 text-yellow-400" /> Reputación y métricas
               </h2>
               <div className="space-y-4">
-                <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
-                  <span className="text-gray-300">Calificación promedio</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
+                  <span className="text-gray-700 dark:text-gray-300">Calificación promedio</span>
                   <div className="flex items-center gap-1">
                     <StarIcon className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                    <span className="text-white font-bold">{sellerInfo.rating > 0 ? sellerInfo.rating : 'N/A'}</span>
+                    <span className="text-gray-900 dark:text-white font-bold">{sellerInfo.rating > 0 ? sellerInfo.rating : 'N/A'}</span>
                   </div>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
-                  <span className="text-gray-300">Total de reseñas</span>
-                  <span className="text-white font-bold">{sellerInfo.totalReviews}</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
+                  <span className="text-gray-700 dark:text-gray-300">Total de reseñas</span>
+                  <span className="text-gray-900 dark:text-white font-bold">{sellerInfo.totalReviews}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
-                  <span className="text-gray-300">Ventas completadas</span>
-                  <span className="text-white font-bold">{sellerInfo.totalSales}</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
+                  <span className="text-gray-700 dark:text-gray-300">Ventas completadas</span>
+                  <span className="text-gray-900 dark:text-white font-bold">{sellerInfo.totalSales}</span>
                 </div>
-                <div className="flex items-center justify-between p-3 bg-slate-800 rounded-lg">
-                  <span className="text-gray-300">Nivel de vendedor</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
+                  <span className="text-gray-700 dark:text-gray-300">Nivel de vendedor</span>
                   <span className={`text-xs px-3 py-1 rounded-full font-semibold border ${getLevelColor(sellerInfo.sellerLevel)}`}>{sellerInfo.sellerLevel}</span>
                 </div>
               </div>
-              <div className="mt-4 p-3 bg-slate-800 rounded-lg">
+              <div className="mt-4 p-3 bg-gray-50 dark:bg-slate-800 rounded-lg">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-gray-400 text-xs">Progreso nivel</span>
-                  <span className="text-gray-400 text-xs">{sellerInfo.levelProgress}%</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-xs">Progreso nivel</span>
+                  <span className="text-gray-600 dark:text-gray-400 text-xs">{sellerInfo.levelProgress}%</span>
                 </div>
-                <div className="w-full bg-slate-700 rounded-full h-2">
+                <div className="w-full bg-gray-200 dark:bg-slate-700 rounded-full h-2">
                   <div className={`bg-gradient-to-r ${getLevelBarColor(sellerInfo.sellerLevel)} h-2 rounded-full transition-all duration-500`} style={{ width: `${sellerInfo.levelProgress}%` }} />
                 </div>
               </div>
@@ -1273,14 +1273,14 @@ export default function SellerDashboard() {
       </div>
 
       {activeTab === 'reviews' && (
-        <div className="bg-slate-900 rounded-xl border border-slate-800 p-8">
-          <h2 className="text-2xl font-bold text-white mb-6">Reseñas de productos</h2>
+        <div className="bg-white dark:bg-slate-900 rounded-xl border border-gray-200 dark:border-slate-800 p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">Reseñas de productos</h2>
           {reviewsLoading ? (
             <div className="flex justify-center py-8">
               <div className="w-8 h-8 border-4 border-emerald-500/30 border-t-emerald-500 rounded-full animate-spin"></div>
             </div>
           ) : reviews.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-gray-600 dark:text-gray-400">
               <StarIcon className="w-16 h-16 mx-auto mb-4 opacity-30" />
               <p className="text-lg font-medium">No hay reseñas aún</p>
               <p className="text-sm">Los clientes aún no han dejado reseñas para tus productos</p>
@@ -1290,14 +1290,14 @@ export default function SellerDashboard() {
               {reviews.map((review) => (
                 <div
                   key={review.id}
-                  className="flex items-center gap-4 p-4 rounded-xl border border-slate-800"
+                  className="flex items-center gap-4 p-4 rounded-xl border border-gray-200 dark:border-slate-800"
                 >
-                  <div className="w-10 h-10 rounded-lg bg-slate-700 flex items-center justify-center text-sm">
+                  <div className="w-10 h-10 rounded-lg bg-gray-200 dark:bg-slate-700 flex items-center justify-center text-sm">
                     {review.user_name?.charAt(0)?.toUpperCase() || "U"}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-white">{review.user_name}</h3>
-                    <p className="text-gray-400 text-sm">{review.comment?.substring(0, 100) || ""}...</p>
+                    <h3 className="font-semibold text-gray-900 dark:text-white">{review.user_name}</h3>
+                    <p className="text-gray-600 dark:text-gray-400 text-sm">{review.comment?.substring(0, 100) || ""}...</p>
                   </div>
                   <div className="flex items-center gap-2">
                     {Array.from({ length: 5 }).map((_, i) => (
@@ -1306,9 +1306,9 @@ export default function SellerDashboard() {
                         className={`w-4 h-4 ${i < review.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-600"}`}
                       />
                     ))}
-                    <span className="text-xs text-gray-400">{review.rating}/5</span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400">{review.rating}/5</span>
                   </div>
-                  <span className="text-xs text-gray-400">
+                  <span className="text-xs text-gray-600 dark:text-gray-400">
                     {new Date(review.created_at).toLocaleDateString("es-CO")}
                   </span>
                 </div>
@@ -1320,15 +1320,15 @@ export default function SellerDashboard() {
 
       {showAddModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <PlusIcon className="w-5 h-5 text-green-400" />
+          <div className="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <PlusIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                 Agregar nuevo producto
               </h2>
               <button
                 onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -1337,12 +1337,12 @@ export default function SellerDashboard() {
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Imágenes del producto <span className="text-gray-500 font-normal">({images.length}/{MAX_PRODUCT_IMAGES})</span>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Imágenes del producto <span className="text-gray-600 dark:text-gray-500 font-normal">({images.length}/{MAX_PRODUCT_IMAGES})</span>
                   </label>
                   <div className="grid grid-cols-3 gap-3 mb-3">
                     {images.map((img, i) => (
-                      <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-slate-700">
+                      <div key={img.id} className="relative aspect-square rounded-xl overflow-hidden bg-gray-50 dark:bg-slate-800 border-2 border-gray-300 dark:border-slate-700">
                         <img
                           src={img.preview}
                           alt={`Imagen ${i + 1}`}
@@ -1363,7 +1363,7 @@ export default function SellerDashboard() {
                       </div>
                     ))}
                     {images.length < MAX_PRODUCT_IMAGES && (
-                      <label className="aspect-square rounded-xl border-2 border-dashed border-slate-600 hover:border-green-500 hover:bg-slate-700/50 flex flex-col items-center justify-center gap-1 text-gray-400 hover:text-white cursor-pointer transition text-center px-1">
+                      <label className="aspect-square rounded-xl border-2 border-dashed border-gray-400 dark:border-slate-600 hover:border-green-500 hover:bg-gray-200/50 dark:hover:bg-slate-700/50 flex flex-col items-center justify-center gap-1 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white cursor-pointer transition text-center px-1">
                         <PlusIcon className="w-6 h-6" />
                         <span className="text-[10px] leading-tight">Agregar foto</span>
                         <input type="file" accept="image/*" multiple className="hidden" onChange={handleAddImages} />
@@ -1378,39 +1378,39 @@ export default function SellerDashboard() {
                       onChange={(e) => setImageUrlInput(e.target.value)}
                       onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddImageUrl(); } }}
                       disabled={images.length >= MAX_PRODUCT_IMAGES}
-                      className="flex-1 bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50"
+                      className="flex-1 bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors disabled:opacity-50"
                     />
                     <button
                       type="button"
                       onClick={handleAddImageUrl}
                       disabled={!imageUrlInput.trim() || images.length >= MAX_PRODUCT_IMAGES}
-                      className="px-3 rounded-lg bg-slate-800 border border-slate-700 text-gray-300 hover:text-white hover:border-green-500 disabled:opacity-40 disabled:cursor-not-allowed transition text-sm"
+                      className="px-3 rounded-lg bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:border-green-500 disabled:opacity-40 disabled:cursor-not-allowed transition text-sm"
                     >
                       Agregar
                     </button>
                   </div>
-                  {uploadingImage && <p className="text-xs text-green-400 animate-pulse">Subiendo imágenes...</p>}
-                  <p className="text-xs text-gray-500">Puedes subir hasta {MAX_PRODUCT_IMAGES} fotos. La primera será la principal. Se guardarán en MinIO.</p>
+                  {uploadingImage && <p className="text-xs text-green-600 dark:text-green-400 animate-pulse">Subiendo imágenes...</p>}
+                  <p className="text-xs text-gray-600 dark:text-gray-500">Puedes subir hasta {MAX_PRODUCT_IMAGES} fotos. La primera será la principal. Se guardarán en MinIO.</p>
                 </div>
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Nombre del producto <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Nombre del producto <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       type="text"
                       placeholder="Ej: Celular Samsung Galaxy S24"
                       value={form.name}
                       onChange={(e) => handleFormChange('name', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
-                    {formErrors.name && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.name}</p>}
+                    {formErrors.name && <p className="text-xs text-red-600 dark:text-red-400 mt-1" role="alert">{formErrors.name}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Precio (COP) <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Precio (COP) <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       type="number"
@@ -1420,16 +1420,16 @@ export default function SellerDashboard() {
                       value={form.price}
                       onChange={(e) => handleFormChange('price', e.target.value)}
                       aria-invalid={!!formErrors.price}
-                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                      className={`w-full bg-gray-50 dark:bg-slate-800 border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.price ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-slate-700 focus:border-green-500'}`}
                     />
                     {formErrors.price && (
-                      <span className="block text-red-500 text-sm mt-1">{formErrors.price}</span>
+                      <span className="block text-red-600 dark:text-red-500 text-sm mt-1">{formErrors.price}</span>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Stock disponible <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Stock disponible <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       type="number"
@@ -1439,16 +1439,16 @@ export default function SellerDashboard() {
                       value={form.stock}
                       onChange={(e) => handleFormChange('stock', e.target.value)}
                       aria-invalid={!!formErrors.stock}
-                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                      className={`w-full bg-gray-50 dark:bg-slate-800 border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-slate-700 focus:border-green-500'}`}
                     />
                     {formErrors.stock && (
-                      <span className="block text-red-500 text-sm mt-1">{formErrors.stock}</span>
+                      <span className="block text-red-600 dark:text-red-500 text-sm mt-1">{formErrors.stock}</span>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-600 dark:text-gray-500 font-normal">opcional</span>
                     </label>
                     <input
                       type="number"
@@ -1459,21 +1459,21 @@ export default function SellerDashboard() {
                       value={form.discount}
                       onChange={(e) => handleFormChange('discount', e.target.value)}
                       aria-invalid={!!formErrors.discount}
-                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-green-500'}`}
+                      className={`w-full bg-gray-50 dark:bg-slate-800 border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${formErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-slate-700 focus:border-green-500'}`}
                     />
                     {formErrors.discount ? (
-                      <span className="block text-red-500 text-sm mt-1">{formErrors.discount}</span>
+                      <span className="block text-red-600 dark:text-red-500 text-sm mt-1">{formErrors.discount}</span>
                     ) : (
-                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                      <span className="block text-gray-600 dark:text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría <span className="text-red-400">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Categoría <span className="text-red-600 dark:text-red-400">*</span></label>
                     <select
                       value={form.category}
                       onChange={(e) => handleFormChange('category', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     >
                       <option value="">Selecciona una categoría</option>
                       <option value="Celulares">Celulares</option>
@@ -1485,55 +1485,55 @@ export default function SellerDashboard() {
                       <option value="Tablets">Tablets</option>
                       <option value="Accesorios">Accesorios</option>
                     </select>
-                    {formErrors.category && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.category}</p>}
+                    {formErrors.category && <p className="text-xs text-red-600 dark:text-red-400 mt-1" role="alert">{formErrors.category}</p>}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción <span className="text-red-400">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Descripción <span className="text-red-600 dark:text-red-400">*</span></label>
                 <textarea
                   rows={3}
                   placeholder="Describe las características principales del producto..."
                   value={form.description}
                   onChange={(e) => handleFormChange('description', e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
+                  className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors resize-none"
                 />
-                {formErrors.description && <p className="text-xs text-red-400 mt-1" role="alert">{formErrors.description}</p>}
+                {formErrors.description && <p className="text-xs text-red-600 dark:text-red-400 mt-1" role="alert">{formErrors.description}</p>}
               </div>
 
               <div>
-                <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                  <ChevronRightIcon className="w-4 h-4 text-green-400" />
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <ChevronRightIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
                   Especificaciones técnicas
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Marca</label>
                     <input
                       type="text"
                       placeholder="Ej: Samsung"
                       value={form.brand}
                       onChange={(e) => handleFormChange('brand', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Modelo</label>
                     <input
                       type="text"
                       placeholder="Ej: Galaxy S24 Ultra"
                       value={form.model}
                       onChange={(e) => handleFormChange('model', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Garantía</label>
                     <select
                       value={form.warranty}
                       onChange={(e) => handleFormChange('warranty', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     >
                       <option value="">Sin garantía</option>
                       <option value="1">1 mes</option>
@@ -1550,7 +1550,7 @@ export default function SellerDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Peso</label>
                     <div className="relative">
                       <input
                         type="text"
@@ -1558,19 +1558,19 @@ export default function SellerDashboard() {
                         placeholder="Ej: 0.25"
                         value={form.weight}
                         onChange={(e) => handleFormChange('weight', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                        className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-green-500 transition-colors"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Dimensiones</label>
                     <input
                       type="text"
                       placeholder="Ej: 15 x 7 x 0.9 cm"
                       value={form.dimensions}
                       onChange={(e) => handleFormChange('dimensions', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-green-500 transition-colors"
                     />
                   </div>
                 </div>
@@ -1579,7 +1579,7 @@ export default function SellerDashboard() {
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => { setShowAddModal(false); setForm(EMPTY_FORM); setFormErrors({}); images.forEach((img) => img.file && URL.revokeObjectURL(img.preview)); setImages([]); setImageUrlInput(''); }}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                  className="flex-1 py-3 bg-gray-50 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors border border-gray-300 dark:border-slate-700"
                 >
                   Cancelar
                 </button>
@@ -1599,15 +1599,15 @@ export default function SellerDashboard() {
 
       {showEditModal && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
-            <div className="flex items-center justify-between p-6 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <PencilSquareIcon className="w-5 h-5 text-blue-400" />
+          <div className="bg-white dark:bg-slate-900 border border-gray-300 dark:border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-slate-800 sticky top-0 bg-white dark:bg-slate-900 z-10">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <PencilSquareIcon className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                 Editar producto
               </h2>
               <button
                 onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -1616,11 +1616,11 @@ export default function SellerDashboard() {
             <div className="p-6 space-y-6">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-300 mb-2">
-                    Imagen del producto <span className="text-gray-500 font-normal">(archivo o URL)</span>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Imagen del producto <span className="text-gray-600 dark:text-gray-500 font-normal">(archivo o URL)</span>
                   </label>
                   <div className="space-y-3 mb-3">
-                    <label className="flex items-center justify-center gap-2 w-full bg-slate-800 border-2 border-dashed border-slate-600 hover:border-blue-500 hover:bg-slate-700/50 text-gray-300 hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
+                    <label className="flex items-center justify-center gap-2 w-full bg-gray-50 dark:bg-slate-800 border-2 border-dashed border-gray-400 dark:border-slate-600 hover:border-blue-500 hover:bg-gray-200/50 dark:hover:bg-slate-700/50 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white rounded-lg px-3 py-3 text-sm cursor-pointer transition text-center">
                       <ArrowUpTrayIcon className="w-5 h-5 flex-shrink-0" />
                       <span className="truncate">{editSelectedFile ? editSelectedFile.name : "Click para cambiar archivo (JPG, PNG, WEBP)"}</span>
                       <input type="file" accept="image/*" className="hidden" onChange={handleEditImageFileChange} />
@@ -1631,20 +1631,20 @@ export default function SellerDashboard() {
                         placeholder="o pega URL https://..."
                         value={editForm.imageUrl}
                         onChange={(e) => handleEditFormChange('imageUrl', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                       />
                     </div>
-                    {editUploading && <p className="text-xs text-blue-400 animate-pulse">Subiendo imagen...</p>}
+                    {editUploading && <p className="text-xs text-blue-600 dark:text-blue-400 animate-pulse">Subiendo imagen...</p>}
                   </div>
-                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-slate-800 border-2 border-dashed border-slate-700 flex items-center justify-center relative">
+                  <div className="w-full aspect-square rounded-xl overflow-hidden bg-gray-50 dark:bg-slate-800 border-2 border-dashed border-gray-300 dark:border-slate-700 flex items-center justify-center relative">
                     {editImagePreview ? (
                       <img src={editImagePreview} alt="Preview" className="w-full h-full object-cover" onError={() => setEditImagePreview(REFERENCE_IMAGE)} />
                     ) : (
                       <div className="text-center">
                         <img src={REFERENCE_IMAGE} alt="Referencia" className="w-full h-full object-cover opacity-30" />
                         <div className="absolute inset-0 flex items-center justify-center flex-col gap-2">
-                          <ArrowUpTrayIcon className="w-8 h-8 text-gray-400" />
-                          <p className="text-gray-400 text-xs">Vista previa</p>
+                          <ArrowUpTrayIcon className="w-8 h-8 text-gray-600 dark:text-gray-400" />
+                          <p className="text-gray-600 dark:text-gray-400 text-xs">Vista previa</p>
                         </div>
                       </div>
                     )}
@@ -1653,22 +1653,22 @@ export default function SellerDashboard() {
 
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Nombre del producto <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Nombre del producto <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       type="text"
                       placeholder="Ej: Celular Samsung Galaxy S24"
                       value={editForm.name}
                       onChange={(e) => handleEditFormChange('name', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
-                    {editFormErrors.name && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.name}</p>}
+                    {editFormErrors.name && <p className="text-xs text-red-600 dark:text-red-400 mt-1" role="alert">{editFormErrors.name}</p>}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Precio (COP) <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Precio (COP) <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       type="number"
@@ -1678,16 +1678,16 @@ export default function SellerDashboard() {
                       value={editForm.price}
                       onChange={(e) => handleEditFormChange('price', e.target.value)}
                       aria-invalid={!!editFormErrors.price}
-                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.price ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
+                      className={`w-full bg-gray-50 dark:bg-slate-800 border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.price ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-slate-700 focus:border-blue-500'}`}
                     />
                     {editFormErrors.price && (
-                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.price}</span>
+                      <span className="block text-red-600 dark:text-red-500 text-sm mt-1">{editFormErrors.price}</span>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Stock disponible <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Stock disponible <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       type="number"
@@ -1697,16 +1697,16 @@ export default function SellerDashboard() {
                       value={editForm.stock}
                       onChange={(e) => handleEditFormChange('stock', e.target.value)}
                       aria-invalid={!!editFormErrors.stock}
-                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
+                      className={`w-full bg-gray-50 dark:bg-slate-800 border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.stock ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-slate-700 focus:border-blue-500'}`}
                     />
                     {editFormErrors.stock && (
-                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.stock}</span>
+                      <span className="block text-red-600 dark:text-red-500 text-sm mt-1">{editFormErrors.stock}</span>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Descuento (%) <span className="text-gray-500 font-normal">opcional</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Descuento (%) <span className="text-gray-600 dark:text-gray-500 font-normal">opcional</span>
                     </label>
                     <input
                       type="number"
@@ -1717,21 +1717,21 @@ export default function SellerDashboard() {
                       value={editForm.discount}
                       onChange={(e) => handleEditFormChange('discount', e.target.value)}
                       aria-invalid={!!editFormErrors.discount}
-                      className={`w-full bg-slate-800 border text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-slate-700 focus:border-blue-500'}`}
+                      className={`w-full bg-gray-50 dark:bg-slate-800 border text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none transition-colors ${editFormErrors.discount ? 'border-red-500 focus:border-red-500' : 'border-gray-300 dark:border-slate-700 focus:border-blue-500'}`}
                     />
                     {editFormErrors.discount ? (
-                      <span className="block text-red-500 text-sm mt-1">{editFormErrors.discount}</span>
+                      <span className="block text-red-600 dark:text-red-500 text-sm mt-1">{editFormErrors.discount}</span>
                     ) : (
-                      <span className="block text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
+                      <span className="block text-gray-600 dark:text-gray-500 text-xs mt-1">Máximo {MAX_DISCOUNT_PERCENT}%</span>
                     )}
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">Categoría <span className="text-red-400">*</span></label>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Categoría <span className="text-red-600 dark:text-red-400">*</span></label>
                     <select
                       value={editForm.category}
                       onChange={(e) => handleEditFormChange('category', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     >
                       <option value="">Selecciona una categoría</option>
                       <option value="Celulares">Celulares</option>
@@ -1743,55 +1743,55 @@ export default function SellerDashboard() {
                       <option value="Tablets">Tablets</option>
                       <option value="Accesorios">Accesorios</option>
                     </select>
-                    {editFormErrors.category && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.category}</p>}
+                    {editFormErrors.category && <p className="text-xs text-red-600 dark:text-red-400 mt-1" role="alert">{editFormErrors.category}</p>}
                   </div>
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1.5">Descripción <span className="text-red-400">*</span></label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Descripción <span className="text-red-600 dark:text-red-400">*</span></label>
                 <textarea
                   rows={3}
                   placeholder="Describe las características principales del producto..."
                   value={editForm.description}
                   onChange={(e) => handleEditFormChange('description', e.target.value)}
-                  className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
+                  className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-blue-500 transition-colors resize-none"
                 />
-                {editFormErrors.description && <p className="text-xs text-red-400 mt-1" role="alert">{editFormErrors.description}</p>}
+                {editFormErrors.description && <p className="text-xs text-red-600 dark:text-red-400 mt-1" role="alert">{editFormErrors.description}</p>}
               </div>
 
               <div>
-                <h3 className="text-base font-semibold text-white mb-3 flex items-center gap-2">
-                  <ChevronRightIcon className="w-4 h-4 text-blue-400" />
+                <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
+                  <ChevronRightIcon className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   Especificaciones técnicas
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Marca</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Marca</label>
                     <input
                       type="text"
                       placeholder="Ej: Samsung"
                       value={editForm.brand}
                       onChange={(e) => handleEditFormChange('brand', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Modelo</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Modelo</label>
                     <input
                       type="text"
                       placeholder="Ej: Galaxy S24 Ultra"
                       value={editForm.model}
                       onChange={(e) => handleEditFormChange('model', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Garantía</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Garantía</label>
                     <select
                       value={editForm.warranty}
                       onChange={(e) => handleEditFormChange('warranty', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     >
                       <option value="">Sin garantía</option>
                       <option value="1">1 mes</option>
@@ -1808,7 +1808,7 @@ export default function SellerDashboard() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Peso</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Peso</label>
                     <div className="relative">
                       <input
                         type="text"
@@ -1816,19 +1816,19 @@ export default function SellerDashboard() {
                         placeholder="Ej: 0.25"
                         value={editForm.weight}
                         onChange={(e) => handleEditFormChange('weight', e.target.value)}
-                        className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                        className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 pr-12 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                       />
                       <span className="absolute right-2 top-1/2 -translate-y-1/2 bg-blue-600 text-white text-xs font-bold px-3 py-1 rounded-full">kg</span>
                     </div>
                   </div>
                   <div className="col-span-2">
-                    <label className="block text-xs font-medium text-gray-400 mb-1.5">Dimensiones</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-400 mb-1.5">Dimensiones</label>
                     <input
                       type="text"
                       placeholder="Ej: 15 x 7 x 0.9 cm"
                       value={editForm.dimensions}
                       onChange={(e) => handleEditFormChange('dimensions', e.target.value)}
-                      className="w-full bg-slate-800 border border-slate-700 text-white placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
                     />
                   </div>
                 </div>
@@ -1837,7 +1837,7 @@ export default function SellerDashboard() {
               <div className="flex gap-3 pt-2">
                 <button
                   onClick={() => { setShowEditModal(false); setEditingId(null); setEditForm(EMPTY_FORM); setEditFormErrors({}); setEditImagePreview(''); setEditSelectedFile(null); }}
-                  className="flex-1 py-3 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                  className="flex-1 py-3 bg-gray-50 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors border border-gray-300 dark:border-slate-700"
                 >
                   Cancelar
                 </button>
@@ -1857,15 +1857,15 @@ export default function SellerDashboard() {
       {showProfileDrawer && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setShowProfileDrawer(false)} />
-          <div className="relative w-full max-w-md bg-slate-900 border-l border-slate-700 shadow-2xl overflow-y-auto animate-slide-in-right">
-            <div className="sticky top-0 z-10 bg-slate-900 border-b border-slate-800 p-6 flex items-center justify-between">
-              <h2 className="text-xl font-bold text-white flex items-center gap-2">
-                <PencilSquareIcon className="w-5 h-5 text-green-400" />
+          <div className="relative w-full max-w-md bg-white dark:bg-slate-900 border-l border-gray-300 dark:border-slate-700 shadow-2xl overflow-y-auto animate-slide-in-right">
+            <div className="sticky top-0 z-10 bg-white dark:bg-slate-900 border-b border-gray-200 dark:border-slate-800 p-6 flex items-center justify-between">
+              <h2 className="text-xl font-bold text-gray-900 dark:text-white flex items-center gap-2">
+                <PencilSquareIcon className="w-5 h-5 text-green-600 dark:text-green-400" />
                 Editar perfil de tienda
               </h2>
               <button
                 onClick={() => setShowProfileDrawer(false)}
-                className="w-8 h-8 flex items-center justify-center text-gray-400 hover:text-white hover:bg-slate-800 rounded-lg transition-all"
+                className="w-8 h-8 flex items-center justify-center text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-50 dark:hover:bg-slate-800 rounded-lg transition-all"
               >
                 <XMarkIcon className="w-5 h-5" />
               </button>
@@ -1873,11 +1873,11 @@ export default function SellerDashboard() {
 
             <div className="p-6 space-y-6">
               <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-2">
                   <CameraIcon className="w-4 h-4" /> Logo de la tienda
                 </h3>
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-20 bg-slate-800 rounded-xl flex items-center justify-center text-3xl font-bold text-green-500 border-2 border-dashed border-slate-700 overflow-hidden">
+                  <div className="w-20 h-20 bg-gray-50 dark:bg-slate-800 rounded-xl flex items-center justify-center text-3xl font-bold text-green-600 dark:text-green-500 border-2 border-dashed border-gray-300 dark:border-slate-700 overflow-hidden">
                     {sellerInfo.logo ? (
                       <img src={resolveImageUrl(sellerInfo.logo)} alt="Logo" className="w-full h-full object-cover" />
                     ) : (
@@ -1885,7 +1885,7 @@ export default function SellerDashboard() {
                     )}
                   </div>
                   <label className="flex-1 cursor-pointer">
-                    <div className="flex items-center justify-center gap-2 py-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl text-sm text-gray-300 transition-colors">
+                    <div className="flex items-center justify-center gap-2 py-3 bg-gray-50 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-700 dark:text-gray-300 transition-colors">
                       <ArrowUpTrayIcon className="w-4 h-4" />
                       Cambiar logo
                     </div>
@@ -1895,12 +1895,12 @@ export default function SellerDashboard() {
               </div>
 
               <div>
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-2">
+                <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-3 flex items-center gap-2">
                   <CameraIcon className="w-4 h-4" /> Banner de la tienda
                 </h3>
                 <label className="cursor-pointer block">
                   {sellerInfo.banner ? (
-                    <div className="relative rounded-xl overflow-hidden border-2 border-slate-700">
+                    <div className="relative rounded-xl overflow-hidden border-2 border-gray-300 dark:border-slate-700">
                       <img src={resolveImageUrl(sellerInfo.banner)} alt="Banner" className="w-full h-32 object-cover" />
                       <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
                         <div className="flex items-center gap-2 text-white text-sm">
@@ -1909,7 +1909,7 @@ export default function SellerDashboard() {
                       </div>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-center gap-2 py-6 bg-slate-800 hover:bg-slate-700 border-2 border-dashed border-slate-700 rounded-xl text-sm text-gray-300 transition-colors">
+                    <div className="flex items-center justify-center gap-2 py-6 bg-gray-50 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 border-2 border-dashed border-gray-300 dark:border-slate-700 rounded-xl text-sm text-gray-700 dark:text-gray-300 transition-colors">
                       <ArrowUpTrayIcon className="w-5 h-5" />
                       Subir banner
                     </div>
@@ -1918,44 +1918,44 @@ export default function SellerDashboard() {
                 </label>
               </div>
 
-              <div className="border-t border-slate-800 pt-6">
-                <h3 className="text-sm font-semibold text-gray-400 uppercase tracking-wide mb-4">Información de la tienda</h3>
+              <div className="border-t border-gray-200 dark:border-slate-800 pt-6">
+                <h3 className="text-sm font-semibold text-gray-600 dark:text-gray-400 uppercase tracking-wide mb-4">Información de la tienda</h3>
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
-                      Nombre de la tienda <span className="text-red-400">*</span>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
+                      Nombre de la tienda <span className="text-red-600 dark:text-red-400">*</span>
                     </label>
                     <input
                       type="text"
                       value={profileForm.name}
                       onChange={(e) => setProfileForm({ ...profileForm, name: e.target.value })}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                       placeholder="TechStore"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                       Correo electrónico
                     </label>
                     <input
                       type="email"
                       value={profileForm.email}
                       onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                       placeholder="tienda@correo.com"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-300 mb-1.5">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">
                       Teléfono de contacto
                     </label>
                     <input
                       type="text"
                       value={profileForm.phone}
                       onChange={(e) => setProfileForm({ ...profileForm, phone: e.target.value })}
-                      className="w-full bg-slate-800 border border-slate-700 text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
+                      className="w-full bg-gray-50 dark:bg-slate-800 border border-gray-300 dark:border-slate-700 text-gray-900 dark:text-white rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:border-green-500 transition-colors"
                       placeholder="+57 300 000 0000"
                     />
                   </div>
@@ -1965,7 +1965,7 @@ export default function SellerDashboard() {
               <div className="flex gap-3 pt-2 pb-4">
                 <button
                   onClick={() => setShowProfileDrawer(false)}
-                  className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                  className="flex-1 py-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors border border-gray-300 dark:border-slate-700"
                 >
                   Cancelar
                 </button>
@@ -1984,16 +1984,16 @@ export default function SellerDashboard() {
 
       {showDeleteConfirm !== null && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-slate-900 border border-red-500/30 rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center">
+          <div className="bg-white dark:bg-slate-900 border border-red-500/30 rounded-2xl p-8 w-full max-w-sm shadow-2xl text-center">
             <div className="w-14 h-14 bg-red-500/10 border border-red-500/30 rounded-full flex items-center justify-center mx-auto mb-4">
-              <TrashIcon className="w-7 h-7 text-red-400" />
+              <TrashIcon className="w-7 h-7 text-red-600 dark:text-red-400" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-2">¿Eliminar producto?</h3>
-            <p className="text-gray-400 text-sm mb-6">Esta acción no se puede deshacer. El producto será removido permanentemente.</p>
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">¿Eliminar producto?</h3>
+            <p className="text-gray-600 dark:text-gray-400 text-sm mb-6">Esta acción no se puede deshacer. El producto será removido permanentemente.</p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(null)}
-                className="flex-1 py-2.5 bg-slate-800 hover:bg-slate-700 text-gray-300 rounded-xl font-medium transition-colors border border-slate-700"
+                className="flex-1 py-2.5 bg-gray-50 dark:bg-slate-800 hover:bg-gray-200 dark:hover:bg-slate-700 text-gray-700 dark:text-gray-300 rounded-xl font-medium transition-colors border border-gray-300 dark:border-slate-700"
               >
                 Cancelar
               </button>

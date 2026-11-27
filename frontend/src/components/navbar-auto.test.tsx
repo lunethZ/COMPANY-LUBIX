@@ -39,7 +39,7 @@ describe('NavbarAuto', () => {
     renderWithProviders(<NavbarAuto />);
 
     expect(screen.getByPlaceholderText('Buscar...')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Login' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Ingresar' })).toBeInTheDocument();
   });
 
   it('muestra la navbar de usuario para el rol user', () => {

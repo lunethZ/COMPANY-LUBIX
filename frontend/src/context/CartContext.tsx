@@ -137,11 +137,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
           if (!cancelled) setLoading(false);
         }
       } else {
-        if (wasAuthed.current && itemsRef.current.length) {
-          writeLocal(itemsRef.current);
-        }
         if (cancelled) return;
-        setItems(readLocal());
+        if (wasAuthed.current) {
+          localStorage.removeItem("cart");
+          setItems([]);
+        } else {
+          setItems(readLocal());
+        }
         setLoading(false);
       }
       wasAuthed.current = isAuthenticated;

@@ -38,13 +38,6 @@ export default function NavbarAdmin() {
             Admin Root
           </span>
         </button>
-        <button
-          onClick={() => void navigate("/")}
-          className="hidden sm:inline-flex ml-2 px-3 py-1.5 rounded-lg text-sm font-semibold border border-green-800/50 bg-green-950/30 text-green-400 hover:bg-green-900/40 transition"
-          title="Ir al inicio"
-        >
-          Inicio
-        </button>
       </div>
 
       {/* ACCIONES DERECHAS: Tema + Menú de Perfil */}

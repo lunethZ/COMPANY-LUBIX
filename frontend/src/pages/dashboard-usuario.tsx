@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/navbaruser';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -44,6 +44,15 @@ import { HeartIcon as HeartSolid } from '@heroicons/react/24/solid';
 
 type Tab = 'overview' | 'orders' | 'saved' | 'integrated' | 'delete-product';
 
+const VALID_TABS: Tab[] = ['overview', 'orders', 'saved', 'integrated', 'delete-product'];
+
+const onlyLetters = (value: string, max: number) =>
+  value.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]/g, "").slice(0, max);
+const onlyDigits = (value: string, max: number) => value.replace(/\D/g, "").slice(0, max);
+const onlyPhone = (value: string, max = 20) => value.replace(/[^\d+\s-]/g, "").slice(0, max);
+const onlyAddress = (value: string, max: number) =>
+  value.replace(/[^a-zA-Z0-9áéíóúÁÉÍÓÚñÑüÜ\s#\-,.°]/g, "").slice(0, max);
+
 interface OrderItem {
   id: string;
   name: string;
@@ -85,7 +94,11 @@ export default function BuyerDashboard() {
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<Tab>('overview');
+  const location = useLocation();
+  const [activeTab, setActiveTab] = useState<Tab>(() => {
+    const tab = new URLSearchParams(location.search).get('tab');
+    return VALID_TABS.includes(tab as Tab) ? (tab as Tab) : 'overview';
+  });
   const themeClasses = {
     page: isDark ? 'bg-slate-950' : 'bg-gray-100',
     card: isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-gray-200 shadow-sm',
@@ -1014,7 +1027,8 @@ export default function BuyerDashboard() {
                     <label className="block text-sm text-gray-400 mb-1">Nombre completo</label>
                     <input
                       value={profileForm.name}
-                      onChange={(e) => setProfileForm((prev) => ({ ...prev, name: e.target.value }))}
+                      onChange={(e) => setProfileForm((prev) => ({ ...prev, name: onlyLetters(e.target.value, 80) }))}
+                      maxLength={80}
                       className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
@@ -1022,7 +1036,9 @@ export default function BuyerDashboard() {
                     <label className="block text-sm text-gray-400 mb-1">Teléfono</label>
                     <input
                       value={profileForm.phone}
-                      onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: e.target.value }))}
+                      onChange={(e) => setProfileForm((prev) => ({ ...prev, phone: onlyPhone(e.target.value) }))}
+                      maxLength={20}
+                      inputMode="tel"
                       className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
@@ -1048,6 +1064,7 @@ export default function BuyerDashboard() {
                       type="password"
                       value={passForm.current}
                       onChange={(e) => setPassForm((prev) => ({ ...prev, current: e.target.value }))}
+                      maxLength={72}
                       className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
@@ -1057,6 +1074,7 @@ export default function BuyerDashboard() {
                       type="password"
                       value={passForm.newPass}
                       onChange={(e) => setPassForm((prev) => ({ ...prev, newPass: e.target.value }))}
+                      maxLength={72}
                       className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`}
                     />
                   </div>
@@ -1073,13 +1091,13 @@ export default function BuyerDashboard() {
                 </h3>
                 <div className="space-y-3 mb-4">
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input value={addressForm.label} onChange={(e) => setAddressForm((prev) => ({ ...prev, label: e.target.value }))} placeholder="Etiqueta (Casa, Oficina)" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
-                    <input value={addressForm.postal_code} onChange={(e) => setAddressForm((prev) => ({ ...prev, postal_code: e.target.value }))} placeholder="Código postal" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
+                    <input value={addressForm.label} onChange={(e) => setAddressForm((prev) => ({ ...prev, label: onlyLetters(e.target.value, 30) }))} maxLength={30} placeholder="Etiqueta (Casa, Oficina)" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
+                    <input value={addressForm.postal_code} onChange={(e) => setAddressForm((prev) => ({ ...prev, postal_code: onlyDigits(e.target.value, 6) }))} maxLength={6} inputMode="numeric" placeholder="Código postal" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   </div>
-                  <input value={addressForm.address} onChange={(e) => setAddressForm((prev) => ({ ...prev, address: e.target.value }))} placeholder="Dirección" className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
+                  <input value={addressForm.address} onChange={(e) => setAddressForm((prev) => ({ ...prev, address: onlyAddress(e.target.value, 100) }))} maxLength={100} placeholder="Dirección" className={`w-full px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input value={addressForm.city} onChange={(e) => setAddressForm((prev) => ({ ...prev, city: e.target.value }))} placeholder="Ciudad" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
-                    <input value={addressForm.department} onChange={(e) => setAddressForm((prev) => ({ ...prev, department: e.target.value }))} placeholder="Departamento" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
+                    <input value={addressForm.city} onChange={(e) => setAddressForm((prev) => ({ ...prev, city: onlyLetters(e.target.value, 60) }))} maxLength={60} placeholder="Ciudad" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
+                    <input value={addressForm.department} onChange={(e) => setAddressForm((prev) => ({ ...prev, department: onlyLetters(e.target.value, 60) }))} maxLength={60} placeholder="Departamento" className={`px-3 py-2 ${themeClasses.input} rounded-lg text-sm focus:outline-none focus:border-green-500`} />
                   </div>
                   <label className="flex items-center gap-2 text-sm text-gray-400 cursor-pointer">
                     <input type="checkbox" checked={addressForm.is_default} onChange={(e) => setAddressForm((prev) => ({ ...prev, is_default: e.target.checked }))} className="w-4 h-4 accent-green-500" />
