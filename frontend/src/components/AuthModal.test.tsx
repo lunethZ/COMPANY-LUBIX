@@ -485,8 +485,7 @@ describe('AuthModal', () => {
     });
     expect(post).toHaveBeenCalledWith(
       '/auth/register-company',
-      expect.any(FormData),
-      { headers: { 'Content-Type': 'multipart/form-data' } }
+      expect.any(FormData)
     );
   });
 

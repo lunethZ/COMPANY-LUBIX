@@ -122,25 +122,44 @@ export const Register = () => {
             return;
         }
 
+        if (mode === "empresa") {
+            const nit = form.nit.trim();
+            const nitDV = form.nitDV.trim();
+            const companyName = form.companyName.trim();
+            if (!/^\d{5,}$/.test(nit)) {
+                setFieldErrors({ nit: "El NIT debe tener al menos 5 dígitos" });
+                showPopup("El NIT debe tener al menos 5 dígitos", "error");
+                return;
+            }
+            if (!/^\d$/.test(nitDV)) {
+                setFieldErrors({ nitDV: "El dígito de verificación debe ser un solo número" });
+                showPopup("El dígito de verificación debe ser un solo número", "error");
+                return;
+            }
+            if (companyName.length < 3 || companyName.length > 50) {
+                setFieldErrors({ companyName: "El nombre de la empresa debe tener entre 3 y 50 caracteres" });
+                showPopup("El nombre de la empresa debe tener entre 3 y 50 caracteres", "error");
+                return;
+            }
+        }
+
         setLoading(true);
 
         try {
             if (mode === "empresa") {
                 const formData = new FormData();
-                formData.append("fullName", form.name);
+                formData.append("fullName", `${form.name} ${form.surname}`.trim());
                 formData.append("email", form.email);
                 formData.append("password", form.password);
                 formData.append("tell", form.tell);
                 formData.append("companyName", form.companyName);
                 formData.append("companyAddress", form.address);
-                formData.append("companyNIT", form.nit);
-                formData.append("companyNITDV", form.nitDV || "0");
+                formData.append("companyNIT", form.nit.trim());
+                formData.append("companyNITDV", form.nitDV.trim() || "0");
                 const blob = new Blob(["placeholder"], { type: "text/plain" });
                 formData.append("certificate", blob, "placeholder.txt");
 
-                await api.post("/auth/register-company", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
+                await api.post("/auth/register-company", formData);
 
                 showPopup("Empresa registrada. Recibirás un correo de verificación.", "success");
             } else {

@@ -533,9 +533,6 @@ describe('Panel de empresa', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/company/products/upload-image',
         expect.any(FormData),
-        expect.objectContaining({
-          headers: { 'Content-Type': 'multipart/form-data' },
-        }),
       );
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/company/products',
@@ -667,7 +664,6 @@ describe('Panel de empresa', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/company/products/upload-image',
         expect.any(FormData),
-        expect.any(Object),
       );
       expect(apiMocks.patch).toHaveBeenCalledWith(
         '/company/products/p1',
@@ -950,16 +946,10 @@ describe('Panel de empresa', () => {
     expect(apiMocks.patch).toHaveBeenCalledWith(
       '/company/dashboard/upload-logo',
       expect.any(FormData),
-      expect.objectContaining({
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }),
     );
     expect(apiMocks.patch).toHaveBeenCalledWith(
       '/company/dashboard/upload-banner',
       expect.any(FormData),
-      expect.objectContaining({
-        headers: { 'Content-Type': 'multipart/form-data' },
-      }),
     );
   }, 30000);
 

@@ -183,7 +183,7 @@ describe('Register', () => {
         ),
       ).toBeInTheDocument()
 
-      const [url, body, config] = post.mock.calls[0]
+      const [url, body] = post.mock.calls[0]
       expect(url).toBe('/auth/register-company')
       expect(body).toBeInstanceOf(FormData)
       const formData = body as FormData
@@ -192,9 +192,6 @@ describe('Register', () => {
       expect(formData.get('companyNITDV')).toBe('1')
       expect(formData.get('companyAddress')).toBe('Calle 1 #2-3')
       expect(formData.get('certificate')).toBeInstanceOf(File)
-      expect(config).toEqual({
-        headers: { 'Content-Type': 'multipart/form-data' },
-      })
     })
   })
 

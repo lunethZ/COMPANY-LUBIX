@@ -515,7 +515,6 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/avatar/upload',
         expect.any(FormData),
-        { headers: { 'Content-Type': 'multipart/form-data' } },
       );
     });
 
@@ -525,7 +524,6 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/banner/upload',
         expect.any(FormData),
-        { headers: { 'Content-Type': 'multipart/form-data' } },
       );
     });
   });
@@ -745,7 +743,6 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/avatar/upload',
         expect.any(FormData),
-        expect.anything(),
       );
     });
 
@@ -758,7 +755,6 @@ describe('Panel del usuario comprador', () => {
       expect(apiMocks.post).toHaveBeenCalledWith(
         '/user/banner/upload',
         expect.any(FormData),
-        expect.anything(),
       );
     });
 

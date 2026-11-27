@@ -313,8 +313,24 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
       return;
     }
     if (mode === "empresa") {
-      if (!form.companyName.trim()) { setError("Nombre de empresa obligatorio"); return; }
-      if (!form.nit.trim()) { setError("NIT obligatorio"); return; }
+      const nit = form.nit.trim();
+      const nitDV = form.nitDV.trim();
+      const companyName = form.companyName.trim();
+      if (!companyName) { setError("Nombre de empresa obligatorio"); return; }
+      if (companyName.length < 3 || companyName.length > 50) {
+        setError("El nombre de la empresa debe tener entre 3 y 50 caracteres");
+        return;
+      }
+      if (!nit) { setError("NIT obligatorio"); return; }
+      if (!/^\d{5,}$/.test(nit)) {
+        setError("El NIT debe tener al menos 5 dígitos");
+        return;
+      }
+      if (!nitDV) { setError("Dígito de verificación obligatorio"); return; }
+      if (!/^\d$/.test(nitDV)) {
+        setError("El dígito de verificación debe ser un solo número");
+        return;
+      }
       if (!form.address.trim()) { setError("Dirección obligatoria"); return; }
     } else {
       if (!form.name.trim()) { setError("Nombre obligatorio"); return; }
@@ -328,19 +344,17 @@ function RegisterForm({ onSwitch, onSuccess }: { onSwitch: () => void; onSuccess
     try {
       if (mode === "empresa") {
         const formData = new FormData();
-        formData.append("fullName", form.name);
+        formData.append("fullName", `${form.name} ${form.surname}`.trim());
         formData.append("email", form.email);
         formData.append("password", form.password);
         formData.append("tell", form.tell);
         formData.append("companyName", form.companyName);
         formData.append("companyAddress", form.address);
-        formData.append("companyNIT", form.nit);
-        formData.append("companyNITDV", form.nitDV || "0");
+        formData.append("companyNIT", form.nit.trim());
+        formData.append("companyNITDV", form.nitDV.trim() || "0");
         const blob = new Blob(["placeholder"], { type: "text/plain" });
         formData.append("certificate", blob, "placeholder.txt");
-        await api.post("/auth/register-company", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        await api.post("/auth/register-company", formData);
         setError("");
         onSuccess();
         navigate("/login", { replace: true });
