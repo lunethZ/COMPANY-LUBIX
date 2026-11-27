@@ -1,3 +1,6 @@
+from unittest.mock import patch
+
+
 def _assert_upload(mock, path, filename):
     mock.assert_called_once()
     file_arg, path_arg = mock.call_args.args
@@ -188,6 +191,16 @@ def test_get_file_invoca_mock_de_lectura(client, storage_mocks):
     assert response.headers["cache-control"] == "public, max-age=86400"
     storage_mocks.get_object.assert_called_once_with("uploads", "avatars/avatar.png")
     storage_mocks.download_stream.assert_not_called()
+
+
+def test_get_file_usa_el_bucket_configurado(client, storage_mocks):
+    with patch("app.services.NasService.subir.bucket", "lubix-media"):
+        response = client.get("/files/products/producto.jpg")
+
+    assert response.status_code == 200
+    storage_mocks.get_object.assert_called_once_with(
+        "lubix-media", "products/producto.jpg"
+    )
 
 
 def test_get_file_usa_fallback_cuando_falla_lectura_directa(client, storage_mocks):
