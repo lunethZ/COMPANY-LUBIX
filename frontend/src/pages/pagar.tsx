@@ -112,6 +112,7 @@ const PagarPage = () => {
   const [processMessage, setProcessMessage] = useState("");
   const [paid, setPaid] = useState(false);
   const [orderNumber, setOrderNumber] = useState("");
+  const [paidSummary, setPaidSummary] = useState({ total: 0, itemCount: 0 });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const [metodo, setMetodo] = useState<MetodoPago>("tarjeta");
@@ -239,6 +240,9 @@ const PagarPage = () => {
 
   const confirmPayment = async () => {
     setProcessing(true);
+    // Se captura antes de vaciar el carrito: al quedar vacío, el total se
+    // recalcula solo con el envío y la pantalla de éxito mostraría un monto erróneo.
+    setPaidSummary({ total, itemCount: cart.reduce((s, i) => s + i.quantity, 0) });
     const messages = [
       "Validando datos de la compra...",
       "Autorizando el método de pago...",
@@ -305,7 +309,7 @@ const PagarPage = () => {
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800">
               <span className="text-muted text-sm">Productos</span>
-              <span className="font-semibold text-sm">{cart.reduce((s, i) => s + i.quantity, 0)}</span>
+              <span className="font-semibold text-sm">{paidSummary.itemCount}</span>
             </div>
             <div className="flex justify-between py-2 border-b border-gray-100 dark:border-gray-800">
               <span className="text-muted text-sm">Método de pago</span>
@@ -315,7 +319,7 @@ const PagarPage = () => {
             </div>
             <div className="flex justify-between py-2">
               <span className="text-muted text-sm">Total pagado</span>
-              <span className="font-bold text-green-500 text-lg">${total.toLocaleString("es-CO")}</span>
+              <span className="font-bold text-green-500 text-lg">${paidSummary.total.toLocaleString("es-CO")}</span>
             </div>
           </div>
           <div className="flex flex-col gap-3">
