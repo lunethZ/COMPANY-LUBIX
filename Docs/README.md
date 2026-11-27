@@ -14,10 +14,10 @@
 | [Plan_Mantenimiento_Infraestructura.md](Plan_Mantenimiento_Infraestructura.md) | Cronograma de mantenimiento, tabla EOL del stack, escaneo Trivy, parches automáticos y rutinas preventivas/correctivas (dependencias, respaldos, rotación de llaves, limpieza y verificación post-despliegue) |
 | [monitoreo.md](monitoreo.md) | Monitoreo de disponibilidad y salud del servicio |
 | [Respaldo_v1_Operativo.md](Respaldo_v1_Operativo.md) | Respaldo cifrado y restauración con `scripts/pg_backup.py` |
-| [Respaldo_v0.md](Respaldo_v0.md) | Versión inicial del plan de respaldos |
+| [Respaldo_v0.md](archivo/Respaldo_v0.md) | Versión inicial del plan de respaldos |
 | [Seguridad_Servidor.md](Seguridad_Servidor.md) | Endurecimiento del servidor y roles de PostgreSQL con mínimo privilegio |
 | [Instalacion_v1.md](Instalacion_v1.md) | Instalación y puesta en marcha (versión vigente) |
-| [Instalacion_v0.md](Instalacion_v0.md) | Versión inicial de la guía de instalación |
+| [Instalacion_v0.md](archivo/Instalacion_v0.md) | Versión inicial de la guía de instalación |
 
 ## Requisitos y planeación
 
@@ -25,7 +25,7 @@
 |---|---|
 | [Backlog_Final.md](Backlog_Final.md) | Backlog consolidado del proyecto |
 | [BC-Implantacion.md](BC-Implantacion.md) | Plan de continuidad e implantación |
-| [Plan_Migracion_v0.md](Plan_Migracion_v0.md) | Migración de datos y puesta en producción |
+| [Plan_Migracion_v0.md](archivo/Plan_Migracion_v0.md) | Migración de datos y puesta en producción |
 | [Matriz_Usuarios_Roles.md](Matriz_Usuarios_Roles.md) | Permisos por rol (usuario, empresa, administrador, soporte) |
 | [HUs/](HUs/) | Historias de usuario por módulo |
 | [RFs/](RFs/) | Requisitos funcionales detallados por módulo |

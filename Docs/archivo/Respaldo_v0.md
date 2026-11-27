@@ -1,3 +1,5 @@
+> **AVISO DE DOCUMENTO HISTÓRICO (OBSOLETO):** Este documento corresponde a una versión preliminar (0) y ha sido reemplazado por [../Respaldo_v1_Operativo.md](../Respaldo_v1_Operativo.md). Se conserva únicamente como referencia histórica.
+
 # Plan de Respaldo — LUBIX (v0)
 
 > **Actualización:** para la operación real usa la versión v1, que incluye script de

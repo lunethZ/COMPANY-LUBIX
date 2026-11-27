@@ -1,3 +1,5 @@
+> **AVISO DE DOCUMENTO HISTÓRICO (OBSOLETO):** Este documento corresponde a una versión preliminar (0) y ha sido reemplazado por [../Instalacion_v1.md](../Instalacion_v1.md). Se conserva únicamente como referencia histórica.
+
 # Guía de Instalación — LUBIX (v0)
 
 > **Versión:** v0 (borrador inicial)
