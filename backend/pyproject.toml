@@ -49,7 +49,7 @@ dependencies = [
     "uvicorn==0.41.0",
     "uvloop==0.22.1",
     "watchfiles==1.1.1",
-    "websockets==16.0",
+    "websockets==17.4",
 ]
 
 [dependency-groups]
