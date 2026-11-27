@@ -283,6 +283,7 @@ Escalamiento: incidencia → responsable del componente → revisión conjunta �
 
 ### 6.3 Capacitación y documentación
 
+- **Plan operativo consolidado:** [`Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md`](./Plan_Actualizaciones_Soporte_Monitoreo_Capacitacion.md) — actualizaciones, soporte (SLA y escalamiento), monitoreo y guía de capacitación para usuarios.
 - **Manual técnico y de usuario:** [`Docs/Manual Tecnico De Usuario/`](./Manual%20Tecnico%20De%20Usuario/).
 - **Operación y despliegue:** [`DEPLOYMENT.md`](./DEPLOYMENT.md) y [`monitoreo.md`](./monitoreo.md).
 - **Respaldos:** [`Respaldo_v1_Operativo.md`](./Respaldo_v1_Operativo.md).
@@ -350,3 +351,87 @@ Escalamiento: incidencia → responsable del componente → revisión conjunta �
 | Acuerdos | Mantener CI y Quality Gate en verde; activar alerta externa; completar simulacro en máquina distinta; corregir issue #84; mantener respaldo cada 6 h |
 | Observaciones | RNF-001 no cumple en el plan free de Render (latencia de red e infraestructura, no de consulta). RNF-009 con hallazgos de códigos de error registrados en issue #84. |
 | Firmas | @lunethZ (calidad y backend) — pendiente @juanpineda y cierre del simulacro |
+
+---
+
+## 8. Ensamblaje y control de entregables
+
+### 8.1 Aportes del equipo
+
+| Integrante | Aporte | Evidencia |
+|---|---|---|
+| @josearmenta2163 | Diseño del plan de capacitación y guion de sesiones | [`Plan_Capacitacion.md`](./Plan_Capacitacion.md) · [`Sesion_Simulada_Capacitacion.md`](./Sesion_Simulada_Capacitacion.md) |
+| @WinStormX | Prueba de la guía rápida y hallazgos de usabilidad | [`Evidencias/Prueba_Guia_Rapida_2026-11-26.md`](./Evidencias/Prueba_Guia_Rapida_2026-11-26.md) |
+| @lunethZ | Validación técnica y revisión de consistencia | Este documento §9 |
+| @nacoooobit | Ensamblaje del entregable e integración en el plan | [`Entrega_Final_Capacitacion.md`](./Entrega_Final_Capacitacion.md) |
+| @juanpineda | Revisión y aprobación de cierre | Acta §7.5 |
+
+### 8.2 Proceso de consolidación
+
+1. Cada integrante entregó su aporte en una rama o documento propio.
+2. Se revisó la consistencia con los manuales 1.1.5, 1.1.7, 1.1.8, 1.1.9 y 1.1.10.
+3. Se resolvieron duplicidades y se unificaron tiempos, canales y nombres de pantallas.
+4. Se integró el resultado en [`Entrega_Final_Capacitacion.md`](./Entrega_Final_Capacitacion.md) y en la sección 9 de este documento.
+5. Se registró la validación por par y el control de cambios.
+
+**Responsable:** @nacoooobit. **Estado:** entregable consolidado y enlazado.
+
+---
+
+## 9. Capacitación, ayudas en línea y ensamblaje del plan
+
+Esta sección integra el contenido de la sección 9 del [`Entrega_Final_Capacitacion.md`](./Entrega_Final_Capacitacion.md) en el plan de implantación.
+
+### 9.1 Plan de capacitación por roles
+
+| Módulo | Contenido | Usuario final | Empresa | Administrador | Mesa de ayuda | Duración |
+|---|---|---|---|---|---|---|
+| M1. Acceso y cuenta | Pestañas, verificación, recuperación y contraseña | ✅ | ✅ | ✅ | ✅ | 20 min |
+| M2. Compra | Catálogo, carrito, checkout y pedido | ✅ | — | — | ✅ | 40 min |
+| M3. Pedidos y PQRS | Mis pedidos, PQRS y seguimiento | ✅ | ✅ | ✅ | ✅ | 30 min |
+| M4. Panel de empresa | Productos, pedidos, estadísticas y perfil | — | ✅ | — | ✅ | 40 min |
+| M5. Administración | Empresas, usuarios, PQRS y resumen | — | — | ✅ | ✅ | 40 min |
+| M6. Mesa de ayuda | Triage, severidad, evidencia y escalamiento | — | — | — | ✅ | 30 min |
+
+**Rutas:** Usuario final M1 → M2 → M3; Empresa M1 → M3 → M4; Administrador M1 → M3 → M5; Mesa de ayuda M1 → M6.
+
+**Evaluación:** cuestionario de 5 preguntas y práctica del rol sin asistencia; aprobación con al menos 4/5 y la lista PA-01 a PA-06. Detalle en [`Plan_Capacitacion.md`](./Plan_Capacitacion.md).
+
+### 9.2 Guía rápida de uso
+
+[`Guia_Rapida_Usuario.md`](./Guia_Rapida_Usuario.md) resume ingreso, compra, pedidos, PQRS, panel de empresa, administración, mesa de ayuda, errores comunes, canales y checklist. Incluye la nota de cold start de Render y la tabla de pestañas **Usuario** / **Empresa**.
+
+### 9.3 Preguntas frecuentes (FAQ)
+
+[`FAQ_Usuarios.md`](./FAQ_Usuarios.md) organiza 36 preguntas en siete bloques: acceso y cuenta, usuario final, empresa, administrador, PQRS y soporte, seguridad y privacidad, y ayudas en línea. Remite al manual 1.1.10 y no inventa canales ni tiempos distintos a los documentados.
+
+### 9.4 Prueba de la guía rápida por un compañero
+
+**Evidencia:** [`Evidencias/Prueba_Guia_Rapida_2026-11-26.md`](./Evidencias/Prueba_Guia_Rapida_2026-11-26.md)
+
+| Criterio | Resultado |
+|---|---|
+| Tareas completadas sin ayuda | 5/5 |
+| Tiempo promedio por tarea | 4 min |
+| Dudas resueltas en la guía | 5/5 |
+| Resultado global | **PASS** |
+
+Hallazgos aplicados: tabla de pestañas, ubicación de **Mis pedidos**, ejemplo de contraseña válida, nota de cold start y enlace al canal de soporte.
+
+### 9.5 Evidencias y criterios de aceptación
+
+- [x] Plan de capacitación por roles diseñado.
+- [x] Guía rápida redactada en Markdown.
+- [x] FAQ redactada en Markdown y organizada por perfil.
+- [x] Aportes de todo el equipo consolidados.
+- [x] Guía rápida probada por un compañero (PASS 5/5).
+- [x] Sección 9 integrada en el plan de implantación.
+- [x] Entregables enlazados desde el README y el plan operativo.
+
+### 9.6 Ensamblaje y control de cambios
+
+| Versión | Fecha | Cambio | Autor |
+|---|---|---|---|
+| 1.0.0 | 2026-11-26 | Integración de la sección 9: plan por roles, guía rápida, FAQ, prueba por par y evidencias | @nacoooobit |
+
+**Responsable:** @nacoooobit. **Revisión:** @lunethZ · @juanpineda. **Estado:** integrado y listo para revisión.
