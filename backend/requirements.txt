@@ -1,18 +1,18 @@
 # Dependencias de ejecución del backend LUBIX.
 # Fuente de verdad para Render y Docker. Mantener en sincronía con pyproject.toml.
-alembic==1.18.4
+alembic==1.20.1
 bcrypt==3.2.2
-email-validator==2.3.0
-fastapi==0.135.1
-greenlet==3.3.2
+email-validator==2.4.0
+fastapi==0.165.0
+greenlet==3.5.6
 httpx==0.28.1
 minio==7.2.20
-passlib==1.7.4
+passlib==1.9.5
 psycopg2-binary==2.9.11
-pydantic==2.12.5
+pydantic==2.14.4
 python-dotenv==1.2.2
 python-jose==3.5.0
 python-multipart>=0.0.27
-requests==2.33.1
-sqlalchemy==2.0.48
-uvicorn==0.41.0
+requests==2.34.2
+sqlalchemy==2.1.9
+uvicorn==0.54.0
