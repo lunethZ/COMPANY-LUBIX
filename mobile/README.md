@@ -1,21 +1,21 @@
 # Lubix Mobile (React Native / Expo)
 
 App móvil de Lubix construida con **Expo SDK 54** (React Native 0.81, React 19).
-Consume el **mismo backend FastAPI** que la web (Docker en `localhost:8001`) y no
+Consume el **mismo backend FastAPI** que la web (Docker en `localhost:8002`) y no
 contiene datos de catálogo hardcodeados: productos, categorías, carrito, direcciones
 y pedidos se sincronizan con el backend mediante JWT.
 
 ## Requisitos
 
 - Node.js 20+ y npm
-- Backend levantado con `docker compose up` (API en `http://localhost:8001`)
+- Backend levantado con `docker compose up` (API en `http://localhost:8002`)
 - Copiar `.env.example` a `.env` y ajustar `EXPO_PUBLIC_API_URL`:
 
   | Contexto          | URL                          |
   | ----------------- | ---------------------------- |
-  | Android Emulador  | `http://10.0.2.2:8001`       |
-  | iOS Simulator     | `http://localhost:8001`      |
-  | Dispositivo físico| `http://<IP-DE-TU-PC>:8001`  |
+  | Android Emulador  | `http://10.0.2.2:8002`       |
+  | iOS Simulator     | `http://localhost:8002`      |
+  | Dispositivo físico| `http://<IP-DE-TU-PC>:8002`  |
 
 ## Instalación y ejecución
 
@@ -27,8 +27,8 @@ npm run typecheck  # verificación de tipos
 ```
 
 Cuando uses un dispositivo físico, asegúrate de que el teléfono y el PC estén en la
-misma red y de que el puerto `8001` esté accesible (en Windows: `netsh advfirewall
-firewall add rule ... allow tcp 8001`, o desactiva temporalmente el firewall).
+misma red y de que el puerto `8002` esté accesible (en Windows: `netsh advfirewall
+firewall add rule ... allow tcp 8002`, o desactiva temporalmente el firewall).
 
 ## Funcionalidad
 

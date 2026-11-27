@@ -1,4 +1,4 @@
-﻿<div align="center">
+<div align="center">
 
 <img src="docs/assets/lubix-banner.png" alt="LUBIX - Plataforma Integral de Gestión Empresarial" width="100%" />
 
@@ -143,9 +143,9 @@ Esta infraestructura modular garantiza escalabilidad horizontal, alta disponibil
 
 | Servicio | Puerto | Descripción |
 | :--- | :--- | :--- |
-| **PostgreSQL** | 5434 (Host) -> 5432 | Base de datos principal |
-| **MinIO** | 9000 | Servidor de almacenamiento de objetos |
-| **Backend (API)** | 8001 (Host) -> 8000 | Capa de servicios REST |
+| **PostgreSQL** | 5435 (Host) -> 5432 | Base de datos principal |
+| **MinIO** | 9100 (API) / 9101 (Consola) | Servidor de almacenamiento de objetos |
+| **Backend (API)** | 8002 (Host) -> 8000 | Capa de servicios REST |
 | **Frontend (Web)** | 5173 | Aplicación de usuario (Configurable en Vite) |
 
 ---
@@ -265,7 +265,7 @@ LUBIX-COMPANY/
 ### Desarrollo local (opcional)
 
 *   **Python 3.13** — [Descargar](https://www.python.org/downloads/)
-*   **Node.js 18+** y **npm** — [Descargar](https://nodejs.org/) (npm viene incluido)
+*   **Node.js 20+** y **npm** — [Descargar](https://nodejs.org/) (npm viene incluido)
 *   **PostgreSQL 16** — [Descargar](https://www.postgresql.org/download/)
 
 ---
@@ -275,8 +275,8 @@ LUBIX-COMPANY/
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/RehnieyAl/lubix-company.git
-cd lubix-company
+git clone https://github.com/lunethZ/COMPANY-LUBIX.git
+cd COMPANY-LUBIX
 ```
 
 ### 2. Crear el archivo de variables de entorno
@@ -347,7 +347,7 @@ MINIO_REGION=
 
 > `MINIO_REGION` se deja vacío con MinIO local y se usa `auto` con Cloudflare R2. El procedimiento completo está en la [guía de despliegue](Docs/DEPLOYMENT.md#44-cloudflare-r2-recomendado).
 
-#### Correo (SMTP Gmail - usar App Password)
+#### Correo transaccional (Brevo, Resend y respaldo SMTP Gmail)
 
 ```env
 GMAIL_USERNAME=tucorreo@gmail.com
@@ -392,9 +392,9 @@ Salida esperada:
 
 ```text
 NAME                COMMAND                  SERVICE      STATUS      PORTS
-lubix-postgres      postgres                 postgres     Up          0.0.0.0:5434->5432/tcp
-lubix-minio         minio server /data       minio        Up          0.0.0.0:9000->9000/tcp
-lubix-backend       uvicorn app.main:app    backend      Up          0.0.0.0:8001->8000/tcp
+lubix-postgres      postgres                 postgres     Up          0.0.0.0:5435->5432/tcp
+lubix-minio         minio server /data       minio        Up          0.0.0.0:9100->9000/tcp
+lubix-backend       uvicorn app.main:app    backend      Up          0.0.0.0:8002->8000/tcp
 lubix-frontend      npm run dev              frontend     Up          0.0.0.0:5173->5173/tcp
 ```
 
@@ -424,9 +424,9 @@ docker compose logs -f postgres
 | Servicio | URL | Descripción |
 | :--- | :--- | :--- |
 | Frontend | [http://localhost:5173](http://localhost:5173) | Aplicación React |
-| Backend API | [http://localhost:8001](http://localhost:8001) | API FastAPI |
-| API Docs | [http://localhost:8001/docs](http://localhost:8001/docs) | Swagger UI |
-| MinIO | [http://localhost:9000](http://localhost:9000) | Almacenamiento de archivos |
+| Backend API | [http://localhost:8002](http://localhost:8002) | API FastAPI |
+| API Docs | [http://localhost:8002/docs](http://localhost:8002/docs) | Swagger UI |
+| MinIO | [http://localhost:9100](http://localhost:9100) | Almacenamiento de archivos |
 
 > Para publicar la API en producción con Render + Neon/Supabase, sigue la [Guía de despliegue](Docs/DEPLOYMENT.md).
 

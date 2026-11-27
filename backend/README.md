@@ -65,12 +65,12 @@ Se cargan desde `backend/.env` (o desde el entorno del contenedor). La plantilla
 
 | Método | Ruta | Descripción |
 |--------|------|-------------|
-| POST | /api/v1/auth/register | Registro de usuario |
+| POST | /auth/register-user | Registro de usuario cliente |
 | POST | /api/v1/auth/login | Inicio de sesión |
 | POST | /api/v1/auth/verify-email | Verificación de correo |
 | POST | /api/v1/auth/forgot-password | Recuperación de contraseña |
 | POST | /api/v1/auth/reset-password | Restablecimiento de contraseña |
-| GET | /health/test | Health check |
+| GET | /health | VerificaciÃ³n de disponibilidad del servicio |
 
 Documentación Swagger disponible en `/docs` al ejecutar el servidor.
 
