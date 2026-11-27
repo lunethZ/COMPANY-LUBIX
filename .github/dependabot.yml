@@ -11,6 +11,7 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 5
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(backend)"
     groups:
@@ -28,6 +29,7 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 5
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(web)"
     groups:
@@ -45,6 +47,7 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 5
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(mobile)"
     groups:
@@ -62,6 +65,7 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 3
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(actions)"
 
@@ -74,6 +78,7 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 3
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(docker)"
 
@@ -86,6 +91,7 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 3
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(docker-backend)"
 
@@ -97,6 +103,7 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 3
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(docker-web)"
 
@@ -108,5 +115,6 @@ updates:
       time: "06:00"
       timezone: "America/Bogota"
     open-pull-requests-limit: 3
+    target-branch: "Develop"
     commit-message:
       prefix: "deps(docker-mobile)"
